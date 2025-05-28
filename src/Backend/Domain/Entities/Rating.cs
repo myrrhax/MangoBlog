@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Enums;
 
 namespace Domain.Entities;
-internal class Rating
+
+public class Rating
 {
+    public Guid UserId { get; set; }
+    public required string ArticleId { get; set; }
+    public RatingType RatingType { get; set; }
+    public DateTime CreationDate { get; set; }
 }

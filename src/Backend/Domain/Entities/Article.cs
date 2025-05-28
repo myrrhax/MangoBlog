@@ -2,8 +2,8 @@
 
 public class Article
 {
-    public string Id { get; set; } = string.Empty;
-    public string Title { get; set; } = string.Empty;
+    public required string Id { get; set; }
+    public required string Title { get; set; }
     public Dictionary<string, object> Content { get; set; } = [];
     public DateTime CreationDate { get; set; }
 }
