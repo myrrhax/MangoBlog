@@ -12,6 +12,7 @@
 *.tlog
 *.log
 *.sln.docstates
+*.editorconfig
 
 #####################################
 # ASP.NET Core

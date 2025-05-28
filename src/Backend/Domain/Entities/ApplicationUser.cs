@@ -13,5 +13,7 @@ public class ApplicationUser
     public DateOnly BirthDate { get; set; }
     public DateTime RegistrationTime { get; set; }
 
+
+    public ICollection<ApplicationUser> Subscriptions { get; set; } = [];
     public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
 }
