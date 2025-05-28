@@ -9,6 +9,7 @@ public class ApplicationUser
     public required string PasswordHash { get; set; }
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
+    public string AvatarUrl { get; set; } = string.Empty;
     public DateOnly BirthDate { get; set; }
     public DateTime RegistrationTime { get; set; }
 
