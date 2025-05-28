@@ -2,15 +2,16 @@
 
 public class Result
 {
-    protected Error? _error;
+    protected readonly Error? _error;
     public bool IsSuccess { get; }
-    public Error? Error
+
+    public Error Error
     {
         get
         {
             if (IsSuccess)
-                throw new InvalidOperationException();
-            return _error;
+                throw new InvalidOperationException("Cannot access Error when value successfull");
+            return _error!;
         }
     }
 
@@ -24,27 +25,33 @@ public class Result
         => new Result(true);
 
     public static Result Failure(Error error)
-        => new Result(false, error);
+        => new Result(false, error ?? throw new ArgumentNullException(nameof(error)));
 }
 
-public class Result<TValue> : Result where TValue : class
+public class Result<TValue> : Result
 {
-    private TValue? _value;
+    protected readonly TValue? _value;
     public TValue? Value
     {
         get
         {
             if (!IsSuccess)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("Cannot access Value when the result is failure");
             return _value;
         }
     }
-    protected Result(bool success, Error? error = null, TValue? value = null)
+    protected Result(bool success, Error? error = null)
         : base(success, error) { }
 
+    protected Result(bool success, TValue value)
+        : base(success, null)
+    {
+        _value = value;
+    }
+
     public static Result<TValue> Success(TValue value)
-        => new Result<TValue>(true, value: value);
+        => new Result<TValue>(true, value: value ?? throw new ArgumentNullException(nameof(value)));
 
     public new static Result<TValue> Failure(Error error)
-        => new Result<TValue>(false, error: error);
+        => new Result<TValue>(false, error: error ?? throw new ArgumentNullException(nameof(error));
 }
