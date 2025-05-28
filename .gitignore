@@ -1,0 +1,81 @@
+#####################################
+# Visual Studio
+#####################################
+.vs/
+*.user
+*.suo
+*.cache
+*.dbmdl
+*.pdb
+*.psess
+*.vsp
+*.tlog
+*.log
+*.sln.docstates
+
+#####################################
+# ASP.NET Core
+#####################################
+bin/
+obj/
+out/
+wwwroot/dist/
+wwwroot/node_modules/
+
+# EF Core
+Migrations/
+
+# User secrets (if used)
+secrets.json
+
+#####################################
+# React / Node.js (в ClientApp)
+#####################################
+ClientApp/node_modules/
+ClientApp/build/
+ClientApp/.env
+ClientApp/.env.*.local
+ClientApp/npm-debug.log*
+ClientApp/yarn-debug.log*
+ClientApp/yarn-error.log*
+ClientApp/.next/
+
+#####################################
+# Docker
+#####################################
+*.container
+*.image
+docker-compose.override.yml
+Dockerfile.*
+.env
+
+#####################################
+# OS
+#####################################
+Thumbs.db
+ehthumbs.db
+.DS_Store
+Icon?
+Desktop.ini
+
+#####################################
+# VS Code / JetBrains
+#####################################
+.vscode/
+.idea/
+.history/
+
+#####################################
+# Test / Coverage
+#####################################
+coverage/
+*.coverage
+*.coveragexml
+TestResults/
+
+#####################################
+# Others
+#####################################
+*.swp
+*.bak
+*.tmp
