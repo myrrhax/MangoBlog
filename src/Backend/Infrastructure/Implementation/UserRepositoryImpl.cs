@@ -134,13 +134,16 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
             .AnyAsync(user => user.Login == login, cancellationToken);
     }
 
-    public async Task<Result> UpdateRefreshToken(Guid tokenId, string newToken, CancellationToken cancellationToken)
+    public async Task<Result> UpdateRefreshToken(Guid tokenId, string newToken, DateTime newExpirationDate, CancellationToken cancellationToken)
     {
         try
         {
             int rows = await context.RefreshTokens
                 .Where(token => token.Id == tokenId)
-                .ExecuteUpdateAsync(entity => entity.SetProperty(property => property.Token, newToken));
+                .ExecuteUpdateAsync(entity => entity
+                    .SetProperty(property => property.Token, newToken)
+                    .SetProperty(property => property.ExpirationDate, newExpirationDate)
+                );
 
             if (rows > 0)
             {
@@ -162,6 +165,7 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
 
     public Task<Result> UpdateUser(ApplicationUser user, CancellationToken cancellationToken)
     {
+        // Todo implement
         throw new NotImplementedException();
     }
 }
