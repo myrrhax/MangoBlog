@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -43,6 +44,8 @@ internal class UsersConfiguration : IEntityTypeConfiguration<ApplicationUser>
             .WithMany();
 
         builder.Property(user => user.Role)
+            .IsRequired()
+            .HasDefaultValue(Role.User)
             .HasConversion<string>();
     }
 }
