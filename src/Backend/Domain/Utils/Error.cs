@@ -2,7 +2,7 @@
 
 public abstract class Error
 {
-    public required string Message { get; init; }
+    public string Message { get; init; }
 
     protected Error(string message)
     {
