@@ -1,7 +1,9 @@
 ﻿using Application.Abstractions;
 using Application.Dto;
+using Application.Extentions;
 using Domain.Entities;
 using Domain.Utils;
+using Domain.Utils.Errors;
 using FluentValidation;
 using MediatR;
 
@@ -30,20 +32,37 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         _validator = validator;
     }
 
-    public Task<Result<UserFullInfoDto>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result<UserFullInfoDto>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
         var validationResult = _validator.Validate(request);
 
         if (validationResult.Errors.Any())
         {
-            return Result<RegisterUserCommand>.Failure();
+            var validationError = new ApplicationValidationError(validationResult.Errors.ToErrorsDictionary());
+
+            return Result<UserFullInfoDto>.Failure(validationError);
         }
-        
+
+        bool isTaken = await VerifyIsLoginOrEmailTaken(request.Login, request.Email, cancellationToken);
+
+        if (isTaken)
+            return Result<UserFullInfoDto>.Failure(new EmailOrLoginAlreadyTaken(request.Login, request.Email));
+
         string hashedPassword = _passwordHasher.HashPassword(request.Password);
-        
-        var user = new ApplicationUser(login: request.Login, email: request.Email, 
+
+        var user = new ApplicationUser(login: request.Login, email: request.Email,
             hash: hashedPassword, firstName: request.FirstName,
             lastName: request.LastName, avatarUrl: request.AvatarUrl, birthDate: request.BirthDate);
 
+        Result insertionResult = await _userRepository.AddUser(user, cancellationToken);
+        if (!insertionResult.IsSuccess) { }
+
+    }
+
+    private async Task<bool> VerifyIsLoginOrEmailTaken(string login, string email, CancellationToken cancellationToken)
+    {
+        bool isLoginTaken = await _userRepository.IsLoginTaken(login, cancellationToken);
+
+        return isLoginTaken || await _userRepository.IsEmailTaken(email, cancellationToken);
     }
 }
