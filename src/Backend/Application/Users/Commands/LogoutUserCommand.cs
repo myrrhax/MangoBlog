@@ -26,6 +26,8 @@ public class LogoutUserCommandHandler : IRequestHandler<LogoutUserCommand, Resul
 
         RefreshToken? token = user.RefreshTokens.FirstOrDefault(token => token.Token == request.RefreshToken);
         if (token is null)
-            return Result.Failure();
+            return Result.Failure(new InvalidToken());
+
+        return await _userRepository.DeleteRefreshToken(token, cancellationToken);
     }
 }
