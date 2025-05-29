@@ -1,4 +1,6 @@
-﻿namespace Domain.Utils;
+﻿using Domain.Utils.Errors;
+
+namespace Domain.Utils;
 
 public class Result
 {
