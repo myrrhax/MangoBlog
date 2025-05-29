@@ -27,6 +27,12 @@ public class Result
 
     public static Result Failure(Error error)
         => new Result(false, error ?? throw new ArgumentNullException(nameof(error)));
+
+    public static Result<TValue> Success<TValue>(TValue value)
+        => new(true, value: value ?? throw new ArgumentNullException(nameof(value)));
+
+    public static Result<TValue> Failure<TValue>(Error error)
+        => new(false, error: error ?? throw new ArgumentNullException(nameof(error)));
 }
 
 public class Result<TValue> : Result
@@ -41,18 +47,12 @@ public class Result<TValue> : Result
             return _value;
         }
     }
-    protected Result(bool success, Error? error = null)
+    internal Result(bool success, Error? error = null)
         : base(success, error) { }
 
-    protected Result(bool success, TValue value)
+    internal Result(bool success, TValue value)
         : base(success, null)
     {
         _value = value;
     }
-
-    public static Result<TValue> Success(TValue value)
-        => new Result<TValue>(true, value: value ?? throw new ArgumentNullException(nameof(value)));
-
-    public new static Result<TValue> Failure(Error error)
-        => new Result<TValue>(false, error: error ?? throw new ArgumentNullException(nameof(error));
 }
