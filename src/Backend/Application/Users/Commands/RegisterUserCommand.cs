@@ -61,11 +61,10 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         }
 
         var writeTokenResult = await WriteTokens(user, cancellationToken);
-        if (writeTokenResult.IsSuccess)
-        {
-            var response = new RegistrationResponse(writeTokenResult.Value.AccessToken, writeTokenResult.Value.RefreshToken,
-                new UserFullInfoDto());
-        }
+
+        return writeTokenResult.IsSuccess
+            ? Result.Success<RegistrationResponse>(new(writeTokenResult.Value.AccessToken, writeTokenResult.Value.RefreshToken, user.MapToFullInfo()))
+            : Result.Failure<RegistrationResponse>();
     }
 
     private async Task<bool> VerifyIsLoginOrEmailTaken(string login, string email, CancellationToken cancellationToken)
