@@ -36,12 +36,11 @@ public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, Result<
 
             return Result.Failure<LoginResponse>(validationError);
         }
-        Result<ApplicationUser> getUserResult = await _userRepository.GetUserByLogin(request.Login, cancellationToken);
+        ApplicationUser? user = await _userRepository.GetUserByLogin(request.Login, cancellationToken);
 
-        if (getUserResult.IsFailure)
+        if (user is null)
             return Result.Failure<LoginResponse>(new UserNotFound());
 
-        ApplicationUser user = getUserResult.Value!;
         bool verificationResult = _passwordHasher.VerifyPassword(request.Password, user.PasswordHash);
 
         if (!verificationResult)
