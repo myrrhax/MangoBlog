@@ -1,4 +1,6 @@
-﻿namespace Domain.Entities;
+﻿using Domain.Enums;
+
+namespace Domain.Entities;
 
 public class ApplicationUser
 {
@@ -12,9 +14,10 @@ public class ApplicationUser
     public string? AvatarUrl { get; set; }
     public DateOnly? BirthDate { get; set; }
     public DateTime RegistrationTime { get; set; }
+    public Role Role { get; set; }
 
     public ApplicationUser(string login, string email, string hash, string firstName, string lastName, 
-        string? avatarUrl = default, DateOnly? birthDate = default)
+        string? avatarUrl = default, DateOnly? birthDate = default, Role role = Role.User)
     {
         Id = Guid.NewGuid();
         Email = email;
@@ -26,6 +29,7 @@ public class ApplicationUser
         AvatarUrl = avatarUrl;
         BirthDate = birthDate;
         RegistrationTime = DateTime.UtcNow;
+        Role = role;
     }
 
     internal ApplicationUser()
