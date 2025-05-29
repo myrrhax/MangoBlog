@@ -39,20 +39,19 @@ public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, Result<
         Result<ApplicationUser> getUserResult = await _userRepository.GetUserByLogin(request.Login, cancellationToken);
 
         if (getUserResult.IsFailure)
-            return Result.Failure<LoginResponse>();
+            return Result.Failure<LoginResponse>(new UserNotFound());
+
+        ApplicationUser user = getUserResult.Value!;
+        bool verificationResult = _passwordHasher.VerifyPassword(request.Password, user.PasswordHash);
+
+        if (!verificationResult)
+            return Result.Failure<LoginResponse>(new InvalidLoginOrPassword());
 
         var writeTokenResult = await WriteTokens(user, cancellationToken);
 
         return writeTokenResult.IsSuccess
-            ? Result.Success<RegistrationResponse>(new(writeTokenResult.Value.AccessToken, writeTokenResult.Value.RefreshToken, user.MapToFullInfo()))
-            : Result.Failure<RegistrationResponse>(new UnableToWriteTokens());
-    }
-
-    private async Task<bool> VerifyIsLoginOrEmailTaken(string login, string email, CancellationToken cancellationToken)
-    {
-        bool isLoginTaken = await _userRepository.IsLoginTaken(login, cancellationToken);
-
-        return isLoginTaken || await _userRepository.IsEmailTaken(email, cancellationToken);
+            ? Result.Success<LoginResponse>(new(writeTokenResult.Value.AccessToken, writeTokenResult.Value.RefreshToken, user.MapToFullInfo()))
+            : Result.Failure<LoginResponse>(new UnableToWriteTokens());
     }
 
     private async Task<Result<(string AccessToken, string RefreshToken)>> WriteTokens(ApplicationUser user, CancellationToken cancellationToken)

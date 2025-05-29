@@ -7,7 +7,7 @@ internal class RegisterUserCommandValidator : AbstractValidator<RegisterUserComm
 {
     private const int MinAge = 3;
     private const int MaxAge = 110;
-    private const string ValidLoginRegex = "^[a-zA-Z]+$";
+    public const string ValidLoginRegex = "^[a-zA-Z]+$";
 
     public RegisterUserCommandValidator()
     {
