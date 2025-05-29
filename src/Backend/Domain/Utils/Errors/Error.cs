@@ -16,3 +16,4 @@ public class UnableToWriteTokens() : Error("Unable to write token");
 public class UserNotFound() : Error("User not found");
 public class InvalidLoginOrPassword() : Error("Invalid login or password");
 public class PasswordsDoesntMatch() : Error("Passwords doesn't match");
+public class InvalidToken() : Error("Invalid or expired refresh token");
