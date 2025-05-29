@@ -41,5 +41,8 @@ internal class UsersConfiguration : IEntityTypeConfiguration<ApplicationUser>
 
         builder.HasMany(user => user.Subscriptions)
             .WithMany();
+
+        builder.Property(user => user.Role)
+            .HasConversion<string>();
     }
 }
