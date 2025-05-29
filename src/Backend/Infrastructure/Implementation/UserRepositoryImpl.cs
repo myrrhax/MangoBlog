@@ -134,9 +134,30 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
             .AnyAsync(user => user.Login == login, cancellationToken);
     }
 
-    public Task<Result> UpdateRefreshToken(RefreshToken token, CancellationToken cancellationToken)
+    public async Task<Result> UpdateRefreshToken(Guid tokenId, string newToken, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        try
+        {
+            int rows = await context.RefreshTokens
+                .Where(token => token.Id == tokenId)
+                .ExecuteUpdateAsync(entity => entity.SetProperty(property => property.Token, newToken));
+
+            if (rows > 0)
+            {
+                logger.LogInformation("Token with id: {} was successfully deleted.",
+                    tokenId);
+                return Result.Success();
+            }
+            logger.LogInformation("Token was not found");
+            return Result.Failure(new InvalidToken());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Unable to update refresh token with id: {}.\nError message: {}\n. Stack trace: {}",
+                tokenId, ex.Message, ex.StackTrace);
+            return Result.Failure(new DatabaseInteractionError("Unable to update refresh token"));
+        }
+        
     }
 
     public Task<Result> UpdateUser(ApplicationUser user, CancellationToken cancellationToken)
