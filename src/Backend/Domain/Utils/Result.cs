@@ -4,6 +4,7 @@ public class Result
 {
     protected readonly Error? _error;
     public bool IsSuccess { get; }
+    public bool IsFailure => !IsSuccess;
 
     public Error Error
     {
