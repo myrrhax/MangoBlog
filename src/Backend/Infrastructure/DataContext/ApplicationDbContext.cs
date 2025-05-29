@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Infrastructure.DataContext.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.DataContext;
@@ -13,5 +14,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(RatingsConfiguration).Assembly);
     }
 }
