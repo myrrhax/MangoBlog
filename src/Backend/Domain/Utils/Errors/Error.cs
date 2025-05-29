@@ -17,3 +17,4 @@ public class UserNotFound() : Error("User not found");
 public class InvalidLoginOrPassword() : Error("Invalid login or password");
 public class PasswordsDoesntMatch() : Error("Passwords doesn't match");
 public class InvalidToken() : Error("Invalid or expired refresh token");
+public class InsertionError(string message) : Error($"Unable to insert to database. Error: {message}");
