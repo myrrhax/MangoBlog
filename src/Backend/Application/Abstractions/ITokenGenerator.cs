@@ -4,6 +4,6 @@ namespace Application.Abstractions;
 
 public interface ITokenGenerator
 {
-    string GenerateRefreshToken();
+    RefreshToken GenerateRefreshToken(ApplicationUser user);
     string GenerateAccessToken(ApplicationUser user);
 }

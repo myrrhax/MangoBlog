@@ -15,7 +15,7 @@ public record RegisterUserCommand(string Login,
     string FirstName, 
     string LastName,
     DateOnly BirthDate,
-    string? AvatarUrl = null) : IRequest<Result<UserFullInfoDto>>;
+    string? AvatarUrl = null) : IRequest<Result<RegistrationResponse>>;
 
 public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<UserFullInfoDto>>
 {
@@ -32,7 +32,7 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         _validator = validator;
     }
 
-    public async Task<Result<UserFullInfoDto>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result<RegistrationResponse>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
         var validationResult = _validator.Validate(request);
 
@@ -40,13 +40,13 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         {
             var validationError = new ApplicationValidationError(validationResult.Errors.ToErrorsDictionary());
 
-            return Result<UserFullInfoDto>.Failure(validationError);
+            return Result<RegistrationResponse>.Failure(validationError);
         }
 
         bool isTaken = await VerifyIsLoginOrEmailTaken(request.Login, request.Email, cancellationToken);
 
         if (isTaken)
-            return Result<UserFullInfoDto>.Failure(new EmailOrLoginAlreadyTaken(request.Login, request.Email));
+            return Result<RegistrationResponse>.Failure(new EmailOrLoginAlreadyTaken(request.Login, request.Email));
 
         string hashedPassword = _passwordHasher.HashPassword(request.Password);
 
@@ -57,9 +57,10 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         Result insertionResult = await _userRepository.AddUser(user, cancellationToken);
         if (insertionResult.IsFailure) 
         {
-            return Result<UserFullInfoDto>.Failure(insertionResult.Error);
+            return Result<RegistrationResponse>.Failure(insertionResult.Error);
         }
 
+        var writeTokenResult = await WriteTokens(user, cancellationToken);
 
     }
 
@@ -73,7 +74,11 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
     private async Task<Result<(string AccessToken, string RefreshToken)>> WriteTokens(ApplicationUser user, CancellationToken cancellationToken)
     {
         string accessToken = _tokenGenerator.GenerateAccessToken(user);
-        string refreshToken = _tokenGenerator.GenerateRefreshToken();
+        RefreshToken refresh = _tokenGenerator.GenerateRefreshToken(user);
+        Result insertionResult = await _userRepository.AddRefreshToken(refresh, cancellationToken);
 
+        return insertionResult.IsSuccess
+            ? Result<(string, string)>.Success((accessToken, refresh.Token))
+            : Result<(string, string)>.Failure(insertionResult.Error);
     }
 }
