@@ -24,7 +24,7 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
         {
             logger.LogError("Unable to add new refresh token to user with id: {}.\nError message: {}\n.Stack trace: {}",
                 refreshToken.UserId, ex.Message, ex.StackTrace);
-            return Result.Failure(new InsertionError(string.Empty));
+            return Result.Failure(new DatabaseInteractionError("Unable to insert new refresh token"));
         }
     }
 
@@ -42,49 +42,96 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
         {
             logger.LogError("Unable to add new user to database.\nError message: {}\n. Stack trace: {}",
                 ex.Message, ex.StackTrace);
-            return Result.Failure(new InsertionError(string.Empty));
+            return Result.Failure(new DatabaseInteractionError("Unable to insert new user"));
         }
     }
 
     public async Task<Result> DeleteRefreshToken(RefreshToken token, CancellationToken cancellationToken)
     {
-        int rows = await context.RefreshTokens
-            .Where(entity => entity.Id == token.Id)
-            .ExecuteDeleteAsync(cancellationToken);
+        try
+        {
+            int rows = await context.RefreshTokens
+                .Where(entity => entity.Id == token.Id)
+                .ExecuteDeleteAsync(cancellationToken);
 
-        return rows > 0
-            ? Result.Success()
-            : Result.Failure();
+            if (rows > 0)
+            {
+                logger.LogInformation("Refresh token: {} was successfully deleted from user with id: {}", 
+                    token.Token, token.UserId);
+                return Result.Success();
+            }
+            logger.LogInformation("Refresh token was not found");
+            return Result.Failure(new InvalidToken());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Unable to delete refresh token: {} from user with id: {}.\nError message: {}\nStack trace: {}",
+                token.Token, token.UserId, ex.Message, ex.StackTrace);
+
+            return Result.Failure(new DatabaseInteractionError("Unable to delete token"));
+        }
     }
 
-    public Task<Result> DeleteUserById(Guid userId, CancellationToken cancellationToken)
+    public async Task<Result> DeleteUserById(Guid userId, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        try
+        {
+            int rows = await context.Users
+                .Where(entity => entity.Id == userId)
+                .ExecuteDeleteAsync(cancellationToken);
+
+            if (rows > 0)
+            {
+                logger.LogInformation("User with id: {} was successfully deleted.",
+                    userId);
+                return Result.Success();
+            }
+            logger.LogInformation("User was not found");
+            return Result.Failure(new UserNotFound());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Unable to delete user with id: {}.\nError message: {}\nStack trace: {}",
+                userId, ex.Message, ex.StackTrace);
+
+            return Result.Failure(new DatabaseInteractionError("Unable to delete user"));
+        }
     }
 
-    public Task<RefreshToken?> GetRefreshToken(string token, Guid userId, CancellationToken cancellationToken)
+    public async Task<RefreshToken?> GetRefreshToken(string token, Guid userId, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return await context.RefreshTokens
+            .AsNoTracking()
+            .FirstOrDefaultAsync(entity => entity.Token == token, cancellationToken);
     }
 
-    public Task<ApplicationUser?> GetUserById(Guid id, CancellationToken cancellationToken)
+    public async Task<ApplicationUser?> GetUserById(Guid id, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return await context.Users
+            .Include(user => user.RefreshTokens)
+            .FirstOrDefaultAsync(user => user.Id == id, cancellationToken);
     }
 
-    public Task<ApplicationUser?> GetUserByLogin(string login, CancellationToken cancellationToken)
+    public async Task<ApplicationUser?> GetUserByLogin(string login, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return await context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(user => user.Login == login, cancellationToken);
+            
     }
 
-    public Task<bool> IsEmailTaken(string email, CancellationToken cancellationToken)
+    public async Task<bool> IsEmailTaken(string email, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return await context.Users
+            .AsNoTracking()
+            .AnyAsync(user => user.Email == email, cancellationToken);
     }
 
-    public Task<bool> IsLoginTaken(string login, CancellationToken cancellationToken)
+    public async Task<bool> IsLoginTaken(string login, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return await context.Users
+            .AsNoTracking()
+            .AnyAsync(user => user.Login == login, cancellationToken);
     }
 
     public Task<Result> UpdateRefreshToken(RefreshToken token, CancellationToken cancellationToken)
