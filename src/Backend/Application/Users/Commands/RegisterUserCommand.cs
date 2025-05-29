@@ -55,7 +55,11 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
             lastName: request.LastName, avatarUrl: request.AvatarUrl, birthDate: request.BirthDate);
 
         Result insertionResult = await _userRepository.AddUser(user, cancellationToken);
-        if (!insertionResult.IsSuccess) { }
+        if (insertionResult.IsFailure) 
+        {
+            return Result<UserFullInfoDto>.Failure(insertionResult.Error);
+        }
+
 
     }
 
@@ -64,5 +68,12 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         bool isLoginTaken = await _userRepository.IsLoginTaken(login, cancellationToken);
 
         return isLoginTaken || await _userRepository.IsEmailTaken(email, cancellationToken);
+    }
+
+    private async Task<Result<(string AccessToken, string RefreshToken)>> WriteTokens(ApplicationUser user, CancellationToken cancellationToken)
+    {
+        string accessToken = _tokenGenerator.GenerateAccessToken(user);
+        string refreshToken = _tokenGenerator.GenerateRefreshToken();
+
     }
 }
