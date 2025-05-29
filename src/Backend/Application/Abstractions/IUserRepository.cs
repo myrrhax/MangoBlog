@@ -5,7 +5,6 @@ namespace Application.Abstractions;
 
 public interface IUserRepository
 {
-    Task<Result<ApplicationUser>> GetUserInfoById(Guid id, CancellationToken cancellationToken);
     Task<Result<ApplicationUser>> GetUserById(Guid id, CancellationToken cancellationToken);
     Task<Result<ApplicationUser>> GetUserByLogin(string login, CancellationToken cancellationToken);
     Task<Result> AddUser(ApplicationUser user, CancellationToken cancellationToken);
