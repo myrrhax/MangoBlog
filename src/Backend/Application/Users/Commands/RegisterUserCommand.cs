@@ -17,7 +17,7 @@ public record RegisterUserCommand(string Login,
     DateOnly BirthDate,
     string? AvatarUrl = null) : IRequest<Result<RegistrationResponse>>;
 
-public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<UserFullInfoDto>>
+public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<RegistrationResponse>>
 {
     private readonly IUserRepository _userRepository;
     private readonly ITokenGenerator _tokenGenerator;
@@ -64,7 +64,7 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
 
         return writeTokenResult.IsSuccess
             ? Result.Success<RegistrationResponse>(new(writeTokenResult.Value.AccessToken, writeTokenResult.Value.RefreshToken, user.MapToFullInfo()))
-            : Result.Failure<RegistrationResponse>();
+            : Result.Failure<RegistrationResponse>(new UnableToWriteTokens());
     }
 
     private async Task<bool> VerifyIsLoginOrEmailTaken(string login, string email, CancellationToken cancellationToken)
