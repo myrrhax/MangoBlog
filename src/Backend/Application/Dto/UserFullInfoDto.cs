@@ -1,8 +1,11 @@
-﻿namespace Application.Dto;
+﻿using Domain.Entities;
+
+namespace Application.Dto;
 
 public class UserFullInfoDto : UserDto
 {
-    public required string Email { get; set; }
-    public required string Login { get; set; }
+    public string Email { get; set; } = string.Empty;
+    public string Login { get; set; } = string.Empty;
     public DateTime RegistrationTime { get; set; }
+    public IEnumerable<UserDto> Subscriptions { get; set; } = [];
 }

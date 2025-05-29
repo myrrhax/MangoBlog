@@ -40,13 +40,13 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         {
             var validationError = new ApplicationValidationError(validationResult.Errors.ToErrorsDictionary());
 
-            return Result<RegistrationResponse>.Failure(validationError);
+            return Result.Failure<RegistrationResponse>(validationError);
         }
 
         bool isTaken = await VerifyIsLoginOrEmailTaken(request.Login, request.Email, cancellationToken);
 
         if (isTaken)
-            return Result<RegistrationResponse>.Failure(new EmailOrLoginAlreadyTaken(request.Login, request.Email));
+            return Result.Failure<RegistrationResponse>(new EmailOrLoginAlreadyTaken(request.Login, request.Email));
 
         string hashedPassword = _passwordHasher.HashPassword(request.Password);
 
@@ -57,11 +57,15 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         Result insertionResult = await _userRepository.AddUser(user, cancellationToken);
         if (insertionResult.IsFailure) 
         {
-            return Result<RegistrationResponse>.Failure(insertionResult.Error);
+            return Result.Failure<RegistrationResponse>(insertionResult.Error);
         }
 
         var writeTokenResult = await WriteTokens(user, cancellationToken);
-
+        if (writeTokenResult.IsSuccess)
+        {
+            var response = new RegistrationResponse(writeTokenResult.Value.AccessToken, writeTokenResult.Value.RefreshToken,
+                new UserFullInfoDto());
+        }
     }
 
     private async Task<bool> VerifyIsLoginOrEmailTaken(string login, string email, CancellationToken cancellationToken)
@@ -78,7 +82,7 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         Result insertionResult = await _userRepository.AddRefreshToken(refresh, cancellationToken);
 
         return insertionResult.IsSuccess
-            ? Result<(string, string)>.Success((accessToken, refresh.Token))
-            : Result<(string, string)>.Failure(insertionResult.Error);
+            ? Result.Success((accessToken, refresh.Token))
+            : Result.Failure<(string, string)>(insertionResult.Error);
     }
 }
