@@ -7,18 +7,18 @@ using MediatR;
 
 namespace Application.Users.Queries;
 
-public record AboutMeCommand(Guid CallerId) : IRequest<UserFullInfoDto?>;
+public record AboutMeQuery(Guid CallerId) : IRequest<UserFullInfoDto?>;
 
-public class AboutMeCommandHandler : IRequestHandler<AboutMeCommand, UserFullInfoDto?>
+public class AboutMeQueryHandler : IRequestHandler<AboutMeQuery, UserFullInfoDto?>
 {
     private readonly IUserRepository _userRepository;
 
-    public AboutMeCommandHandler(IUserRepository userRepository)
+    public AboutMeQueryHandler(IUserRepository userRepository)
     {
         _userRepository = userRepository;
     }
 
-    public async Task<UserFullInfoDto?> Handle(AboutMeCommand request, CancellationToken cancellationToken)
+    public async Task<UserFullInfoDto?> Handle(AboutMeQuery request, CancellationToken cancellationToken)
     {
         ApplicationUser? entity = await _userRepository.GetUserById(request.CallerId, cancellationToken);
 
