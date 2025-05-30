@@ -68,9 +68,30 @@ public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) 
     }
 
     [Authorize]
+    [HttpPost]
+    [Route("logout")]
     public async Task<IActionResult> LogoutUser()
     {
-        LogoutUserCommand command = 
+        Guid? userId = User.GetUserId();
+        if (userId is null || CurrentRefreshToken == string.Empty)
+            return NotFound();
+
+        LogoutUserCommand command = new(userId.Value, CurrentRefreshToken);
+        Result response = await mediator.Send(command);
+
+        if (response.IsSuccess)
+        {
+            RemoveToken();
+
+            return Ok();
+        }
+
+        return NotFound();
+    }
+
+    private void RemoveToken()
+    {
+        HttpContext.Response.Cookies.Delete(jwtConfig.Value.CookieName);
     }
 
     private string CurrentRefreshToken
