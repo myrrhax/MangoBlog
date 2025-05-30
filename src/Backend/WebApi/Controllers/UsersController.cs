@@ -18,10 +18,15 @@ public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) 
     public async Task<IActionResult> RegisterUser([FromBody] RegisterUserCommand request)
     {
         Result<RegistrationResponse> result = await mediator.Send(request);
+        
+        if (result.IsSuccess)
+        {
+            RefreshToken = result.Value!.RefreshToken;
 
-        return result.IsSuccess
-            ? Ok(result.Value)
-            : BadRequest(result.Error);
+            return Ok(result.Value!);
+        }
+
+        return BadRequest(result.Error);
     }
 
     [HttpPost]
@@ -30,24 +35,35 @@ public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) 
     {
         Result<LoginResponse> result = await mediator.Send(request);
 
-        return result.IsSuccess
-            ? Ok(result.Value)
-            : result.Error switch
-            {
-                UserNotFound or InvalidLoginOrPassword => NotFound(result.Error),
-                _ => BadRequest(result.Error)
-            };
+        if (result.IsSuccess)
+        {
+            RefreshToken = result.Value!.RefreshToken;
+
+            return Ok(result.Value!);
+        }
+
+        return result.Error switch
+        {
+            UserNotFound or InvalidLoginOrPassword => NotFound(result.Error),
+            _ => BadRequest(result.Error)
+        };
     }
 
-    private string? RefreshToken
+    private string RefreshToken
     {
         get
         {
-            return HttpContext.Request.Cookies.Contains(jwtConfig.Value);
+            return HttpContext.Request.Cookies[jwtConfig.Value.CookieName] ?? string.Empty;
         }
         set
         {
-
+            HttpContext.Response.Cookies.Append(jwtConfig.Value.CookieName, value 
+                ?? throw new ArgumentNullException(nameof(value)), 
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    SameSite = SameSiteMode.Strict,
+                });
         }
     }
 }
