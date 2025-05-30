@@ -1,5 +1,6 @@
 ﻿using Application.Dto;
 using Application.Users.Commands;
+using Application.Users.Queries;
 using Domain.Utils;
 using Domain.Utils.Errors;
 using Infrastructure.Utils;
@@ -87,6 +88,33 @@ public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) 
         }
 
         return NotFound();
+    }
+
+    [HttpGet]
+    [Authorize]
+    [Route("{id:guid}")]
+    public async Task<IActionResult> AboutMe([FromRoute] Guid id)
+    {
+        GetUserInfoQuery query = new GetUserInfoQuery(id);
+        UserDto? dto = await mediator.Send(query);
+
+        return dto is null
+            ? NotFound()
+            : Ok(dto);
+    }
+
+    [HttpGet]
+    [Authorize]
+    [Route("me")]
+    public async Task<IActionResult> AboutMe()
+    {
+        Guid userId = User.GetUserId() ?? Guid.Empty;
+        AboutMeQuery query = new AboutMeQuery(userId);
+        UserFullInfoDto? fullInfoDto = await mediator.Send(query);
+        
+        return fullInfoDto is null
+            ? NotFound() 
+            : Ok(fullInfoDto);
     }
 
     private void RemoveToken()
