@@ -2,14 +2,16 @@
 using Application.Users.Commands;
 using Domain.Utils;
 using Domain.Utils.Errors;
+using Infrastructure.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/users")]
-public class UsersController(IMediator mediator) : ControllerBase
+public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) : ControllerBase
 {
     [HttpPost]
     [Route("register")]
@@ -35,5 +37,17 @@ public class UsersController(IMediator mediator) : ControllerBase
                 UserNotFound or InvalidLoginOrPassword => NotFound(result.Error),
                 _ => BadRequest(result.Error)
             };
+    }
+
+    private string? RefreshToken
+    {
+        get
+        {
+            return HttpContext.Request.Cookies.Contains(jwtConfig.Value);
+        }
+        set
+        {
+
+        }
     }
 }
