@@ -38,7 +38,7 @@ internal class UsersConfiguration : IEntityTypeConfiguration<ApplicationUser>
 
         builder.HasMany(user => user.RefreshTokens)
             .WithOne(token => token.User)
-            .HasForeignKey(token => token.Id);
+            .HasForeignKey(token => token.UserId);
 
         builder.HasMany(user => user.Subscriptions)
             .WithMany();
