@@ -32,7 +32,7 @@ public class ApplicationUser
         Role = role;
     }
 
-    internal ApplicationUser()
+    public ApplicationUser()
     {
         
     }
