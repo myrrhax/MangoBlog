@@ -98,7 +98,7 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
         }
     }
 
-    public async Task<RefreshToken?> GetRefreshToken(string token, Guid userId, CancellationToken cancellationToken)
+    public async Task<RefreshToken?> GetRefreshToken(string token, CancellationToken cancellationToken)
     {
         return await context.RefreshTokens
             .AsNoTracking()
