@@ -21,4 +21,19 @@ public class UsersController(IMediator mediator) : ControllerBase
             ? Ok(result.Value)
             : BadRequest(result.Error);
     }
+
+    [HttpPost]
+    [Route("login")]
+    public async Task<IActionResult> LoginUser([FromBody] LoginUserCommand request)
+    {
+        Result<LoginResponse> result = await mediator.Send(request);
+
+        return result.IsSuccess
+            ? Ok(result.Value)
+            : result.Error switch
+            {
+                UserNotFound or InvalidLoginOrPassword => NotFound(result.Error),
+                _ => BadRequest(result.Error)
+            };
+    }
 }
