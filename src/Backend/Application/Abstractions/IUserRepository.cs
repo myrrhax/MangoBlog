@@ -13,7 +13,7 @@ public interface IUserRepository
     Task<bool> IsEmailTaken(string email, CancellationToken cancellationToken);
     Task<bool> IsLoginTaken(string login, CancellationToken cancellationToken);
     Task<Result> AddRefreshToken(RefreshToken refreshToken, CancellationToken cancellationToken);
-    Task<RefreshToken?> GetRefreshToken(string token, Guid userId, CancellationToken cancellationToken);
+    Task<RefreshToken?> GetRefreshToken(string token, CancellationToken cancellationToken);
     Task<Result> UpdateRefreshToken(Guid tokenId, string newToken, DateTime newExpirationTime, CancellationToken cancellationToken);
     Task<Result> DeleteRefreshToken(RefreshToken token, CancellationToken cancellationToken);
 }
