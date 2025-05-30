@@ -25,6 +25,7 @@ internal class TokenGeneratorImpl(IOptions<JwtConfig> jwtConfig) : ITokenGenerat
 
         var token = new JwtSecurityToken(
             issuer: jwtConfig.Value.Issuer,
+            audience: jwtConfig.Value.Audience,
             claims: claims,
             expires: DateTime.UtcNow.AddMinutes(jwtConfig.Value.ExpirationTimeMinutes),
             signingCredentials: creds
