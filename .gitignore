@@ -80,3 +80,4 @@ TestResults/
 *.swp
 *.bak
 *.tmp
+/src/Backend/WebApi/appsettings.Development.json
