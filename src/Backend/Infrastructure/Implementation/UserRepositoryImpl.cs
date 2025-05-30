@@ -102,6 +102,7 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
     {
         return await context.RefreshTokens
             .AsNoTracking()
+            .Include(token => token.User)
             .FirstOrDefaultAsync(entity => entity.Token == token, cancellationToken);
     }
 
@@ -109,12 +110,15 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
     {
         return await context.Users
             .Include(user => user.RefreshTokens)
+            .Include(user => user.Subscriptions)
             .FirstOrDefaultAsync(user => user.Id == id, cancellationToken);
     }
 
     public async Task<ApplicationUser?> GetUserByLogin(string login, CancellationToken cancellationToken)
     {
         return await context.Users
+            .AsNoTracking()
+            .Include(user => user.Subscriptions)
             .FirstOrDefaultAsync(user => user.Login == login, cancellationToken);
             
     }
