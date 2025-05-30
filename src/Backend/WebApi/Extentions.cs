@@ -11,6 +11,7 @@ public static class Extentions
     {
         var cfg = configuration.GetSection("JwtConfig").Get<JwtConfig>();
         if (cfg is null) throw new ArgumentException("Unable to read jwt settings from appsettings.json");
+        services.Configure<JwtConfig>(configuration.GetSection("JwtConfig"));
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
            .AddJwtBearer(options =>
