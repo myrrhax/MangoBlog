@@ -19,6 +19,7 @@ public static class DependencyInjectionExtentions
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddSingleton<IPasswordHasher, PasswordHasherImpl>();
+        services.AddSingleton<ITokenGenerator, TokenGeneratorImpl>();
 
         return services;
     }
