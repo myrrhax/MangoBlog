@@ -117,7 +117,6 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
     public async Task<ApplicationUser?> GetUserByLogin(string login, CancellationToken cancellationToken)
     {
         return await context.Users
-            .AsNoTracking()
             .Include(user => user.Subscriptions)
             .FirstOrDefaultAsync(user => user.Login == login, cancellationToken);
             
