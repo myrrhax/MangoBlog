@@ -4,6 +4,7 @@ using Domain.Utils;
 using Domain.Utils.Errors;
 using Infrastructure.Utils;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -64,6 +65,12 @@ public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) 
         }
 
         return NotFound(response.Error);
+    }
+
+    [Authorize]
+    public async Task<IActionResult> LogoutUser()
+    {
+        LogoutUserCommand command = 
     }
 
     private string CurrentRefreshToken

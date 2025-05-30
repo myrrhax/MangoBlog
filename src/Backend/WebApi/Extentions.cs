@@ -1,6 +1,7 @@
 ﻿using Infrastructure.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using System.Text;
 
 namespace WebApi;
@@ -34,5 +35,13 @@ public static class Extentions
         });
 
         return services;
+    }
+
+    public static Guid? GetUserId(this ClaimsPrincipal claims)
+    {
+        Claim? idClaim = claims.FindFirst(claim => claim.Type == ClaimTypes.NameIdentifier);
+        return idClaim is null
+            ? null
+            : (Guid.TryParse(idClaim.Value, out Guid result) ? result : null);
     }
 }
