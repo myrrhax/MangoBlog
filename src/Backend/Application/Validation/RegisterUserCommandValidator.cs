@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Application.Validation;
 
-internal class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
+public class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
 {
     private const int MinAge = 3;
     private const int MaxAge = 110;
