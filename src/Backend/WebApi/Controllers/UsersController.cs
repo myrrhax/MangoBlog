@@ -21,7 +21,7 @@ public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) 
         
         if (result.IsSuccess)
         {
-            RefreshToken = result.Value!.RefreshToken;
+            CurrentRefreshToken = result.Value!.RefreshToken;
 
             return Ok(result.Value!);
         }
@@ -37,7 +37,7 @@ public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) 
 
         if (result.IsSuccess)
         {
-            RefreshToken = result.Value!.RefreshToken;
+            CurrentRefreshToken = result.Value!.RefreshToken;
 
             return Ok(result.Value!);
         }
@@ -49,7 +49,24 @@ public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) 
         };
     }
 
-    private string RefreshToken
+    [HttpPost]
+    [Route("refresh")]
+    public async Task<IActionResult> RefreshUser()
+    {
+        RefreshTokenCommand command = new(CurrentRefreshToken);
+        Result<RefreshResponse> response = await mediator.Send(command);
+        
+        if (response.IsSuccess)
+        {
+            CurrentRefreshToken = response.Value!.RefreshToken;
+
+            return Ok(response.Value!);
+        }
+
+        return NotFound(response.Error);
+    }
+
+    private string CurrentRefreshToken
     {
         get
         {
