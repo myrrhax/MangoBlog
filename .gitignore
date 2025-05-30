@@ -29,8 +29,6 @@ Migrations/
 # User secrets (if used)
 secrets.json
 
-appsettings.Development.json
-
 #####################################
 # React / Node.js (в ClientApp)
 #####################################
