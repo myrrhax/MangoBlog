@@ -23,6 +23,7 @@ public static class Extentions
                    ValidateAudience = true,
                    ValidateIssuerSigningKey = true,
                    ValidIssuer = cfg.Issuer,
+                   ValidAudience = cfg.Audience,
                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(cfg.SecretKey)),
                };
            });
