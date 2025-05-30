@@ -115,7 +115,6 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
     public async Task<ApplicationUser?> GetUserByLogin(string login, CancellationToken cancellationToken)
     {
         return await context.Users
-            .AsNoTracking()
             .FirstOrDefaultAsync(user => user.Login == login, cancellationToken);
             
     }
@@ -123,7 +122,6 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
     public async Task<bool> IsEmailTaken(string email, CancellationToken cancellationToken)
     {
         return await context.Users
-            .AsNoTracking()
             .AnyAsync(user => user.Email == email, cancellationToken);
     }
 
