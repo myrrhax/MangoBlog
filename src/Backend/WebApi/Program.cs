@@ -1,3 +1,4 @@
+using WebApi;
 using Infrastructure;
 using Application.Extentions;
 
@@ -20,6 +21,8 @@ builder.Services
     .AddUseCases();
 #endregion
 
+builder.Services.AddJwtAuthentication(builder.Configuration);
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -29,6 +32,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
