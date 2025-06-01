@@ -37,6 +37,21 @@ public class ArticlesController(IMediator mediator) : ControllerBase
 
         return dto is null
             ? NotFound()
-            : Ok(dto);
+            : Ok(new { data = dto });
+    }
+
+    [HttpGet]
+    [Route("my")]
+    [Authorize]
+    public async Task<IActionResult> GetMyArticles()
+    {
+        Guid userId = User.GetUserId()!.Value;
+        GetMyArticlesQuery query = new(userId);
+
+        IEnumerable<ArticleDto> dtos = await mediator.Send(query);
+
+        return dtos.Any()
+            ? Ok(new { data = dtos })
+            : NotFound();
     }
 }
