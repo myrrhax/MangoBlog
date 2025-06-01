@@ -1,4 +1,5 @@
-﻿using Application.Articles.Commands;
+﻿using System.Reflection.Metadata.Ecma335;
+using Application.Articles.Commands;
 using FluentValidation;
 using Newtonsoft.Json.Linq;
 
@@ -30,16 +31,14 @@ public class CreateArticleCommandValidator : AbstractValidator<CreateArticleComm
         if (!content.TryGetValue("blocks", out var blocksObj))
             return false;
 
-        if (blocksObj is not JArray blocksArray)
-            blocksArray = JArray.FromObject(blocksObj); // попытка привести к массиву
-
-        if (blocksArray.Count == 0)
+        if (blocksObj is not Array array)
             return false;
 
-        foreach (var block in blocksArray)
+        dynamic[] blocksArray = array.Cast<dynamic>().ToArray();
+        foreach (dynamic block in blocksArray)
         {
-            var type = block["type"]?.ToString();
-            var data = block["data"] as JObject;
+            string type = block.type?.ToString() ?? string.Empty;
+            dynamic? data = block.data;
 
             if (string.IsNullOrWhiteSpace(type) || data == null)
                 return false;
@@ -47,21 +46,16 @@ public class CreateArticleCommandValidator : AbstractValidator<CreateArticleComm
             switch (type)
             {
                 case "header":
-                    if (data["level"] is null || data["level"]?.Type != JTokenType.Integer)
+                    if (data!.level is null || !int.TryParse(data.level?.ToString(), out int _))
                         return false;
                     break;
                 case "paragraph":
-                    if (string.IsNullOrWhiteSpace(data["text"]?.ToString()))
+                    if (string.IsNullOrWhiteSpace(data!.text?.ToString()))
                         return false;
                     break;
-
-                case "image":
-                    if (data["file"]?["url"] is null || data["file"]?["url"]?.Type != JTokenType.String)
-                        return false;
-                    break;
-
-                case "video":
-                    if (string.IsNullOrWhiteSpace(data["url"]?.ToString()))
+                case "image" or "video":
+                    string url = data!.file?.url.url?.ToString() ?? string.Empty;
+                    if (string.IsNullOrEmpty(url) || !Uri.TryCreate(url, UriKind.Absolute, out var _))
                         return false;
                     break;
                 default:
