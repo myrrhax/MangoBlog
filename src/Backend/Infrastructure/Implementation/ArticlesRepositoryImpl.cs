@@ -46,7 +46,7 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
         catch (Exception ex)
         {
             _logger.LogError("An error occurred article insertion (article id: {}).\nError: {}\nStack trace: {}",
-                document.Id, ex.InnerException, ex.StackTrace);
+                document.Id, ex.Message, ex.StackTrace);
 
             return Result.Failure<Article>(new DatabaseInteractionError("Failed to insert document"));
         }
