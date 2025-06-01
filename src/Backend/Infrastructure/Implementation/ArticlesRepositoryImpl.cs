@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using Newtonsoft.Json;
 
 namespace Infrastructure.Implementation;
 
@@ -34,7 +35,7 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
             CreatorId = dto.CreatorId,
             CreationDate = DateTime.UtcNow,
             Tags = dto.Tags.ToList(),
-            Content = dto.Content.ToBsonDocument(),
+            Content = JsonConvert.SerializeObject(dto.Content).ToBsonDocument(),
         };
         try
         {
