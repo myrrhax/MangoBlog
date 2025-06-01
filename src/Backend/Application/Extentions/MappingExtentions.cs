@@ -1,6 +1,7 @@
 ﻿using Application.Dto;
 using Application.Dto.Articles;
 using Domain.Entities;
+using Domain.Enums;
 
 namespace Application.Extentions;
 
@@ -37,7 +38,7 @@ internal static class MappingExtentions
         };
     }
 
-    public static ArticleDto MapToDto(this Article entity, ApplicationUser creator, int likes = 0, int dislikes = 0)
+    public static ArticleDto MapToDto(this Article entity, ApplicationUser creator, int likes = 0, int dislikes = 0, RatingType? reaction = null)
     {
         return new ArticleDto(entity.Id, 
             creator.MapToDto(), 
@@ -45,6 +46,7 @@ internal static class MappingExtentions
             entity.Tags, 
             entity.CreationDate, 
             likes, 
-            dislikes);
+            dislikes,
+            reaction);
     }
 }

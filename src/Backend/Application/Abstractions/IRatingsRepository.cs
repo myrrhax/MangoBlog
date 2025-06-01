@@ -1,11 +1,13 @@
-﻿using Domain.Enums;
+﻿using Domain.Entities;
+using Domain.Enums;
 
 namespace Application.Abstractions;
 
 public interface IRatingsRepository
 {
-    Task<int> GetPostLikesCount(Guid postId, CancellationToken cancellationToken);
-    Task<int> GetPostDislikesCount(Guid postId, CancellationToken cancellationToken);
-    Task<double> GetPostAverageRating(Guid postId, CancellationToken cancellationToken);
-    Task<RatingType?> GetUserRating(Guid userId, CancellationToken cancellationToken);
+    Task<int> GetPostLikesCount(string postId, CancellationToken cancellationToken);
+    Task<int> GetPostDislikesCount(string postId, CancellationToken cancellationToken);
+    Task<double> GetPostAverageRating(string postId, CancellationToken cancellationToken);
+    Task<RatingType?> GetUserRating(Guid userId, string postId, CancellationToken cancellationToken);
+    Task<IEnumerable<Rating>> GetUserRatings(Guid userId, CancellationToken cancellationToken);
 }
