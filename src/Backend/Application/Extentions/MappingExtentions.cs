@@ -15,6 +15,7 @@ internal static class MappingExtentions
             LastName = entity.LastName,
             AvatarUrl = entity.AvatarUrl,
             BirthDate = entity.BirthDate,
+            Role = entity.Role.ToString()
         };
     }
 

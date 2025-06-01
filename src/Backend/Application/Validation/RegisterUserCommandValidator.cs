@@ -3,11 +3,12 @@ using FluentValidation;
 
 namespace Application.Validation;
 
-internal class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
+public class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
 {
+    public const string ValidLoginRegex = "^[a-zA-Z]+$";
     private const int MinAge = 3;
     private const int MaxAge = 110;
-    public const string ValidLoginRegex = "^[a-zA-Z]+$";
+    private const string ValidNameFormatRegex = "^([А-Яа-яЁё]+|[A-Za-z]+)$";
 
     public RegisterUserCommandValidator()
     {
@@ -39,6 +40,15 @@ internal class RegisterUserCommandValidator : AbstractValidator<RegisterUserComm
             .Matches("[a-z]").WithMessage("Password must contain at least one lowercase letter of the English alphabet")
             .Matches("[A-Z]").WithMessage("Password must contain at least one uppercase letter of the English alphabet")
             .Matches("[!@#$%^&*(),.?\":{}|<>]").WithMessage("Password must contain at least one special character");
+
+        RuleFor(command => command.FirstName)
+            .Matches(ValidNameFormatRegex)
+            .WithMessage("Invalid name format. Don't use special characters or numbers");
+
+        RuleFor(command => command.LastName)
+            .Matches(ValidNameFormatRegex)
+            .WithMessage("Invalid name format. Don't use special characters or numbers");
+
     }
 
     private bool IsAgeValid(DateOnly birthDate)
