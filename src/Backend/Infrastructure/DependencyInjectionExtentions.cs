@@ -27,11 +27,11 @@ public static class DependencyInjectionExtentions
         return services;
     }
 
-    public static IServiceCollection AddMongoDb(this IServiceCollection services, IOptions<MongoConnectionConfig> connectionConfig)
+    public static IServiceCollection AddMongoDb(this IServiceCollection services, MongoConnectionConfig connectionConfig)
     {
         services.AddSingleton<IMongoClient, MongoClient>(options =>
         {
-            return new MongoClient(connectionConfig.Value.ConnectionString);
+            return new MongoClient(connectionConfig.ConnectionString);
         });
 
         return services;
