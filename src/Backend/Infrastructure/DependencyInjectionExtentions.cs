@@ -16,6 +16,7 @@ public static class DependencyInjectionExtentions
     {
         services.AddScoped<IUserRepository, UserRepositoryImpl>();
         services.AddScoped<IArticlesRepository, ArticlesRepositoryImpl>();
+        services.AddScoped<ITagsRepository, TagsRepositoryImpl>();
 
         return services;
     }
