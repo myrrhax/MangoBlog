@@ -2,12 +2,21 @@
 
 public class Article
 {
-    public required string Id { get; set; }
-    public required string Title { get; set; }
+    public string Id { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
     public Dictionary<string, object> Content { get; set; } = [];
     public Guid CreatorId { get; set; }
-    public required string CreatorUserName { get; set; }
-    public required string CreatorAvatarUrl { get; set; }
     public DateTime CreationDate { get; set; }
     public ICollection<Tag> Tags { get; set; } = [];
+
+    public Article(string id, string title, Dictionary<string, object> content, 
+        Guid creatorId, ICollection<Tag> tags, DateTime? creationDate = null)
+    {
+        Id = id;
+        Title = title;
+        Content = content;
+        CreatorId = creatorId;
+        Tags = tags;
+        CreationDate = creationDate ?? DateTime.UtcNow;
+    }
 }
