@@ -3,6 +3,6 @@
 namespace Application.Dto.Articles;
 
 public record CreateArticleDto(string Title, 
-    Dictionary<string, object> Content, 
+    Dictionary<string, dynamic> Content, 
     Guid CreatorId, 
     IEnumerable<Tag> Tags);
