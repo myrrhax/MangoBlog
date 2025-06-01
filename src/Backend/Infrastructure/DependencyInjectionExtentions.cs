@@ -2,7 +2,6 @@
 using Infrastructure.DataContext;
 using Infrastructure.Implementation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure;
