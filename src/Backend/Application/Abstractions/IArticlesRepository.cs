@@ -7,5 +7,5 @@ namespace Application.Abstractions;
 public interface IArticlesRepository
 {
     Task<Result<Article>> CreateArticle(CreateArticleDto dto);
-    Task<Article> GetArticleById(string id);
+    Task<Article?> GetArticleById(string id);
 }

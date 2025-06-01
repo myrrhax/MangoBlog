@@ -26,7 +26,7 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
         _logger = logger;
     }
 
-    public async Task<Result<Article>> CreateArticle(CreateArticleDto dto, CancellationToken cancellationToken)
+    public async Task<Result<Article>> CreateArticle(CreateArticleDto dto)
     {
         ArticleDocument document = new ArticleDocument
         {
@@ -51,5 +51,11 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
 
             return Result.Failure<Article>(new DatabaseInteractionError("Failed to insert document"));
         }
+    }
+
+    public async Task<Article?> GetArticleById(string id)
+    {
+        return await _articles.Find(article => article.Id == id)
+            .SingleAsync();
     }
 }
