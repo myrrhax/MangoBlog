@@ -26,42 +26,11 @@ public class CreateArticleCommandValidator : AbstractValidator<CreateArticleComm
             .Must(BeValidEditorJsContent).WithMessage("Content must be valid Editor.js format");
     }
 
-    private bool BeValidEditorJsContent(Dictionary<string, dynamic> content)
+    private bool BeValidEditorJsContent(Dictionary<string, object> content)
     {
         if (!content.TryGetValue("blocks", out var blocksObj))
             return false;
 
-        if (blocksObj is not Array blocksArray)
-            return false;
-
-        foreach (dynamic block in blocksArray)
-        {
-            string type = block.type?.ToString() ?? string.Empty;
-            dynamic? data = block.data;
-
-            if (string.IsNullOrWhiteSpace(type) || data == null)
-                return false;
-
-            switch (type)
-            {
-                case "header":
-                    if (data!.level is null || !int.TryParse(data.level?.ToString(), out int _))
-                        return false;
-                    break;
-                case "paragraph":
-                    if (string.IsNullOrWhiteSpace(data!.text?.ToString()))
-                        return false;
-                    break;
-                case "image" or "video":
-                    string url = data!.file?.url.url?.ToString() ?? string.Empty;
-                    if (string.IsNullOrEmpty(url) || !Uri.TryCreate(url, UriKind.Absolute, out var _))
-                        return false;
-                    break;
-                default:
-                    return false;
-            }
-        }
-
-        return true;
+        return blocksObj is JArray; // ToDo better validation
     }
 }
