@@ -26,14 +26,15 @@ public class CreateArticleCommandValidator : AbstractValidator<CreateArticleComm
             .Must(BeValidEditorJsContent).WithMessage("Content must be valid Editor.js format");
     }
 
-    private bool BeValidEditorJsContent(Dictionary<string, dynamic> content)
+    private bool BeValidEditorJsContent(Dictionary<string, object> content)
     {
         if (!content.TryGetValue("blocks", out var blocksObj))
             return false;
 
-        if (blocksObj is not Array blocksArray)
+        if (blocksObj is not Array array)
             return false;
 
+        dynamic[] blocksArray = array.Cast<dynamic>().ToArray();
         foreach (dynamic block in blocksArray)
         {
             string type = block.type?.ToString() ?? string.Empty;
