@@ -6,5 +6,5 @@ namespace Application.Abstractions;
 
 public interface IArticlesRepository
 {
-    Task<Result<Article>> CreateArticle(CreateArticleDto dto);
+    Task<Result<Article>> CreateArticle(CreateArticleDto dto, CancellationToken cancellationToken);
 }
