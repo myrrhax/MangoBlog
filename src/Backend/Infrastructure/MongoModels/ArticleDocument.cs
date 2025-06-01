@@ -15,8 +15,6 @@ internal class ArticleDocument
     
     [BsonRepresentation(BsonType.String)]
     public Guid CreatorId { get; set; }
-
-    [BsonRepresentation(BsonType.Array)]
     public ICollection<Tag> Tags { get; set; } = [];
     public DateTime CreationDate { get; set; }
 
