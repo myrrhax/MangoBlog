@@ -15,6 +15,7 @@ public static class DependencyInjectionExtentions
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepositoryImpl>();
+        services.AddScoped<IArticlesRepository, ArticlesRepositoryImpl>();
 
         return services;
     }
