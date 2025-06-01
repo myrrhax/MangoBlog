@@ -9,4 +9,5 @@ public class Article
     public required string CreatorUserName { get; set; }
     public required string CreatorAvatarUrl { get; set; }
     public DateTime CreationDate { get; set; }
+    public ICollection<Tag> Tags { get; set; } = [];
 }
