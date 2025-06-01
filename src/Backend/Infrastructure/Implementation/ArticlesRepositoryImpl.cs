@@ -35,7 +35,7 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
             CreatorId = dto.CreatorId,
             CreationDate = DateTime.UtcNow,
             Tags = dto.Tags.ToList(),
-            Content = JsonConvert.SerializeObject(dto.Content).ToBsonDocument(),
+            Content = BsonDocument.Parse(JsonConvert.SerializeObject(dto.Content)),
         };
         try
         {
