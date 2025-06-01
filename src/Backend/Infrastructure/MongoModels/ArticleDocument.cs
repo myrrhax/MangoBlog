@@ -20,11 +20,6 @@ internal class ArticleDocument
 
     public static implicit operator Article(ArticleDocument document)
     {
-        return new Article(document.Id, 
-            document.Title, 
-            document.Content.ToDictionary(), 
-            document.CreatorId, 
-            document.Tags, 
-            document.CreationDate);
+        return document.MapToEntity();
     }
 }

@@ -29,6 +29,20 @@ internal class RatingsRepositoryImpl(ApplicationDbContext context) : IRatingsRep
             .CountAsync(cancellationToken);
     }
 
+    public async Task<Dictionary<string, (int, int)>> GetRatingsForArticles(IEnumerable<Article> articles, CancellationToken cancellationToken)
+    {
+        Dictionary<string, (int, int)> result = new();
+
+        foreach (Article article in articles)
+        {
+            int likes = await GetPostLikesCount(article.Id, cancellationToken);
+            int dislikes = await GetPostDislikesCount(article.Id, cancellationToken);
+            result[article.Id] = (likes, dislikes);
+        }
+
+        return result;
+    }
+
     public async Task<RatingType?> GetUserRating(Guid userId, string postId, CancellationToken cancellationToken)
     {
         Rating? rating = await context.Ratings

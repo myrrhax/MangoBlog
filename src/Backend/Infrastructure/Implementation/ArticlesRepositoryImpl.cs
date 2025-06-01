@@ -58,4 +58,12 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
         return await _articles.Find(article => article.Id == id)
             .SingleAsync();
     }
+
+    public async Task<IEnumerable<Article>> GetUserArticles(Guid userId)
+    {
+        IEnumerable<ArticleDocument> documents = await _articles.Find(article => article.CreatorId == userId)
+            .ToListAsync();
+
+        return documents.Select(document => document.MapToEntity());
+    }
 }
