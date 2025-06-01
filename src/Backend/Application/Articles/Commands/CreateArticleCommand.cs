@@ -10,7 +10,7 @@ using MediatR;
 namespace Application.Articles.Commands;
 
 public record CreateArticleCommand(string Title, 
-    Dictionary<string, object> Content, 
+    Dictionary<string, dynamic> Content, 
     Guid CreatorId, 
     IEnumerable<string> Tags) : IRequest<Result<ArticleDto>>;
 
