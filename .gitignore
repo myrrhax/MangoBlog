@@ -12,6 +12,7 @@
 *.tlog
 *.log
 *.sln.docstates
+*.editorconfig
 
 #####################################
 # ASP.NET Core
@@ -79,3 +80,4 @@ TestResults/
 *.swp
 *.bak
 *.tmp
+/src/Backend/WebApi/appsettings.Development.json
