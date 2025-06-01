@@ -19,4 +19,14 @@ internal class ArticleDocument
     [BsonRepresentation(BsonType.Array)]
     public ICollection<Tag> Tags { get; set; } = [];
     public DateTime CreationDate { get; set; }
+
+    public static implicit operator Article(ArticleDocument document)
+    {
+        return new Article(document.Id, 
+            document.Title, 
+            document.Content.ToDictionary(), 
+            document.CreatorId, 
+            document.Tags, 
+            document.CreationDate);
+    }
 }
