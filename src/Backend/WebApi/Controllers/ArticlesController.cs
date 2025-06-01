@@ -1,4 +1,5 @@
 ﻿using Application.Articles.Commands;
+using Application.Articles.Queries;
 using Application.Dto.Articles;
 using Domain.Utils;
 using MediatR;
@@ -9,11 +10,11 @@ using WebApi.Dto;
 namespace WebApi.Controllers;
 
 [ApiController]
-[Authorize]
 [Route("api/articles")]
 public class ArticlesController(IMediator mediator) : ControllerBase
 {
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> CreateArtcile([FromBody] CreateArticleRequest request)
     {
         Guid userId = User.GetUserId() ?? Guid.Empty;
@@ -23,5 +24,19 @@ public class ArticlesController(IMediator mediator) : ControllerBase
         return result.IsSuccess
             ? Ok(result.Value) 
             : BadRequest(result.Error);
+    }
+
+    [HttpGet]
+    [Route("{id}")]
+    public async Task<IActionResult> GetArticleById([FromRoute] string id)
+    {
+        Guid? userId = User.GetUserId();
+        GetArticleByIdQuery query = new(id, userId);
+
+        ArticleDto? dto = await mediator.Send(query);
+
+        return dto is null
+            ? NotFound()
+            : Ok(dto);
     }
 }

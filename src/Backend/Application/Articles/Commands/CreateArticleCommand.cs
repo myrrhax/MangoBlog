@@ -47,7 +47,7 @@ public class CreateArticleCommandHandler : IRequestHandler<CreateArticleCommand,
             return Result.Failure<ArticleDto>(tagInsertionResult.Error);
 
         CreateArticleDto dto = new CreateArticleDto(request.Title, request.Content, request.CreatorId, tagInsertionResult.Value!);
-        Result<Article> articleInsertionResult = await _articlesRepository.CreateArticle(dto, cancellationToken);
+        Result<Article> articleInsertionResult = await _articlesRepository.CreateArticle(dto);
 
         return articleInsertionResult.IsSuccess
             ? Result.Success(articleInsertionResult.Value!.MapToDto(creator))
