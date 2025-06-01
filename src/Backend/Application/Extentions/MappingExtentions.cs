@@ -1,4 +1,5 @@
 ﻿using Application.Dto;
+using Application.Dto.Articles;
 using Domain.Entities;
 
 namespace Application.Extentions;
@@ -34,5 +35,16 @@ internal static class MappingExtentions
             RegistrationTime = entity.RegistrationTime,
             Subscriptions = entity.Subscriptions.Select(sub => sub.MapToDto())
         };
+    }
+
+    public static ArticleDto MapToDto(this Article entity, ApplicationUser creator, int likes = 0, int dislikes = 0)
+    {
+        return new ArticleDto(entity.Id, 
+            creator.MapToDto(), 
+            entity.Content, 
+            entity.Tags, 
+            entity.CreationDate, 
+            likes, 
+            dislikes);
     }
 }

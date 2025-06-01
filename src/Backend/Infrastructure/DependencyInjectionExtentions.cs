@@ -1,9 +1,12 @@
 ﻿using Application.Abstractions;
 using Infrastructure.DataContext;
 using Infrastructure.Implementation;
+using Infrastructure.Utils;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using MongoDB.Bson.Serialization.Conventions;
+using MongoDB.Driver;
 
 namespace Infrastructure;
 
@@ -20,6 +23,16 @@ public static class DependencyInjectionExtentions
     {
         services.AddScoped<IPasswordHasher, PasswordHasherImpl>();
         services.AddScoped<ITokenGenerator, TokenGeneratorImpl>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddMongoDb(this IServiceCollection services, IOptions<MongoConnectionConfig> connectionConfig)
+    {
+        services.AddSingleton<IMongoClient, MongoClient>(options =>
+        {
+            return new MongoClient(connectionConfig.Value.ConnectionString);
+        });
 
         return services;
     }
