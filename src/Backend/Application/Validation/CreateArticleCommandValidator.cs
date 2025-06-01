@@ -31,38 +31,6 @@ public class CreateArticleCommandValidator : AbstractValidator<CreateArticleComm
         if (!content.TryGetValue("blocks", out var blocksObj))
             return false;
 
-        if (blocksObj is not Array array)
-            return false;
-
-        dynamic[] blocksArray = array.Cast<dynamic>().ToArray();
-        foreach (dynamic block in blocksArray)
-        {
-            string type = block.type?.ToString() ?? string.Empty;
-            dynamic? data = block.data;
-
-            if (string.IsNullOrWhiteSpace(type) || data == null)
-                return false;
-
-            switch (type)
-            {
-                case "header":
-                    if (data!.level is null || !int.TryParse(data.level?.ToString(), out int _))
-                        return false;
-                    break;
-                case "paragraph":
-                    if (string.IsNullOrWhiteSpace(data!.text?.ToString()))
-                        return false;
-                    break;
-                case "image" or "video":
-                    string url = data!.file?.url.url?.ToString() ?? string.Empty;
-                    if (string.IsNullOrEmpty(url) || !Uri.TryCreate(url, UriKind.Absolute, out var _))
-                        return false;
-                    break;
-                default:
-                    return false;
-            }
-        }
-
-        return true;
+        return blocksObj is JArray; // ToDo better validation
     }
 }
