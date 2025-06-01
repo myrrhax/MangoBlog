@@ -1,6 +1,7 @@
 using WebApi;
 using Infrastructure;
 using Application.Extentions;
+using Infrastructure.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,8 +11,15 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 #region Register Infrastructure
+var mongoConncetionSettings = builder.Configuration.GetSection("Mongo").Get<MongoConnectionConfig>();
+if (mongoConncetionSettings is null)
+    throw new ArgumentNullException(nameof(mongoConncetionSettings));
+
+builder.Services.Configure<MongoConnectionConfig>(builder.Configuration.GetSection("Mongo"));
+
 builder.Services
     .AddDatabase(builder.Configuration.GetConnectionString("postgres")!)
+    .AddMongoDb(mongoConncetionSettings)
     .AddServices()
     .AddRepositories();
 #endregion
