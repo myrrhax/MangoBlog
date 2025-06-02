@@ -20,14 +20,12 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
 {
     private readonly IMongoCollection<ArticleDocument> _articles;
     private readonly ILogger<ArticlesRepositoryImpl> _logger;
-    private readonly ApplicationDbContext context;
 
-    public ArticlesRepositoryImpl(IMongoClient client, IOptions<MongoConnectionConfig> config, ILogger<ArticlesRepositoryImpl> logger, ApplicationDbContext context)
+    public ArticlesRepositoryImpl(IMongoClient client, IOptions<MongoConnectionConfig> config, ILogger<ArticlesRepositoryImpl> logger)
     {
         var database = client.GetDatabase(config.Value.DatabaseName);
         _articles = database.GetCollection<ArticleDocument>(MongoConnectionConfig.ArticlesCollectionName);
         _logger = logger;
-        this.context = context;
     }
 
     public async Task<Result> CreateArticle(Article dto)
