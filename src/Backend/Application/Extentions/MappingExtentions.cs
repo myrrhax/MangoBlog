@@ -38,10 +38,10 @@ internal static class MappingExtentions
         };
     }
 
-    public static ArticleDto MapToDto(this Article entity, ApplicationUser creator, int likes = 0, int dislikes = 0, RatingType? reaction = null)
+    public static ArticleDto MapToDto(this Article entity, ApplicationUser? creator, int likes = 0, int dislikes = 0, RatingType? reaction = null)
     {
         return new ArticleDto(entity.Id, 
-            creator.MapToDto(), 
+            creator?.MapToDto(), 
             entity.Content, 
             entity.Tags, 
             entity.CreationDate, 

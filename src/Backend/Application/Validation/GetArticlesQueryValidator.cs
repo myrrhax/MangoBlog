@@ -12,6 +12,10 @@ public class GetArticlesQueryValidator : AbstractValidator<GetArticlesQuery>
             .GreaterThanOrEqualTo(1)
             .WithMessage("Page must be greater than 1");
 
+        RuleFor(article => article.PageSize)
+            .GreaterThanOrEqualTo(1)
+            .WithMessage("Page size must be greater than 1");
+
         RuleFor(article => article.AuthorId)
             .Must(id => id != Guid.Empty)
             .When(article => article.AuthorId is not null)
