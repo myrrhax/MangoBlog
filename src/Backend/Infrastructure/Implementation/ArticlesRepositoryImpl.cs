@@ -83,4 +83,17 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
 
         return documents.Select(document => document.MapToEntity());
     }
+
+    public async Task<Result<Article>> UpdateArticle(UpdateArticleDto dto)
+    {
+        try
+        {
+            await _articles.FindOneAndReplace(article => article.Id == dto.ArticleId,
+                new Article(dto.ArticleId, dto.Title, dto.Content,))
+        }
+        catch (Exception ex)
+        {
+
+        }
+    }
 }

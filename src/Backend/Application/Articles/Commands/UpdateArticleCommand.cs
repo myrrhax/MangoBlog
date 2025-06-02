@@ -68,8 +68,14 @@ public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand,
         if (getTagsResult.IsFailure)
             return Result.Failure<ArticleDto>(getTagsResult.Error);
 
-        var dto = new UpdateArticleDto(article.Id, request.Title, request.Content, getTagsResult.Value!);
-        Result<Article> updateResult = await _articlesRepository.UpdateArticle(dto);
+        var replaceArticle = new Article(article.Id, 
+            request.Title, 
+            request.Content, 
+            request.CallerId, 
+            getTagsResult.Value!.ToList(), 
+            article.CreationDate);
+
+        Result<Article> updateResult = await _articlesRepository.ReplaceArticle(replaceArticle);
 
         if (updateResult.IsFailure)
             return Result.Failure<ArticleDto>(updateResult.Error);
