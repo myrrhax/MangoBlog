@@ -135,6 +135,17 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
             .AnyAsync(user => user.Login == login, cancellationToken);
     }
 
+    public async Task<Dictionary<string, ApplicationUser?>> LoadAuthors(Dictionary<string, Guid> authorIds, CancellationToken cancellationToken)
+    {
+        List<ApplicationUser> users = await context.Users
+            .Where(user => authorIds.Values.Contains(user.Id))
+            .ToListAsync();
+
+        return authorIds.Keys
+            .ToDictionary(key => key,
+                key => users.FirstOrDefault(user => user.Id == authorIds[key]));
+    }
+
     public async Task<Result> UpdateRefreshToken(Guid tokenId, string newToken, DateTime newExpirationDate, CancellationToken cancellationToken)
     {
         try

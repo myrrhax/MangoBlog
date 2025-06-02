@@ -2,6 +2,7 @@
 using Application.Dto.Articles;
 using DnsClient.Internal;
 using Domain.Entities;
+using Domain.Enums;
 using Domain.Utils;
 using Domain.Utils.Errors;
 using Infrastructure.MongoModels;
@@ -67,6 +68,11 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
     {
         return await _articles.Find(article => article.Id == id)
             .SingleAsync();
+    }
+
+    public Task<IEnumerable<Article>> GetArticles(string query, int page, int pageSize, SortType creationDateSort, SortType popularitySort, Guid? authorId = null)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task<IEnumerable<Article>> GetUserArticles(Guid userId)
