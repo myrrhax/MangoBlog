@@ -18,3 +18,5 @@ public class InvalidLoginOrPassword() : Error("Invalid login or password");
 public class PasswordsDoesntMatch() : Error("Passwords doesn't match");
 public class InvalidToken() : Error("Invalid or expired refresh token");
 public class DatabaseInteractionError(string message) : Error($"Unable to interact with database. Error: {message}");
+public class ArticleNotFound(string articleId) : Error($"Article with id: {articleId} is not found");
+public class NoPermission(Guid userId) : Error($"User with id: {userId} has no permission for this");
