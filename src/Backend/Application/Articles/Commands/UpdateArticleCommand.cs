@@ -75,18 +75,17 @@ public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand,
             getTagsResult.Value!.ToList(), 
             article.CreationDate);
 
-        Result<Article> updateResult = await _articlesRepository.ReplaceArticle(replaceArticle);
+        Result updateResult = await _articlesRepository.ReplaceArticle(replaceArticle);
 
         if (updateResult.IsFailure)
             return Result.Failure<ArticleDto>(updateResult.Error);
 
-        Article updatedArticle = updateResult.Value!;
-        (int likes, int dislikes) = await _ratingsRepository.GetPostLikesAndDislikes(updatedArticle.Id, cancellationToken);
-        var resultModel = new ArticleDto(updatedArticle.Id,
+        (int likes, int dislikes) = await _ratingsRepository.GetPostLikesAndDislikes(replaceArticle.Id, cancellationToken);
+        var resultModel = new ArticleDto(replaceArticle.Id,
             caller.MapToDto(),
-            updatedArticle.Content,
-            updatedArticle.Tags,
-            updatedArticle.CreationDate,
+            replaceArticle.Content,
+            replaceArticle.Tags,
+            replaceArticle.CreationDate,
             likes,
             dislikes,
             UserRating: null);
