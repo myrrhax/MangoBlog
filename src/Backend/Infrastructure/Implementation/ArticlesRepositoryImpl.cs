@@ -5,6 +5,7 @@ using Domain.Entities;
 using Domain.Enums;
 using Domain.Utils;
 using Domain.Utils.Errors;
+using Infrastructure.DataContext;
 using Infrastructure.MongoModels;
 using Infrastructure.Utils;
 using Microsoft.Extensions.Logging;
@@ -19,12 +20,14 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
 {
     private readonly IMongoCollection<ArticleDocument> _articles;
     private readonly ILogger<ArticlesRepositoryImpl> _logger;
+    private readonly ApplicationDbContext context;
 
-    public ArticlesRepositoryImpl(IMongoClient client, IOptions<MongoConnectionConfig> config, ILogger<ArticlesRepositoryImpl> logger)
+    public ArticlesRepositoryImpl(IMongoClient client, IOptions<MongoConnectionConfig> config, ILogger<ArticlesRepositoryImpl> logger, ApplicationDbContext context)
     {
         var database = client.GetDatabase(config.Value.DatabaseName);
         _articles = database.GetCollection<ArticleDocument>(MongoConnectionConfig.ArticlesCollectionName);
         _logger = logger;
+        this.context = context;
     }
 
     public async Task<Result> CreateArticle(Article dto)
@@ -70,9 +73,53 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
             .SingleAsync();
     }
 
-    public Task<IEnumerable<Article>> GetArticles(string query, int page, int pageSize, SortType creationDateSort, SortType popularitySort, Guid? authorId = null)
+    // ToDo добавить слой сервиса, в котором будет просходить кэширование + выборка по популярности
+    public async Task<IEnumerable<Article>> GetArticles(IEnumerable<string> tags,
+        string query,
+        int page,
+        int pageSize,
+        SortType creationDateSort,
+        SortType popularitySort,
+        Guid? authorId = null)
     {
-        throw new NotImplementedException();
+        var builder = Builders<ArticleDocument>.Filter;
+        var filter = FilterDefinition<ArticleDocument>.Empty;
+
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            filter &= builder.Regex(doc => doc.Title, new BsonRegularExpression(query, "i"));
+        }
+
+        if (tags.Any())
+        {
+            var tagFilterDefinition = Builders<Domain.Entities.Tag>.Filter.In(tag => tag.Name, tags);
+            filter &= builder.ElemMatch(doc => doc.Tags, tagFilterDefinition);
+        }
+
+        if (authorId.HasValue)
+        {
+            filter &= builder.Where(doc => doc.CreatorId == authorId.Value);
+        }
+
+        var sortBuilder = Builders<ArticleDocument>.Sort;
+        SortDefinition<ArticleDocument>? sort = creationDateSort switch
+        {
+            SortType.Ascending => sortBuilder.Ascending(doc => doc.CreationDate),
+            SortType.Descending => sortBuilder.Descending(doc => doc.CreationDate),
+            _ => null,
+        };
+
+        var queryResult = _articles.Find(filter);
+
+        if (sort is not null)
+            queryResult.Sort(sort);
+
+        List<ArticleDocument> documents = await queryResult
+            .Skip((page - 1) * pageSize)
+            .Limit(pageSize)
+            .ToListAsync();
+
+        return documents.Select(document => document.MapToEntity());
     }
 
     public async Task<IEnumerable<Article>> GetUserArticles(Guid userId)

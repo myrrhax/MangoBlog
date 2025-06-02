@@ -51,9 +51,10 @@ public class GetArticlesQueryHandler : IRequestHandler<GetArticlesQuery, Result<
             query: request.Query ?? string.Empty,
             creationDateSort: StringParsing.ParseSortType(request.SortByDate ?? string.Empty),
             popularitySort: StringParsing.ParseSortType(request.SortByPopularity ?? string.Empty),
-            authorId: request.AuthorId);
+            authorId: request.AuthorId,
+            tags: request.Tags ?? []);
         var auhtorIds = articles.ToDictionary(article => article.Id, article => article.CreatorId);
-        Dictionary<string, ApplicationUser> authors = await _userRepository.LoadAuthors(auhtorIds, cancellationToken);
+        Dictionary<string, ApplicationUser?> authors = await _userRepository.LoadAuthors(auhtorIds, cancellationToken);
 
         IEnumerable<ArticleDto> dtos = articles.Select(article =>
         {
