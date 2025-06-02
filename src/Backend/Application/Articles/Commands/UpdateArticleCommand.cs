@@ -22,13 +22,19 @@ public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand,
     private readonly IArticlesRepository _articlesRepository;
     private readonly IValidator<UpdateArticleCommand> _validator;
     private readonly ITagsRepository _tagsRepository;
+    private readonly IRatingsRepository _ratingsRepository;
 
-    public UpdateArticleCommandHandler(IUserRepository userRepository, IArticlesRepository articlesRepository, IValidator<UpdateArticleCommand> validator, ITagsRepository tagsRepository)
+    public UpdateArticleCommandHandler(IUserRepository userRepository, 
+        IArticlesRepository articlesRepository, 
+        IValidator<UpdateArticleCommand> validator, 
+        ITagsRepository tagsRepository, 
+        IRatingsRepository ratingsRepository)
     {
         _userRepository = userRepository;
         _articlesRepository = articlesRepository;
         _validator = validator;
         _tagsRepository = tagsRepository;
+        _ratingsRepository = ratingsRepository;
     }
 
     public async Task<Result<ArticleDto>> Handle(UpdateArticleCommand request, CancellationToken cancellationToken)
@@ -62,12 +68,23 @@ public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand,
         if (getTagsResult.IsFailure)
             return Result.Failure<ArticleDto>(getTagsResult.Error);
 
-        var dto = new UpdateArticleDto(request.ArticleId, request.Title, request.Content, getTagsResult.Value!);
+        var dto = new UpdateArticleDto(article.Id, request.Title, request.Content, getTagsResult.Value!);
         Result<Article> updateResult = await _articlesRepository.UpdateArticle(dto);
-        
+
         if (updateResult.IsFailure)
             return Result.Failure<ArticleDto>(updateResult.Error);
 
-        
+        Article updatedArticle = updateResult.Value!;
+        (int likes, int dislikes) = await _ratingsRepository.GetPostLikesAndDislikes(updatedArticle.Id, cancellationToken);
+        var resultModel = new ArticleDto(updatedArticle.Id,
+            caller.MapToDto(),
+            updatedArticle.Content,
+            updatedArticle.Tags,
+            updatedArticle.CreationDate,
+            likes,
+            dislikes,
+            UserRating: null);
+
+        return Result.Success(resultModel);
     }
 }

@@ -33,8 +33,7 @@ public class GetArticleByIdQueryHandler : IRequestHandler<GetArticleByIdQuery, A
         if (creator is null)
             return null;
 
-        int likes = await _ratingsRepository.GetPostLikesCount(request.ArticleId, cancellationToken);
-        int dislikes = await _ratingsRepository.GetPostDislikesCount(request.ArticleId, cancellationToken);
+        (int likes, int dislikes) = await _ratingsRepository.GetPostLikesAndDislikes(article.Id, cancellationToken);
         RatingType? userReaction = request.UserId is null || request.UserId == creator.Id
             ? null
             : await _ratingsRepository.GetUserRating(request.UserId.Value, request.ArticleId, cancellationToken);
