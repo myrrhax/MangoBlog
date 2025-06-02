@@ -1,6 +1,7 @@
 ﻿using Application.Abstractions;
 using Domain.Entities;
 using Domain.Utils;
+using Domain.Utils.Errors;
 using MediatR;
 
 namespace Application.Articles.Commands;
@@ -27,6 +28,15 @@ public class DeleteArticleCommandHandler : IRequestHandler<DeleteArticleCommand,
         ApplicationUser? user = getUserTask.Result;
         Article? article = getArticleTask.Result;
 
-        if (user is null || article is null) ;
+        if (user is null)
+            return Result.Failure(new UserNotFound());
+
+        if (article is null)
+            return Result.Failure(new ArticleNotFound(request.ArticleId));
+
+        if (article.CreatorId != request.CallerId)
+            return Result.Failure(new NoPermission(request.CallerId));
+
+        return await _articleRepository.DeleteArtcile(article.Id);
     }
 }
