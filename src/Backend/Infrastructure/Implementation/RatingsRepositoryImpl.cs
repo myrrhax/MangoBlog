@@ -13,31 +13,56 @@ internal class RatingsRepositoryImpl(ApplicationDbContext context) : IRatingsRep
         throw new NotImplementedException();
     }
 
-    public async Task<int> GetPostDislikesCount(string postId, CancellationToken cancellationToken)
+    public async Task<(int, int)> GetPostLikesAndDislikes(string postId, CancellationToken cancellationToken)
     {
-        return await context.Ratings
+        var groups = await context.Ratings
             .AsNoTracking()
-            .Where(rating => rating.ArticleId == postId && rating.RatingType == RatingType.Dislike)
-            .CountAsync(cancellationToken);
+            .Where(rating => rating.ArticleId == postId)
+            .GroupBy(rating => rating.RatingType)
+            .Select(group => new
+            {
+                Type = group.Key,
+                Count = group.Count()
+            })
+            .ToListAsync(cancellationToken);
+
+        int likes = groups.FirstOrDefault(g => g.Type == RatingType.Like)?.Count ?? 0;
+        int dislikes = groups.FirstOrDefault(g => g.Type == RatingType.Dislike)?.Count ?? 0;
+
+        return (likes, dislikes);
     }
 
-    public async Task<int> GetPostLikesCount(string postId, CancellationToken cancellationToken)
+    public async Task<Dictionary<string, (int, int)>> GetRatingsForArticles(
+        IEnumerable<Article> articles,
+        CancellationToken cancellationToken)
     {
-        return await context.Ratings
+        var articleIds = articles.Select(a => a.Id).ToList();
+
+        var groupedRatings = await context.Ratings
             .AsNoTracking()
-            .Where(rating => rating.ArticleId == postId && rating.RatingType == RatingType.Like)
-            .CountAsync(cancellationToken);
-    }
+            .Where(r => articleIds.Contains(r.ArticleId))
+            .GroupBy(r => new { r.ArticleId, r.RatingType })
+            .Select(g => new
+            {
+                g.Key.ArticleId,
+                g.Key.RatingType,
+                Count = g.Count()
+            })
+            .ToListAsync(cancellationToken);
 
-    public async Task<Dictionary<string, (int, int)>> GetRatingsForArticles(IEnumerable<Article> articles, CancellationToken cancellationToken)
-    {
-        Dictionary<string, (int, int)> result = new();
+        var result = articleIds.ToDictionary(id => id, id => (likes: 0, dislikes: 0));
 
-        foreach (Article article in articles)
+        foreach (var rating in groupedRatings)
         {
-            int likes = await GetPostLikesCount(article.Id, cancellationToken);
-            int dislikes = await GetPostDislikesCount(article.Id, cancellationToken);
-            result[article.Id] = (likes, dislikes);
+            if (result.TryGetValue(rating.ArticleId, out var counts))
+            {
+                if (rating.RatingType == RatingType.Like)
+                    counts.likes = rating.Count;
+                else if (rating.RatingType == RatingType.Dislike)
+                    counts.dislikes = rating.Count;
+
+                result[rating.ArticleId] = counts;
+            }
         }
 
         return result;
