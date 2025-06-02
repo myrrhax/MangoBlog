@@ -19,4 +19,9 @@ public class Article
         Tags = tags;
         CreationDate = creationDate ?? DateTime.UtcNow;
     }
+
+    public Article()
+    {
+        
+    }
 }

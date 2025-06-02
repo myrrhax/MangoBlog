@@ -26,15 +26,16 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
         _logger = logger;
     }
 
-    public async Task<Result<Article>> CreateArticle(Article dto)
+    public async Task<Result> CreateArticle(Article dto)
     {
-        var document = dto
+        ArticleDocument document = dto.ToDocument();
+        document.Id = ObjectId.GenerateNewId().ToString();
         try
         {
             await _articles.InsertOneAsync(document);
             _logger.LogInformation("New article was inserted with id: {}", document.Id);
-
-            return Result.Success<Article>(document);
+            dto.Id = document.Id;
+            return Result.Success();
         }
         catch (Exception ex)
         {
@@ -76,22 +77,22 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
         return documents.Select(document => document.MapToEntity());
     }
 
-    public async Task<Result<Article>> ReplaceArticle(Article dto)
+    public async Task<Result> ReplaceArticle(Article dto)
     {
         try
         {
-            var newDocument = new ArticleDocument()
-            {
-                Id = dto.Id,
-                Title = dto.Title,
-                Content = dto.Content,
-            };
-            await _articles.FindOneAndReplace(article => article.Id == dto.ArticleId,
-                dto);
+            ArticleDocument document = dto.ToDocument();
+            await _articles.FindOneAndReplaceAsync(article => article.Id == dto.Id,
+                document);
+
+            _logger.LogInformation("Article with id: {} was replaced with new document", dto.Id);
+            return Result.Success();
         }
         catch (Exception ex)
         {
+            _logger.LogError("An error occurred article replacement (articleId: {}). Error: {}", dto.Id, ex.Message);
 
+            return Result.Failure(new DatabaseInteractionError("Failed to update article"));
         }
     }
 }

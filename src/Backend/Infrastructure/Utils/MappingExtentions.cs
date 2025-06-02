@@ -20,9 +20,13 @@ internal static class MappingExtentions
 
     public static ArticleDocument ToDocument(this Article article)
     {
+        string documentId = ObjectId.TryParse(article.Id, out ObjectId id) 
+            ? id.ToString()
+            : string.Empty;
+
         return new ArticleDocument
         {
-            Id = ObjectId.GenerateNewId().ToString(),
+            Id = documentId,
             Title = article.Title,
             CreatorId = article.CreatorId,
             CreationDate = article.CreationDate,

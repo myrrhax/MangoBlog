@@ -46,11 +46,19 @@ public class CreateArticleCommandHandler : IRequestHandler<CreateArticleCommand,
         if (tagInsertionResult.IsFailure) // insertion error
             return Result.Failure<ArticleDto>(tagInsertionResult.Error);
 
-        var article = new CreateArticleDto(request.Title, request.Content, request.CreatorId, tagInsertionResult.Value!);
-        Result<Article> articleInsertionResult = await _articlesRepository.CreateArticle(dto);
+        var article = new Article()
+        {
+            Title = request.Title,
+            Content = request.Content,
+            CreatorId = request.CreatorId,
+            Tags = tagInsertionResult.Value!.ToList(),
+            CreationDate = DateTime.UtcNow,
+        };
+
+        Result articleInsertionResult = await _articlesRepository.CreateArticle(article);
 
         return articleInsertionResult.IsSuccess
-            ? Result.Success(articleInsertionResult.Value!.MapToDto(creator))
+            ? Result.Success(article.MapToDto(creator))
             : Result.Failure<ArticleDto>(articleInsertionResult.Error);
     }
 }
