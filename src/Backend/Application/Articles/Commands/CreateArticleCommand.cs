@@ -46,7 +46,7 @@ public class CreateArticleCommandHandler : IRequestHandler<CreateArticleCommand,
         if (tagInsertionResult.IsFailure) // insertion error
             return Result.Failure<ArticleDto>(tagInsertionResult.Error);
 
-        CreateArticleDto dto = new CreateArticleDto(request.Title, request.Content, request.CreatorId, tagInsertionResult.Value!);
+        var article = new CreateArticleDto(request.Title, request.Content, request.CreatorId, tagInsertionResult.Value!);
         Result<Article> articleInsertionResult = await _articlesRepository.CreateArticle(dto);
 
         return articleInsertionResult.IsSuccess

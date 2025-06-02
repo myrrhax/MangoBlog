@@ -26,17 +26,9 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
         _logger = logger;
     }
 
-    public async Task<Result<Article>> CreateArticle(CreateArticleDto dto)
+    public async Task<Result<Article>> CreateArticle(Article dto)
     {
-        ArticleDocument document = new ArticleDocument
-        {
-            Id = ObjectId.GenerateNewId().ToString(),
-            Title = dto.Title,
-            CreatorId = dto.CreatorId,
-            CreationDate = DateTime.UtcNow,
-            Tags = dto.Tags.ToList(),
-            Content = BsonDocument.Parse(JsonConvert.SerializeObject(dto.Content)),
-        };
+        var document = dto
         try
         {
             await _articles.InsertOneAsync(document);
@@ -84,12 +76,18 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
         return documents.Select(document => document.MapToEntity());
     }
 
-    public async Task<Result<Article>> UpdateArticle(UpdateArticleDto dto)
+    public async Task<Result<Article>> ReplaceArticle(Article dto)
     {
         try
         {
+            var newDocument = new ArticleDocument()
+            {
+                Id = dto.Id,
+                Title = dto.Title,
+                Content = dto.Content,
+            };
             await _articles.FindOneAndReplace(article => article.Id == dto.ArticleId,
-                new Article(dto.ArticleId, dto.Title, dto.Content,))
+                dto);
         }
         catch (Exception ex)
         {

@@ -6,8 +6,8 @@ namespace Application.Abstractions;
 
 public interface IArticlesRepository
 {
-    Task<Result<Article>> CreateArticle(CreateArticleDto dto);
-    Task<Result<Article>> ReplaceArticle(Article newArticle);
+    Task<Result> CreateArticle(Article dto);
+    Task<Result> ReplaceArticle(Article newArticle);
     Task<Article?> GetArticleById(string id);
     Task<IEnumerable<Article>> GetUserArticles(Guid userId);
     Task<Result> DeleteArtcile(string artcileId);
