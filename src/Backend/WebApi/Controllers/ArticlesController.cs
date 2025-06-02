@@ -23,7 +23,7 @@ public class ArticlesController(IMediator mediator) : ControllerBase
         Result<ArticleDto> result =  await mediator.Send(command);
 
         return result.IsSuccess
-            ? Ok(result.Value) 
+            ? CreatedAtAction(nameof(GetArticleById), new { id = result.Value!.Id }, result.Value) 
             : BadRequest(result.Error);
     }
 
