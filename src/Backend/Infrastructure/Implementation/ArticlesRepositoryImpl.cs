@@ -53,6 +53,23 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
         }
     }
 
+    public async Task<Result> DeleteArtcile(string artcileId)
+    {
+        try
+        {
+            await _articles.FindOneAndDeleteAsync(article => article.Id == artcileId);
+            _logger.LogInformation("Article with id: {} successfully deleted", artcileId);
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("An error occurred deleting article with id: {}. Error: {}\nStack trace: {}", artcileId, ex.Message, ex.StackTrace);
+
+            return Result.Failure(new DatabaseInteractionError($"Failed to delete article with id: {artcileId}"));
+        }
+    }
+
     public async Task<Article?> GetArticleById(string id)
     {
         return await _articles.Find(article => article.Id == id)
