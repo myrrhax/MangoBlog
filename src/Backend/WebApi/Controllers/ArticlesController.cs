@@ -74,4 +74,23 @@ public class ArticlesController(IMediator mediator) : ControllerBase
                 _ => BadRequest()
             };
     }
+
+    [HttpPut]
+    [Authorize]
+    public async Task<IActionResult> UpdateArticle([FromBody] UpdateArticleRequest request)
+    {
+        Guid userId = User.GetUserId()!.Value;
+        var command = new UpdateArticleCommand(request.ArticleId, userId, request.Title, request.Content, request.Tags);
+        Result<ArticleDto> updateResult = await mediator.Send(command);
+
+        return updateResult.IsSuccess
+            ? Ok(updateResult.Value)
+            : updateResult.Error switch
+            {
+                UserNotFound or NoPermission => Forbid(),
+                ArticleNotFound => NotFound(),
+                ApplicationValidationError => BadRequest(updateResult.Error),
+                _ => BadRequest()
+            };
+    }
 }
