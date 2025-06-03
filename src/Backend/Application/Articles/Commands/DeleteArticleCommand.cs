@@ -12,11 +12,15 @@ public class DeleteArticleCommandHandler : IRequestHandler<DeleteArticleCommand,
 {
     private readonly IArticlesRepository _articleRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IRatingsRepository _ratingsRepository;
 
-    public DeleteArticleCommandHandler(IArticlesRepository articleRepository, IUserRepository userRepository)
+    public DeleteArticleCommandHandler(IArticlesRepository articleRepository,
+        IUserRepository userRepository,
+        IRatingsRepository ratingsRepository)
     {
         _articleRepository = articleRepository;
         _userRepository = userRepository;
+        _ratingsRepository = ratingsRepository;
     }
 
     public async Task<Result> Handle(DeleteArticleCommand request, CancellationToken cancellationToken)
@@ -37,7 +41,15 @@ public class DeleteArticleCommandHandler : IRequestHandler<DeleteArticleCommand,
         if (article.CreatorId != request.CallerId)
             return Result.Failure(new NoPermission(request.CallerId));
 
-        // ToDo удалить все оценки о посте
-        return await _articleRepository.DeleteArtcile(article.Id);
+        Result postDeleteResult = await _articleRepository.DeleteArtcile(article.Id);
+
+        if (postDeleteResult.IsSuccess)
+        {
+            await _ratingsRepository.DeletePostRatings(article.Id, cancellationToken);
+
+            return Result.Success();
+        }
+
+        return Result.Failure(postDeleteResult.Error);
     }
 }
