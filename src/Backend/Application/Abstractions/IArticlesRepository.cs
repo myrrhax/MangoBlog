@@ -9,6 +9,7 @@ public interface IArticlesRepository
 {
     Task<Result> CreateArticle(Article dto);
     Task<Result> ReplaceArticle(Article newArticle);
+    Task<Result> UpdateArticleRating(string postId, int likes, int dislikes);
     Task<Article?> GetArticleById(string id);
     Task<IEnumerable<Article>> GetUserArticles(Guid userId);
     Task<Result> DeleteArtcile(string artcileId);

@@ -1,4 +1,5 @@
-﻿using Domain.Enums;
+﻿using System.Reflection.Metadata.Ecma335;
+using Domain.Enums;
 
 namespace Domain.Utils;
 
@@ -11,4 +12,23 @@ public static class StringParsing
             "desc" => SortType.Descending,
             _ => SortType.None,
         };
+
+    public static bool TryParseRatingType(string type, out RatingType? rating)
+    {
+        switch(type)
+        {
+            case "like":
+                rating = RatingType.Like;
+                break;
+            case "dislike":
+                rating = RatingType.Dislike;
+                break;
+            default:
+                rating = null;
+                return false;
+        }
+
+        return true;
+    }
+        
 }

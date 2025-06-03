@@ -10,4 +10,12 @@ public class ApplicationValidationError : Error
     {
         _errors = errors;
     }
+
+    public static ApplicationValidationError ErrorFrom(string field, string message)
+    {
+        var dict = new Dictionary<string, List<string>>();
+        dict[field] = new List<string>() { message };
+
+        return new ApplicationValidationError(dict);
+    }
 }
