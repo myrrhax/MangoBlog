@@ -1,5 +1,6 @@
 ﻿using Domain.Entities;
 using Domain.Enums;
+using Domain.Utils;
 
 namespace Application.Abstractions;
 
@@ -10,4 +11,5 @@ public interface IRatingsRepository
     Task<RatingType?> GetUserRating(Guid userId, string postId, CancellationToken cancellationToken);
     Task<IEnumerable<Rating>> GetUserRatings(Guid userId, CancellationToken cancellationToken);
     Task<Dictionary<string, (int, int)>> GetRatingsForArticles(IEnumerable<Article> articles, CancellationToken cancellationToken);
+    Task<Result> DeletePostRatings(string postId, CancellationToken cancellationToken); 
 }

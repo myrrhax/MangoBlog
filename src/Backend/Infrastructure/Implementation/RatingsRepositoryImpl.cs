@@ -1,13 +1,37 @@
 ﻿using Application.Abstractions;
+using DnsClient.Internal;
 using Domain.Entities;
 using Domain.Enums;
+using Domain.Utils;
+using Domain.Utils.Errors;
 using Infrastructure.DataContext;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Implementation;
 
-internal class RatingsRepositoryImpl(ApplicationDbContext context) : IRatingsRepository
+internal class RatingsRepositoryImpl(ApplicationDbContext context, 
+    ILogger<RatingsRepositoryImpl> logger) : IRatingsRepository
 {
+    public async Task<Result> DeletePostRatings(string postId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await context.Ratings
+                .Where(rating => rating.ArticleId == postId)
+                .ExecuteDeleteAsync();
+            logger.LogInformation("Ratings for post: {} successfully deleted", postId);
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Unable to delete post ratings (postId: {}). Error: {}", postId, ex.Message);
+
+            return Result.Failure(new DatabaseInteractionError($"Unable to delete post: {postId}"));
+        }
+    }
+
     public Task<double> GetPostAverageRating(string postId, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
