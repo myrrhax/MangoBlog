@@ -24,3 +24,6 @@ public class ArticleNotFound(string articleId) : Error($"Article with id: {artic
 public class NoPermission(Guid userId) : Error($"User with id: {userId} has no permission for this");
 public class RatingNotFound(string postId)
     : Error($"Rating for post ({postId}) is not found");
+
+public class RatingAlreadyExists(Guid userId, string postId)
+    : Error($"User {userId} already have same rating for post: {postId}");

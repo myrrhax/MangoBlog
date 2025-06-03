@@ -46,6 +46,27 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
         }
     }
 
+    public async Task<Result> DecrementRatingFromArtcile(string postId, RatingType type)
+    {
+        UpdateDefinition<ArticleDocument> definition = type == RatingType.Like
+            ? Builders<ArticleDocument>.Update.Inc(article => article.Likes, -1) // раньше был лайк
+            : Builders<ArticleDocument>.Update.Inc(article => article.Dislikes, -1); // раньше был дизлайк
+
+        try
+        {
+            await _articles.UpdateOneAsync(article => article.Id == postId, definition);
+
+            _logger.LogInformation("Rating successfully decremented for post: {}", postId);
+            return Result.Success();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Unable to decrement rating from post: {}. Error: {}", postId, e.Message);
+
+            return Result.Failure(new DatabaseInteractionError("Unable to connect to database"));
+        }
+    }
+
     public async Task<Result> DeleteArtcile(string artcileId)
     {
         try
@@ -65,8 +86,15 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
 
     public async Task<Article?> GetArticleById(string id)
     {
-        return await _articles.Find(article => article.Id == id)
-            .SingleAsync();
+        try 
+        {
+            return await _articles.Find(article => article.Id == id)
+                .SingleAsync();
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
     }
 
     public async Task<IEnumerable<Article>> GetArticles(IEnumerable<string> tags,
@@ -137,6 +165,41 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
 
         return documents.Select(document => document.MapToEntity());
     }
+
+    public async Task<Result> PerformRatingChange(string postId, RatingType type, bool removeOld)
+    {
+        var updates = new List<UpdateDefinition<ArticleDocument>>();
+
+        if (type == RatingType.Like)
+            updates.Add(Builders<ArticleDocument>.Update.Inc(a => a.Likes, 1));
+        else
+            updates.Add(Builders<ArticleDocument>.Update.Inc(a => a.Dislikes, 1));
+
+        if (removeOld)
+        {
+            if (type == RatingType.Like)
+                updates.Add(Builders<ArticleDocument>.Update.Inc(a => a.Dislikes, -1));
+            else
+                updates.Add(Builders<ArticleDocument>.Update.Inc(a => a.Likes, -1));
+        }
+
+        var updateCommand = Builders<ArticleDocument>.Update.Combine(updates);
+
+        try
+        {
+            await _articles.UpdateOneAsync(article => article.Id == postId, updateCommand);
+            _logger.LogInformation("Post {} successfully updated", postId);
+
+            return Result.Success();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Unable to update post: {}. Error: {}", postId, e.Message);
+
+            return Result.Failure(new DatabaseInteractionError("Unable to update post"));
+        }
+    }
+
 
     public async Task<Result> ReplaceArticle(Article dto)
     {

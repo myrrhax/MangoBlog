@@ -14,4 +14,5 @@ public interface IRatingsRepository
     Task<Result> DeletePostRatings(string postId, CancellationToken cancellationToken);
     Task<Result> UpdateRating(string postId, Guid userId, RatingType newRating, CancellationToken cancellationToken);
     Task<Result> AddRating(string postId, Guid userId, RatingType rating, CancellationToken cancellationToken);
+    Task<Result> RemoveRatingFromPost(string postId, Guid userId, CancellationToken cancellationToken);
 }

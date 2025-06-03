@@ -136,6 +136,24 @@ internal class RatingsRepositoryImpl(ApplicationDbContext context,
             .ToListAsync();
     }
 
+    public async Task<Result> RemoveRatingFromPost(string postId, Guid userId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            int rows = await context.Ratings
+                .Where(rating => rating.UserId == userId && rating.ArticleId == postId)
+                .ExecuteDeleteAsync(cancellationToken);
+
+            return rows > 0
+                ? Result.Success()
+                : Result.Failure(new RatingNotFound(postId));
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure(new DatabaseInteractionError($"Failed to remove rating from post: {postId}"));
+        }
+    }
+
     public async Task<Result> UpdateRating(string postId, Guid userId, RatingType newRating, CancellationToken cancellationToken)
     {
         try

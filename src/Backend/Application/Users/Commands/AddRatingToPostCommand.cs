@@ -26,7 +26,7 @@ public class AddRatingToPostCommandHandler : IRequestHandler<AddRatingToPostComm
     {
         if (!StringParsing.TryParseRatingType(request.RatingType, out RatingType? type))
         {
-            var error = ApplicationValidationError.ErrorFrom(nameof(request.RatingType), 
+            var error = ApplicationValidationError.ErrorFrom(nameof(request.RatingType),
                 $"Unable to parse value: {request.RatingType}. Valid types: {{like, dislike}}");
 
             return Result.Failure(error);
@@ -41,19 +41,51 @@ public class AddRatingToPostCommandHandler : IRequestHandler<AddRatingToPostComm
         if (article is null)
             return Result.Failure(new ArticleNotFound(request.PostId));
 
-        int likes = type!.Value == RatingType.Like
-                ? article.Likes + 1
-                : article.Likes;
+        bool operationIsInvalid = rating is not null && rating == type
+            || rating is null && type == RatingType.None;
+        
+        if (operationIsInvalid)
+        {
+            return Result.Failure(new RatingAlreadyExists(request.CallerId, request.PostId));
+        }
 
-        int dislikes = type!.Value == RatingType.Dislike
-            ? article.Dislikes + 1
-            : article.Dislikes;
-        var updateInDocumentsTask = _articlesRepository.UpdateArticleRating(article.Id, likes, dislikes);
+        bool removeRating = rating is not null && type == RatingType.None;
+        if (removeRating) // remove rating from article
+        {
+            Result removeResult = await RemoveRating(article.Id, request.CallerId, rating!.Value, cancellationToken);
+
+            return removeResult;
+        }
+
+        // change rating or add new rating
+        bool changeOld = rating is not null &&
+            (rating.Value == RatingType.Like && type == RatingType.Dislike
+            || rating.Value == RatingType.Dislike && type == RatingType.Like);
+
+        var updateInDocumentsTask = _articlesRepository.PerformRatingChange(article.Id, type!.Value, changeOld);
         Task<Result> updateInRatingsTask = rating is null
             ? _ratingsRepository.AddRating(article.Id, request.CallerId, type!.Value, cancellationToken) // add new
             : _ratingsRepository.UpdateRating(article.Id, request.CallerId, type!.Value, cancellationToken); // update current
 
         await Task.WhenAll(updateInDocumentsTask, updateInRatingsTask);
+        return Result.Success();
+    }
+
+    private async Task<Result> RemoveRating(string postId, Guid userId, RatingType type, CancellationToken cancellationToken)
+    {
+        var decrementTask = _articlesRepository.DecrementRatingFromArtcile(postId, type);
+        var removeUserRating = _ratingsRepository.RemoveRatingFromPost(postId, userId, cancellationToken);
+
+        await Task.WhenAll(decrementTask, removeUserRating);
+        Result decrementResult = decrementTask.Result;
+        Result removeUserResult = removeUserRating.Result;
+
+        if (decrementResult.IsFailure)
+            return decrementResult;
+
+        if (removeUserResult.IsFailure)
+            return removeUserResult;
+
         return Result.Success();
     }
 }

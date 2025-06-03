@@ -23,6 +23,9 @@ public static class StringParsing
             case "dislike":
                 rating = RatingType.Dislike;
                 break;
+            case "none":
+                rating = RatingType.None;
+                break;
             default:
                 rating = null;
                 return false;
