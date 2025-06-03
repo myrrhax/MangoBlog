@@ -37,6 +37,7 @@ public class DeleteArticleCommandHandler : IRequestHandler<DeleteArticleCommand,
         if (article.CreatorId != request.CallerId)
             return Result.Failure(new NoPermission(request.CallerId));
 
+        // ToDo удалить все оценки о посте
         return await _articleRepository.DeleteArtcile(article.Id);
     }
 }

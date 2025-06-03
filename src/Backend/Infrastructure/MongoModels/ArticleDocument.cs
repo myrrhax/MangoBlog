@@ -15,10 +15,11 @@ internal class ArticleDocument
     
     [BsonRepresentation(BsonType.String)]
     public Guid CreatorId { get; set; }
-    public ICollection<Tag> Tags { get; set; } = [];
+    public ICollection<string> Tags { get; set; } = [];
     public DateTime CreationDate { get; set; }
     public int Likes { get; set; }
     public int Dislikes { get; set; }
+
 
     public static implicit operator Article(ArticleDocument document)
     {

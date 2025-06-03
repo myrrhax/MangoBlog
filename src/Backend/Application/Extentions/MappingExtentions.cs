@@ -38,7 +38,7 @@ internal static class MappingExtentions
         };
     }
 
-    public static ArticleDto MapToDto(this Article entity, ApplicationUser? creator, int likes, int dislikes, RatingType? reaction = null)
+    public static ArticleDto MapToDto(this Article entity, ApplicationUser? creator, RatingType? reaction = null)
     {
         return new ArticleDto(entity.Id, 
             creator?.MapToDto(),
@@ -46,8 +46,8 @@ internal static class MappingExtentions
             entity.Content, 
             entity.Tags, 
             entity.CreationDate, 
-            likes, 
-            dislikes,
+            entity.Likes, 
+            entity.Dislikes,
             reaction);
     }
 }

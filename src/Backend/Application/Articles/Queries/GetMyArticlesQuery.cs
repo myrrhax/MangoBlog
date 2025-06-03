@@ -33,23 +33,16 @@ public class GetMyArticlesQueryHandler : IRequestHandler<GetMyArticlesQuery, IEn
         if (!articles.Any() || user is null)
             return Enumerable.Empty<ArticleDto>();
 
-        Dictionary<string, (int, int)> ratings = await _ratingsRepository.GetRatingsForArticles(articles, cancellationToken);
         return articles.Select(article =>
         {
-            int likes = 0, dislikes = 0;
-            if (ratings.ContainsKey(article.Id))
-            {
-                (likes, dislikes) = ratings[article.Id];
-            }
-
             return new ArticleDto(article.Id,
                 user.MapToDto(),
                 article.Title,
                 article.Content,
                 article.Tags,
                 article.CreationDate,
-                likes,
-                dislikes,
+                article.Likes,
+                article.Dislikes,
                 UserRating: null);
         });
     }

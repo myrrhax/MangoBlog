@@ -25,7 +25,6 @@ public class GetArticleByIdQueryHandler : IRequestHandler<GetArticleByIdQuery, A
     public async Task<ArticleDto?> Handle(GetArticleByIdQuery request, CancellationToken cancellationToken)
     {
         Article? article = await _articlesRepository.GetArticleById(request.ArticleId);
-        
         if (article is null)
             return null;
 
@@ -33,11 +32,10 @@ public class GetArticleByIdQueryHandler : IRequestHandler<GetArticleByIdQuery, A
         if (creator is null)
             return null;
 
-        (int likes, int dislikes) = await _ratingsRepository.GetPostLikesAndDislikes(article.Id, cancellationToken);
         RatingType? userReaction = request.UserId is null || request.UserId == creator.Id
             ? null
             : await _ratingsRepository.GetUserRating(request.UserId.Value, request.ArticleId, cancellationToken);
 
-        return article.MapToDto(creator, likes, dislikes);
+        return article.MapToDto(creator);
     }
 }

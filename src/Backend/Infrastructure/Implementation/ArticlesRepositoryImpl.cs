@@ -1,18 +1,15 @@
 ﻿using Application.Abstractions;
-using Application.Dto.Articles;
 using DnsClient.Internal;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Utils;
 using Domain.Utils.Errors;
-using Infrastructure.DataContext;
 using Infrastructure.MongoModels;
 using Infrastructure.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using Newtonsoft.Json;
 
 namespace Infrastructure.Implementation;
 

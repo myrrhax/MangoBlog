@@ -72,7 +72,7 @@ public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand,
             request.Title, 
             request.Content, 
             request.CallerId, 
-            getTagsResult.Value!.ToList(),
+            request.Tags.ToList(),
             article.Likes,
             article.Dislikes,
             article.CreationDate);

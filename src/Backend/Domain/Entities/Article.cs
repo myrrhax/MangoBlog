@@ -7,12 +7,12 @@ public class Article
     public Dictionary<string, object> Content { get; set; } = [];
     public Guid CreatorId { get; set; }
     public DateTime CreationDate { get; set; }
-    public ICollection<Tag> Tags { get; set; } = [];
+    public ICollection<string> Tags { get; set; } = [];
     public int Likes { get; set; }
     public int Dislikes { get; set; }
 
     public Article(string id, string title, Dictionary<string, object> content, 
-        Guid creatorId, ICollection<Tag> tags, int likes, int dislikes, DateTime? creationDate = null)
+        Guid creatorId, ICollection<string> tags, int likes, int dislikes, DateTime? creationDate = null)
     {
         Id = id;
         Title = title;
