@@ -90,8 +90,8 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
 
         if (tags.Any())
         {
-            var tagFilterDefinition = Builders<Domain.Entities.Tag>.Filter.In(tag => tag.Name, tags);
-            filter &= builder.ElemMatch(doc => doc.Tags, tagFilterDefinition);
+            IEnumerable<string> loweredTags = tags.Select(tag => tag.ToLower());
+            filter &= builder.Where(doc );
         }
 
         if (authorId.HasValue)

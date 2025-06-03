@@ -42,6 +42,23 @@ public class ArticlesController(IMediator mediator) : ControllerBase
     }
 
     [HttpGet]
+    public async Task<IActionResult> GetArticles([FromQuery] IEnumerable<string>? tags = null,
+        [FromQuery] string? query = null,
+        [FromQuery] string? sortByDate = null,
+        [FromQuery] string? sortByPopularity = null,
+        [FromQuery] Guid? authorId = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        var command = new GetArticlesQuery(tags, query, sortByDate, sortByPopularity, authorId, page, pageSize);
+        Result<IEnumerable<ArticleDto>> result = await mediator.Send(command);
+
+        return result.IsSuccess
+            ? (result.Value!.Any() ? Ok(result.Value) : NotFound())
+            : BadRequest(result.Error);
+    }
+
+    [HttpGet]
     [Route("my")]
     [Authorize]
     public async Task<IActionResult> GetMyArticles()

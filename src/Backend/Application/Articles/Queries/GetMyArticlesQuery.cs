@@ -44,6 +44,7 @@ public class GetMyArticlesQueryHandler : IRequestHandler<GetMyArticlesQuery, IEn
 
             return new ArticleDto(article.Id,
                 user.MapToDto(),
+                article.Title,
                 article.Content,
                 article.Tags,
                 article.CreationDate,

@@ -83,6 +83,7 @@ public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand,
         (int likes, int dislikes) = await _ratingsRepository.GetPostLikesAndDislikes(replaceArticle.Id, cancellationToken);
         var resultModel = new ArticleDto(replaceArticle.Id,
             caller.MapToDto(),
+            replaceArticle.Title,
             replaceArticle.Content,
             replaceArticle.Tags,
             replaceArticle.CreationDate,
