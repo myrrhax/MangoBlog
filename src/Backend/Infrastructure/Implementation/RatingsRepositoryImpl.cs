@@ -13,6 +13,32 @@ namespace Infrastructure.Implementation;
 internal class RatingsRepositoryImpl(ApplicationDbContext context, 
     ILogger<RatingsRepositoryImpl> logger) : IRatingsRepository
 {
+    public async Task<Result> AddRating(string postId, Guid userId, RatingType rating, CancellationToken cancellationToken)
+    {
+        var entity = new Rating()
+        {
+            ArticleId = postId,
+            UserId = userId,
+            RatingType = rating,
+            CreationDate = DateTime.UtcNow,
+        };
+
+        try
+        {
+            await context.Ratings.AddAsync(entity, cancellationToken);
+            await context.SaveChangesAsync();
+
+            logger.LogInformation("New rating ({}, {} - {})", postId, userId, rating.ToString());
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Unable to add new rating: ({}, {} - {}). Error: {}", postId, userId, rating.ToString(), ex.Message);
+
+            return Result.Failure(new DatabaseInteractionError("Unable to add new rating"));
+        }
+    }
+
     public async Task<Result> DeletePostRatings(string postId, CancellationToken cancellationToken)
     {
         try
@@ -103,8 +129,30 @@ internal class RatingsRepositoryImpl(ApplicationDbContext context,
             : rating.RatingType;
     }
 
-    public Task<IEnumerable<Rating>> GetUserRatings(Guid userId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<Rating>> GetUserRatings(Guid userId, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return await context.Ratings
+            .Where(rating => rating.UserId == userId)
+            .ToListAsync();
+    }
+
+    public async Task<Result> UpdateRating(string postId, Guid userId, RatingType newRating, CancellationToken cancellationToken)
+    {
+        try
+        {
+            int rows = await context.Ratings
+                .Where(rating =>  rating.ArticleId == postId && rating.UserId == userId)
+                .ExecuteUpdateAsync(rating => rating.SetProperty(rating => rating.RatingType, newRating));
+
+            return rows > 0
+                ? Result.Success()
+                : Result.Failure(new RatingNotFound(postId));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("An error occurred updating rating ({}, {}). Error: {}", postId, userId, ex.Message);
+
+            return Result.Failure(new DatabaseInteractionError("Failed to update rating"));
+        }
     }
 }

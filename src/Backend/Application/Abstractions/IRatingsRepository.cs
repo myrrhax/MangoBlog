@@ -11,5 +11,7 @@ public interface IRatingsRepository
     Task<RatingType?> GetUserRating(Guid userId, string postId, CancellationToken cancellationToken);
     Task<IEnumerable<Rating>> GetUserRatings(Guid userId, CancellationToken cancellationToken);
     Task<Dictionary<string, (int, int)>> GetRatingsForArticles(IEnumerable<Article> articles, CancellationToken cancellationToken);
-    Task<Result> DeletePostRatings(string postId, CancellationToken cancellationToken); 
+    Task<Result> DeletePostRatings(string postId, CancellationToken cancellationToken);
+    Task<Result> UpdateRating(string postId, Guid userId, RatingType newRating, CancellationToken cancellationToken);
+    Task<Result> AddRating(string postId, Guid userId, RatingType rating, CancellationToken cancellationToken);
 }
