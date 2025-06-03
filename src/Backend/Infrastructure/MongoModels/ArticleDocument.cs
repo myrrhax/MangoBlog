@@ -20,7 +20,6 @@ internal class ArticleDocument
     public int Likes { get; set; }
     public int Dislikes { get; set; }
 
-
     public static implicit operator Article(ArticleDocument document)
     {
         return document.MapToEntity();

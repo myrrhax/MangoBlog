@@ -9,6 +9,7 @@ using Infrastructure.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 
 namespace Infrastructure.Implementation;
@@ -68,7 +69,6 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
             .SingleAsync();
     }
 
-    // ToDo добавить слой сервиса, в котором будет просходить кэширование + выборка по популярности
     public async Task<IEnumerable<Article>> GetArticles(IEnumerable<string> tags,
         string query,
         int page,
@@ -77,44 +77,57 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
         SortType popularitySort,
         Guid? authorId = null)
     {
-        var builder = Builders<ArticleDocument>.Filter;
-        var filter = FilterDefinition<ArticleDocument>.Empty;
-
+        var pipeline = new List<BsonDocument>();
+        var matchFilter = new BsonDocument();
         if (!string.IsNullOrWhiteSpace(query))
         {
-            filter &= builder.Regex(doc => doc.Title, new BsonRegularExpression(query, "i"));
+            matchFilter.Add("Title", new BsonDocument("$regex", query).Add("$options", "i"));
         }
 
         if (tags.Any())
         {
-            IEnumerable<string> loweredTags = tags.Select(tag => tag.ToLower());
-            // ToDo доделать
+            var tagsArray = new BsonArray(tags);
+            matchFilter.Add("Tags", new BsonDocument("$all", tagsArray));
         }
 
         if (authorId.HasValue)
         {
-            filter &= builder.Where(doc => doc.CreatorId == authorId.Value);
+            matchFilter.Add("CreatorId", authorId.Value.ToString());
+        }
+        pipeline.Add(new BsonDocument("$match", matchFilter));
+
+        // project
+        if (popularitySort != SortType.None)
+        {
+            pipeline.Add(new BsonDocument("$addFields", new BsonDocument("totalVotes", new BsonDocument("$add", new BsonArray { "$Likes", "$Dislikes" }))));
         }
 
-        var sortBuilder = Builders<ArticleDocument>.Sort;
-        SortDefinition<ArticleDocument>? sort = creationDateSort switch
+        var sortDefinition = new BsonDocument();
+        if (popularitySort != SortType.None)
         {
-            SortType.Ascending => sortBuilder.Ascending(doc => doc.CreationDate),
-            SortType.Descending => sortBuilder.Descending(doc => doc.CreationDate),
-            _ => null,
-        };
+            sortDefinition.Add("totalVotes", popularitySort == SortType.Ascending ? 1 : -1);
+        }
+        if (creationDateSort != SortType.None)
+        {
+            sortDefinition.Add("CreationDate", creationDateSort == SortType.Ascending ? 1 : -1);
+        }
 
-        var queryResult = _articles.Find(filter);
+        if (sortDefinition.Any())
+        {
+            pipeline.Add(new BsonDocument("$sort", sortDefinition));
+        }
 
-        if (sort is not null)
-            queryResult.Sort(sort);
+        pipeline.Add(new BsonDocument("$skip", (page - 1) * pageSize));
+        pipeline.Add(new BsonDocument("$limit", pageSize));
 
-        List<ArticleDocument> documents = await queryResult
-            .Skip((page - 1) * pageSize)
-            .Limit(pageSize)
-            .ToListAsync();
-
-        return documents.Select(document => document.MapToEntity());
+        List<BsonDocument> rawDocs = await _articles.Aggregate<BsonDocument>(pipeline).ToListAsync();
+        var articles = rawDocs.Select(doc =>
+        {
+            doc.Remove("totalVotes");
+            var mapped = BsonSerializer.Deserialize<ArticleDocument>(doc);
+            return mapped.MapToEntity();
+        });
+        return articles;
     }
 
     public async Task<IEnumerable<Article>> GetUserArticles(Guid userId)
