@@ -41,15 +41,7 @@ public class AddRatingToPostCommandHandler : IRequestHandler<AddRatingToPostComm
         if (article is null)
             return Result.Failure(new ArticleNotFound(request.PostId));
 
-        bool operationIsInvalid = rating is not null && rating == type
-            || rating is null && type == RatingType.None;
-        
-        if (operationIsInvalid)
-        {
-            return Result.Failure(new RatingAlreadyExists(request.CallerId, request.PostId));
-        }
-
-        bool removeRating = rating is not null && type == RatingType.None;
+        bool removeRating = rating is not null && rating == type;
         if (removeRating) // remove rating from article
         {
             Result removeResult = await RemoveRating(article.Id, request.CallerId, rating!.Value, cancellationToken);
@@ -58,9 +50,7 @@ public class AddRatingToPostCommandHandler : IRequestHandler<AddRatingToPostComm
         }
 
         // change rating or add new rating
-        bool changeOld = rating is not null &&
-            (rating.Value == RatingType.Like && type == RatingType.Dislike
-            || rating.Value == RatingType.Dislike && type == RatingType.Like);
+        bool changeOld = rating is not null;
 
         var updateInDocumentsTask = _articlesRepository.PerformRatingChange(article.Id, type!.Value, changeOld);
         Task<Result> updateInRatingsTask = rating is null
