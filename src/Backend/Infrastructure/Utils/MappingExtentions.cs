@@ -15,6 +15,8 @@ internal static class MappingExtentions
             document.Content.ToDictionary(),
             document.CreatorId,
             document.Tags,
+            document.Likes,
+            document.Dislikes,
             document.CreationDate);
     }
 
@@ -32,6 +34,8 @@ internal static class MappingExtentions
             CreationDate = article.CreationDate,
             Tags = article.Tags.ToList(),
             Content = BsonDocument.Parse(JsonConvert.SerializeObject(article.Content)),
+            Likes = article.Likes,
+            Dislikes = article.Dislikes,
         };
     }
 }

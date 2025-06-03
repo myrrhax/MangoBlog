@@ -72,7 +72,9 @@ public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand,
             request.Title, 
             request.Content, 
             request.CallerId, 
-            getTagsResult.Value!.ToList(), 
+            getTagsResult.Value!.ToList(),
+            article.Likes,
+            article.Dislikes,
             article.CreationDate);
 
         Result updateResult = await _articlesRepository.ReplaceArticle(replaceArticle);
@@ -80,15 +82,14 @@ public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand,
         if (updateResult.IsFailure)
             return Result.Failure<ArticleDto>(updateResult.Error);
 
-        (int likes, int dislikes) = await _ratingsRepository.GetPostLikesAndDislikes(replaceArticle.Id, cancellationToken);
         var resultModel = new ArticleDto(replaceArticle.Id,
             caller.MapToDto(),
             replaceArticle.Title,
             replaceArticle.Content,
             replaceArticle.Tags,
             replaceArticle.CreationDate,
-            likes,
-            dislikes,
+            replaceArticle.Likes,
+            replaceArticle.Dislikes,
             UserRating: null);
 
         return Result.Success(resultModel);

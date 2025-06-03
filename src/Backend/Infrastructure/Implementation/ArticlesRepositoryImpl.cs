@@ -91,7 +91,7 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
         if (tags.Any())
         {
             IEnumerable<string> loweredTags = tags.Select(tag => tag.ToLower());
-            filter &= builder.Where(doc );
+            // ToDo доделать
         }
 
         if (authorId.HasValue)

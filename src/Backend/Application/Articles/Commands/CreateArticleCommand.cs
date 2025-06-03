@@ -53,6 +53,8 @@ public class CreateArticleCommandHandler : IRequestHandler<CreateArticleCommand,
             CreatorId = request.CreatorId,
             Tags = tagInsertionResult.Value!.ToList(),
             CreationDate = DateTime.UtcNow,
+            Likes = 0,
+            Dislikes = 0,
         };
 
         Result articleInsertionResult = await _articlesRepository.CreateArticle(article);
