@@ -1,6 +1,7 @@
 ﻿using Application.Articles.Commands;
 using Application.Articles.Queries;
 using Application.Dto.Articles;
+using Application.Users.Commands;
 using Domain.Utils;
 using Domain.Utils.Errors;
 using MediatR;
@@ -108,6 +109,23 @@ public class ArticlesController(IMediator mediator) : ControllerBase
                 ArticleNotFound => NotFound(),
                 ApplicationValidationError => BadRequest(updateResult.Error),
                 _ => BadRequest()
+            };
+    }
+
+    [HttpPost]
+    [Authorize]
+    [Route("add-rating")]
+    public async Task<IActionResult> AddRating([FromBody] AddRatingRequest request)
+    {
+        var command = new AddRatingToPostCommand(request.PostId, User.GetUserId()!.Value, request.RatingType);
+        Result result = await mediator.Send(command);
+
+        return result.IsSuccess
+            ? Ok()
+            : result.Error switch
+            {
+                ArticleNotFound => NotFound(),
+                _ => BadRequest(result.Error)
             };
     }
 }
