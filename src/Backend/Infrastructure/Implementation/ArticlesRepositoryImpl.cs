@@ -130,19 +130,19 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
             pipeline.Add(new BsonDocument("$addFields", new BsonDocument("totalVotes", new BsonDocument("$add", new BsonArray { "$Likes", "$Dislikes" }))));
         }
 
-        var sortDefinition = new BsonDocument();
+        var sortDefinition = new List<BsonElement>();
         if (popularitySort != SortType.None)
         {
-            sortDefinition.Add("totalVotes", popularitySort == SortType.Ascending ? 1 : -1);
+            sortDefinition.Add(new BsonElement("totalVotes", popularitySort == SortType.Ascending ? 1 : -1));
         }
         if (creationDateSort != SortType.None)
         {
-            sortDefinition.Add("CreationDate", creationDateSort == SortType.Ascending ? 1 : -1);
+            sortDefinition.Add(new BsonElement("CreationDate", creationDateSort == SortType.Ascending ? 1 : -1));
         }
 
         if (sortDefinition.Any())
         {
-            pipeline.Add(new BsonDocument("$sort", sortDefinition));
+            pipeline.Add(new BsonDocument("$sort", new BsonDocument(sortDefinition)));
         }
 
         pipeline.Add(new BsonDocument("$skip", (page - 1) * pageSize));
