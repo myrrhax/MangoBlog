@@ -33,3 +33,9 @@ public class InvalidFileExtention(string extention, string[] validExtentions)
 
 public class FailedToLoadFile(string message)
     : Error($"An error occurred loading file to server: {message}");
+
+public class SubscriptionAlreadyExists(Guid subscriberId, Guid channelId)
+    : Error($"User {subscriberId} already subscribed to channel {channelId}");
+
+public class SubscriptionNotFound(Guid subscriberId, Guid channelId)
+    : Error($"Subscription ({subscriberId}, {channelId}) is not found");

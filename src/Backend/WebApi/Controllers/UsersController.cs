@@ -117,6 +117,14 @@ public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) 
             : Ok(fullInfoDto);
     }
 
+    [HttpPost]
+    [Authorize]
+    [Route("subscribe/{channelId:guid}")]
+    public async Task<IActionResult> Subscribe()
+    {
+        Guid 
+    }
+
     private void RemoveToken()
     {
         HttpContext.Response.Cookies.Delete(jwtConfig.Value.CookieName);

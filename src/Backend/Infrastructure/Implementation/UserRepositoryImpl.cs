@@ -28,6 +28,38 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
         }
     }
 
+    public async Task<Result> AddSubscription(Guid subscriberId, Guid userId, CancellationToken cancellationToken)
+    {
+        ApplicationUser subscriber = await context.Users
+            .Include(user => user.Subscriptions)
+            .FirstAsync(user => user.Id == subscriberId);
+        
+        ApplicationUser? userChannel = await context.Users.FindAsync(userId);
+        if (userChannel is null)
+            return Result.Failure(new UserNotFound());
+
+        try
+        {
+            if (subscriber.Subscriptions.Contains(userChannel))
+            {
+                return Result.Failure(new SubscriptionAlreadyExists(subscriberId, userId));
+            }
+            subscriber.Subscriptions.Add(userChannel);
+            await context.SaveChangesAsync(cancellationToken);
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Failed to add new subscription (SubscriberId: {}, ChannelId: {}).\nError: {}", 
+                subscriberId, 
+                userId,
+                ex.Message);
+
+            return Result.Failure(new DatabaseInteractionError("Failed to add subscription"));
+        }
+    }
+
     public async Task<Result> AddUser(ApplicationUser user, CancellationToken cancellationToken)
     {
         try
@@ -145,6 +177,38 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
         return authorIds.Keys
             .ToDictionary(key => key,
                 key => users.FirstOrDefault(user => user.Id == authorIds[key]));
+    }
+
+    public async Task<Result> RemoveSubscription(Guid subscriberId, Guid userId, CancellationToken cancellationToken)
+    {
+        ApplicationUser subscriber = await context.Users
+           .Include(user => user.Subscriptions)
+           .FirstAsync(user => user.Id == subscriberId);
+
+        ApplicationUser? userChannel = await context.Users.FindAsync(userId);
+        if (userChannel is null)
+            return Result.Failure(new UserNotFound());
+
+        try
+        {
+            if (subscriber.Subscriptions.Contains(userChannel))
+            {
+                return Result.Failure(new SubscriptionNotFound(subscriberId, userId));
+            }
+            subscriber.Subscriptions.Remove(userChannel);
+            await context.SaveChangesAsync(cancellationToken);
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Failed to remove subscription (SubscriberId: {}, ChannelId: {}).\nError: {}",
+                subscriberId,
+                userId,
+                ex.Message);
+
+            return Result.Failure(new DatabaseInteractionError("Failed to remove subscription"));
+        }
     }
 
     public async Task<Result> UpdateRefreshToken(Guid tokenId, string newToken, DateTime newExpirationDate, CancellationToken cancellationToken)

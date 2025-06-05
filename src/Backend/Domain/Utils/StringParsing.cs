@@ -30,5 +30,12 @@ public static class StringParsing
 
         return true;
     }
-        
+
+    public static SubscriptionType ParseSubscription(string subscription)
+        => subscription switch
+        {
+            "sub" => SubscriptionType.Subscribe,
+            "unsub" => SubscriptionType.Unsubscribe,
+            _ => throw new ArgumentException("Invalid value for subscription")
+        };
 }
