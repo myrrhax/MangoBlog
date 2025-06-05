@@ -25,12 +25,13 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
     private readonly IValidator<RegisterUserCommand> _validator;
     private readonly IMediaFileService _mediaFileService;
 
-    public RegisterUserCommandHandler(IUserRepository userRepository, ITokenGenerator tokenGenerator, IPasswordHasher passwordHasher, IValidator<RegisterUserCommand> validator)
+    public RegisterUserCommandHandler(IUserRepository userRepository, ITokenGenerator tokenGenerator, IPasswordHasher passwordHasher, IValidator<RegisterUserCommand> validator, IMediaFileService mediaFileService)
     {
         _userRepository = userRepository;
         _tokenGenerator = tokenGenerator;
         _passwordHasher = passwordHasher;
         _validator = validator;
+        _mediaFileService = mediaFileService;
     }
 
     public async Task<Result<RegistrationResponse>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
@@ -51,15 +52,17 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
 
         string hashedPassword = _passwordHasher.HashPassword(request.Password);
         
-        MediaFile? avatar = null;
-        if (request.AvatarUrl is not null)
-        {
-            avatar = await _mediaFileService.GetMediaFile(request.AvatarUrl);
-        }
+        // parse avatar
+        Uri.TryCreate(request.AvatarUrl, UriKind.Absolute, out Uri? avatarUrl);
+        string? avatarName = avatarUrl?.Segments?.Last()?.TrimEnd('/');
+
+        MediaFile? avatarFile = avatarName is not null
+            ? await _mediaFileService.GetMediaFile(avatarName)
+            : null;
 
         var user = new ApplicationUser(login: request.Login, email: request.Email,
             hash: hashedPassword, firstName: request.FirstName,
-            lastName: request.LastName, avatar: avatar, birthDate: request.BirthDate);
+            lastName: request.LastName, avatar: avatarFile, birthDate: request.BirthDate);
 
         Result insertionResult = await _userRepository.AddUser(user, cancellationToken);
         if (insertionResult.IsFailure) 

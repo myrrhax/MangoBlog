@@ -18,6 +18,6 @@ public interface IMediaFileService
         string extention,
         Guid creatorId, 
         bool isAvatar);
-    Task<Stream?> LoadFile(string url);
-    Task<MediaFile?> GetMediaFile(string url);
+    Task<Stream?> LoadFile(string fileName);
+    Task<MediaFile?> GetMediaFile(string fileName);
 }
