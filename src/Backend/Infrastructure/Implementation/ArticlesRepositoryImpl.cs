@@ -166,6 +166,14 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
         return documents.Select(document => document.MapToEntity());
     }
 
+    public async Task<IEnumerable<Article>> LoadArticles(IEnumerable<string> ids)
+    {
+        IEnumerable<ArticleDocument> documents = await _articles.Find(article => ids.Contains(article.Id))
+            .ToListAsync();
+
+        return documents.Select(document => document.MapToEntity());
+    }
+
     public async Task<Result> PerformRatingChange(string postId, RatingType type, bool removeOld)
     {
         var updates = new List<UpdateDefinition<ArticleDocument>>();
