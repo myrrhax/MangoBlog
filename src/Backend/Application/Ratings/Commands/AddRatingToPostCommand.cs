@@ -5,7 +5,7 @@ using Domain.Utils;
 using Domain.Utils.Errors;
 using MediatR;
 
-namespace Application.Users.Commands;
+namespace Application.Ratings.Commands;
 
 public record AddRatingToPostCommand(string PostId, 
     Guid CallerId, 
