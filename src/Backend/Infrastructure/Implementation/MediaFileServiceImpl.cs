@@ -1,6 +1,7 @@
 ﻿using System.Security.Cryptography;
 using Application.Abstractions;
 using Domain.Entities;
+using Domain.Enums;
 using Domain.Utils;
 using Domain.Utils.Errors;
 using Infrastructure.DataContext;
@@ -28,14 +29,15 @@ internal class MediaFileServiceImpl : IMediaFileService
         _logger = logger;
     }
 
-    public Task<MediaFile?> GetMediaFile(string url)
+    public async Task<(Stream, MediaFileType)?> LoadFile(Guid fileId)
     {
-        throw new NotImplementedException();
-    }
+        MediaFile? file = await _context.MediaFiles.FindAsync(fileId);
+        
+        if (file is null || !File.Exists(file.FilePath))
+            return null;
 
-    public Task<Stream?> LoadFile(string url)
-    {
-        throw new NotImplementedException();
+        Stream fs = File.OpenRead(file.FilePath);
+        return (fs, file.FileType);
     }
 
     // ToDo перенести загрузку в Background Task-у через канал и отправлять уведомления о загрузке

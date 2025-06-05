@@ -1,4 +1,5 @@
 ﻿using Application.MediFiles.Commands;
+using Application.MediFiles.Queries;
 using Domain.Entities;
 using Domain.Utils;
 using MediatR;
@@ -32,9 +33,10 @@ public class MediaController(IMediator mediator) : ControllerBase
     }
 
     [HttpGet]
-    [Route("name")]
-    public async Task<IActionResult> GetFile([FromRoute] string name)
+    [Route("{id:guid}")]
+    public async Task<IActionResult> GetFile([FromRoute] Guid id)
     {
-        return Ok();
+        var query = new GetMediaByIdQuery(id);
+        Stream? fileStream = query
     }
 }

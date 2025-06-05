@@ -1,12 +1,13 @@
 ﻿using Application.Abstractions;
 using Domain.Entities;
+using Domain.Enums;
 using MediatR;
 
 namespace Application.MediFiles.Queries;
 
-public record GetMediaByIdQuery(Guid MediaId) : IRequest<Stream?>;
+public record GetMediaByIdQuery(Guid MediaId) : IRequest<(Stream, MediaFileType)?>;
 
-public class GetMediaByIdQueryHandler : IRequestHandler<GetMediaByIdQuery, Stream?>
+public class GetMediaByIdQueryHandler : IRequestHandler<GetMediaByIdQuery, (Stream, MediaFileType)?>
 {
     private readonly IMediaFileService _mediaFileService;
 
@@ -15,7 +16,7 @@ public class GetMediaByIdQueryHandler : IRequestHandler<GetMediaByIdQuery, Strea
         _mediaFileService = mediaFileService;
     }
 
-    public async Task<Stream?> Handle(GetMediaByIdQuery request, CancellationToken cancellationToken)
+    public async Task<(Stream, MediaFileType)?> Handle(GetMediaByIdQuery request, CancellationToken cancellationToken)
     {
         return await _mediaFileService.LoadFile(request.MediaId);
     }
