@@ -11,4 +11,4 @@ public record ArticleDto(string Id,
     DateTime CreatioDate,
     int Likes,
     int Dislikes,
-    RatingType? UserRating = null);
+    string? UserRating = null);

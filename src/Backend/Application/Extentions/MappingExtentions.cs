@@ -48,6 +48,6 @@ internal static class MappingExtentions
             entity.CreationDate, 
             entity.Likes, 
             entity.Dislikes,
-            reaction);
+            reaction?.ToString());
     }
 }

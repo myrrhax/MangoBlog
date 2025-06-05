@@ -5,6 +5,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Dto;
+using Application.Ratings.Queries;
+using Application.Dto.Articles;
 
 namespace WebApi.Controllers;
 
@@ -27,5 +29,18 @@ public class RatingsController(IMediator mediator) : ControllerBase
                 ArticleNotFound => NotFound(),
                 _ => BadRequest(result.Error)
             };
+    }
+
+    [HttpGet]
+    [Route("my")]
+    public async Task<IActionResult> GetUserRatedPosts()
+    {
+        Guid userId = User.GetUserId()!.Value;
+        var command = new GetMyRatedPostsCommand(userId);
+        IEnumerable<ArticleDto> articles = await mediator.Send(command);
+
+        return articles.Any()
+            ? Ok(articles)
+            : NotFound();
     }
 }
