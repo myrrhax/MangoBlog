@@ -18,6 +18,7 @@ internal class MediaFileServiceImpl : IMediaFileService
     private static string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
     private static string[] allowedImageTypes = { ".jpg", ".jpeg", ".png", ".bmp", };
     private static string[] allowedVideoTypes = { ".mp4", ".avi", ".mov", ".mkv", ".webm" };
+    private static string[] validExtentions = allowedVideoTypes.Concat(allowedImageTypes).ToArray();
     private readonly ApplicationDbContext _context;
     private readonly ILogger<MediaFileServiceImpl> _logger;
 
@@ -37,7 +38,7 @@ internal class MediaFileServiceImpl : IMediaFileService
         throw new NotImplementedException();
     }
 
-    // ToDo перенести загрузку в Background Task-у
+    // ToDo перенести загрузку в Background Task-у через канал и отправлять уведомления о загрузке
     public async Task<Result<MediaFile>> LoadFileToServer(Stream fileStream, 
         string extention, 
         string url, 
@@ -78,7 +79,7 @@ internal class MediaFileServiceImpl : IMediaFileService
             }
             else
             {
-                return Result.Failure();
+                return Result.Failure<MediaFile>(new InvalidFileExtention(extention, validExtentions));
             }
 
             var mediaFile = new MediaFile
@@ -92,6 +93,8 @@ internal class MediaFileServiceImpl : IMediaFileService
 
             await _context.MediaFiles.AddAsync(mediaFile);
             await _context.SaveChangesAsync();
+
+            return Result.Success(mediaFile);
         }
         catch (DbUpdateException ex)
         {
@@ -101,7 +104,7 @@ internal class MediaFileServiceImpl : IMediaFileService
         catch (Exception ex)
         {
             _logger.LogError($"Failed to upload file: {ex.Message}");
-            return Result.Failure();
+            return Result.Failure<MediaFile>(new FailedToLoadFile(ex.Message));
         }
     }
 }
