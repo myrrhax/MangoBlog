@@ -40,8 +40,7 @@ internal class MediaFileServiceImpl : IMediaFileService
 
     // ToDo перенести загрузку в Background Task-у через канал и отправлять уведомления о загрузке
     public async Task<Result<MediaFile>> LoadFileToServer(Stream fileStream, 
-        string extention, 
-        string url, 
+        string extention,
         Guid creatorId, 
         bool isAvatar)
     {
@@ -85,7 +84,7 @@ internal class MediaFileServiceImpl : IMediaFileService
             var mediaFile = new MediaFile
             {
                 Id = Guid.NewGuid(),
-                Url = url + hashName,
+                FileName = hashName,
                 FilePath = filePath,
                 LoadTime = creationDate,
                 IsAvatar = isAvatar

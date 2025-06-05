@@ -16,7 +16,6 @@ public interface IMediaFileService
     /// <returns>File hashname</returns>
     Task<Result<MediaFile>> LoadFileToServer(Stream fileStream, 
         string extention,
-        string url,
         Guid creatorId, 
         bool isAvatar);
     Task<Stream?> LoadFile(string url);

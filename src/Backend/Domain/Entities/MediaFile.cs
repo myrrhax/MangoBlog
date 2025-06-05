@@ -5,7 +5,7 @@ namespace Domain.Entities;
 public class MediaFile
 {
     public Guid Id { get; set; }
-    public string Url { get; set; } = string.Empty;
+    public string FileName { get; set; } = string.Empty;
     public string FilePath { get; set; } = string.Empty;
     public MediaFileType FileType { get; set; }
     public DateTime LoadTime { get; set; }
