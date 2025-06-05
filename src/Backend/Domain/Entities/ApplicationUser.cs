@@ -11,7 +11,8 @@ public class ApplicationUser
     public string PasswordHash { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
-    public string? AvatarUrl { get; set; }
+    public Guid? AvatarId { get; set; }
+    public MediaFile? Avatar { get; set; }
     public DateOnly? BirthDate { get; set; }
     public DateTime RegistrationTime { get; set; }
     public Role Role { get; set; }
@@ -20,7 +21,7 @@ public class ApplicationUser
     public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
 
     public ApplicationUser(string login, string email, string hash, string firstName, string lastName, 
-        string? avatarUrl = default, DateOnly? birthDate = default, Role role = Role.User)
+        MediaFile? avatar = default, DateOnly? birthDate = default, Role role = Role.User)
     {
         Id = Guid.NewGuid();
         Email = email;
@@ -29,7 +30,8 @@ public class ApplicationUser
         PasswordHash = hash;
         FirstName = firstName;
         LastName = lastName;
-        AvatarUrl = avatarUrl;
+        Avatar = avatar;
+        AvatarId = avatar?.Id;
         BirthDate = birthDate;
         RegistrationTime = DateTime.UtcNow;
         Role = role;

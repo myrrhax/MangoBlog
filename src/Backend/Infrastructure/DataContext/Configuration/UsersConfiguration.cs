@@ -33,8 +33,15 @@ internal class UsersConfiguration : IEntityTypeConfiguration<ApplicationUser>
             .HasMaxLength(25)
             .IsRequired();
 
-        builder.Property(entity => entity.AvatarUrl)
+        builder.Property(entity => entity.Avatar)
             .HasDefaultValue(null);
+
+        builder.HasOne(entity => entity.Avatar)
+            .WithOne(avatar => avatar.Loader);
+
+        builder.HasMany(entity => entity.MediaFiles)
+            .WithOne(media => media.Loader)
+            .HasForeignKey(media => media.LoaderId);
 
         builder.HasMany(user => user.RefreshTokens)
             .WithOne(token => token.User)

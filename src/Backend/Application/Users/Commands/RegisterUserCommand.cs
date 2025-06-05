@@ -23,6 +23,7 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
     private readonly ITokenGenerator _tokenGenerator;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IValidator<RegisterUserCommand> _validator;
+    private readonly IMediaFileService _mediaFileService;
 
     public RegisterUserCommandHandler(IUserRepository userRepository, ITokenGenerator tokenGenerator, IPasswordHasher passwordHasher, IValidator<RegisterUserCommand> validator)
     {
@@ -49,10 +50,16 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
             return Result.Failure<RegistrationResponse>(new EmailOrLoginAlreadyTaken(request.Login, request.Email));
 
         string hashedPassword = _passwordHasher.HashPassword(request.Password);
+        
+        MediaFile? avatar = null;
+        if (request.AvatarUrl is not null)
+        {
+            avatar = await _mediaFileService.GetMediaFile(request.AvatarUrl);
+        }
 
         var user = new ApplicationUser(login: request.Login, email: request.Email,
             hash: hashedPassword, firstName: request.FirstName,
-            lastName: request.LastName, avatarUrl: request.AvatarUrl, birthDate: request.BirthDate);
+            lastName: request.LastName, avatar: avatar, birthDate: request.BirthDate);
 
         Result insertionResult = await _userRepository.AddUser(user, cancellationToken);
         if (insertionResult.IsFailure) 

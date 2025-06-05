@@ -111,6 +111,7 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
         return await context.Users
             .Include(user => user.RefreshTokens)
             .Include(user => user.Subscriptions)
+            .Include(user => user.Avatar)
             .FirstOrDefaultAsync(user => user.Id == id, cancellationToken);
     }
 
@@ -118,8 +119,8 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
     {
         return await context.Users
             .Include(user => user.Subscriptions)
+            .Include(user => user.Avatar)
             .FirstOrDefaultAsync(user => user.Login == login, cancellationToken);
-            
     }
 
     public async Task<bool> IsEmailTaken(string email, CancellationToken cancellationToken)

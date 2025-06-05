@@ -6,7 +6,7 @@ public class MediaFile
 {
     public Guid Id { get; set; }
     public Guid LoaderId { get; set; }
-    public string HashName { get; set; } = string.Empty;
+    public string Url { get; set; } = string.Empty;
     public string FilePath { get; set; } = string.Empty;
     public MediaFileType FileType { get; set; }
     public DateTime LoadTime { get; set; }

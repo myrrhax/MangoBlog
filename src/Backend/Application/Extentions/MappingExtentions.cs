@@ -15,7 +15,7 @@ internal static class MappingExtentions
             DisplayedName = entity.DisplayedName,
             FirstName = entity.FirstName,
             LastName = entity.LastName,
-            AvatarUrl = entity.AvatarUrl,
+            AvatarUrl = entity.Avatar.Url,
             BirthDate = entity.BirthDate,
             Role = entity.Role.ToString()
         };
@@ -29,7 +29,7 @@ internal static class MappingExtentions
             DisplayedName = entity.DisplayedName,
             FirstName = entity.FirstName,
             LastName = entity.LastName,
-            AvatarUrl = entity.AvatarUrl,
+            AvatarUrl = entity.Avatar.Url,
             BirthDate = entity.BirthDate,
             Email = entity.Email,
             Login = entity.Login,
