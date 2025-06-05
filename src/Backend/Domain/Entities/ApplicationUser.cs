@@ -15,6 +15,9 @@ public class ApplicationUser
     public DateOnly? BirthDate { get; set; }
     public DateTime RegistrationTime { get; set; }
     public Role Role { get; set; }
+    public ICollection<MediaFile> MediaFiles { get; set; } = [];
+    public ICollection<ApplicationUser> Subscriptions { get; set; } = [];
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
 
     public ApplicationUser(string login, string email, string hash, string firstName, string lastName, 
         string? avatarUrl = default, DateOnly? birthDate = default, Role role = Role.User)
@@ -36,7 +39,4 @@ public class ApplicationUser
     {
         
     }
-
-    public ICollection<ApplicationUser> Subscriptions { get; set; } = [];
-    public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
 }
