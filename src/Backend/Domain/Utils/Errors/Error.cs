@@ -39,3 +39,9 @@ public class SubscriptionAlreadyExists(Guid subscriberId, Guid channelId)
 
 public class SubscriptionNotFound(Guid subscriberId, Guid channelId)
     : Error($"Subscription ({subscriberId}, {channelId}) is not found");
+
+public class MediaNotFound(Guid mediaId)
+    : Error($"Media file with id {mediaId} is not found");
+
+public class InvalidMediaFormat(Guid mediaId, MediaFileType type)
+    : Error($"Media file {mediaId} have invalid format: {type.ToString()}");

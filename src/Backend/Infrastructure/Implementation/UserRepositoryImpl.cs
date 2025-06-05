@@ -78,6 +78,26 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
         }
     }
 
+    public async Task<Result> ChangeAvatar(Guid userId, Guid avatarId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            int rows = await context.Users
+                .Where(user => user.Id == userId)
+                .ExecuteUpdateAsync(user => user.SetProperty(prop => prop.AvatarId, avatarId));
+
+            return rows > 0
+                ? Result.Success()
+                : Result.Failure(new UserNotFound());
+        }
+        catch (Exception e)
+        {
+            logger.LogError("Failed to change avatar for user: {}. Error: {}", userId, e.Message);
+
+            return Result.Failure(new DatabaseInteractionError("Failed to change avatar"));
+        }
+    }
+
     public async Task<Result> DeleteRefreshToken(RefreshToken token, CancellationToken cancellationToken)
     {
         try
@@ -238,11 +258,5 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
             return Result.Failure(new DatabaseInteractionError("Unable to update refresh token"));
         }
         
-    }
-
-    public Task<Result> UpdateUser(ApplicationUser user, CancellationToken cancellationToken)
-    {
-        // Todo implement
-        throw new NotImplementedException();
     }
 }
