@@ -139,6 +139,26 @@ public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) 
         };
     }
 
+    [HttpPatch]
+    [Authorize]
+    [Route("avatar")]
+    public async Task<IActionResult> ChangeAvatar([FromBody] UpdateAvatarRequestDto dto)
+    {
+        Guid userId = User.GetUserId()!.Value;
+        var command = new UpdateAvatarCommand(userId, dto.AvatarId);
+        Result result = await mediator.Send(command);
+
+        return result switch
+        {
+            { IsSuccess: true } => Ok(),
+            _ => result.Error switch
+            {
+                MediaNotFound => NotFound(),
+                _ => BadRequest(result.Error)
+            }
+        };
+    }
+
     private void RemoveToken()
     {
         HttpContext.Response.Cookies.Delete(jwtConfig.Value.CookieName);
