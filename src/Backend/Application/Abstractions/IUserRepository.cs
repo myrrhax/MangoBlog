@@ -17,4 +17,6 @@ public interface IUserRepository
     Task<Result> UpdateRefreshToken(Guid tokenId, string newToken, DateTime newExpirationTime, CancellationToken cancellationToken);
     Task<Result> DeleteRefreshToken(RefreshToken token, CancellationToken cancellationToken);
     Task<Dictionary<string, ApplicationUser?>> LoadAuthors(Dictionary<string, Guid> articleAuthors, CancellationToken cancellationToken);
+    Task<Result> AddSubscription(Guid subscriberId, Guid userId, CancellationToken cancellationToken);
+    Task<Result> RemoveSubscription(Guid subscriberId, Guid userId, CancellationToken cancellationToken);
 }
