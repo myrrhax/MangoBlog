@@ -63,12 +63,15 @@ internal class MediaFileServiceImpl : IMediaFileService
             if (allowedImageTypes.Contains(extention)) // load image and crop if it is an avatar
             {
                 using var image = await Image.LoadAsync(fileStream);
-                image.Mutate(img => img.Resize(new ResizeOptions
+                if (isAvatar)
                 {
-                    Size = new Size(AvatarWidth, AvatarHeight),
-                    Mode = ResizeMode.Crop
-                }));
-
+                    image.Mutate(img => img.Resize(new ResizeOptions
+                    {
+                        Size = new Size(AvatarWidth, AvatarHeight),
+                        Mode = ResizeMode.Crop
+                    }));
+                }
+                
                 await using FileStream outputStream = File.OpenWrite(filePath);
                 await image.SaveAsJpegAsync(outputStream);
             }

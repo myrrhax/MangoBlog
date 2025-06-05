@@ -26,4 +26,8 @@
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="uploads\2025\6\5\" />
+  </ItemGroup>
+
 </Project>
