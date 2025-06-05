@@ -22,6 +22,7 @@ obj/
 out/
 wwwroot/dist/
 wwwroot/node_modules/
+uploads/
 
 # EF Core
 Migrations/
