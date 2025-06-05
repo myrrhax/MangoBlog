@@ -33,6 +33,7 @@ internal static class MappingExtentions
             BirthDate = entity.BirthDate,
             Email = entity.Email,
             Login = entity.Login,
+            Role = entity.Role.ToString(),
             RegistrationTime = entity.RegistrationTime,
             Subscriptions = entity.Subscriptions.Select(sub => sub.MapToDto())
         };
