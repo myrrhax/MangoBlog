@@ -9,6 +9,6 @@ public class UserDto
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty;
-    public string? AvatarFileName { get; set; }
+    public string? AvatarId { get; set; }
     public DateOnly? BirthDate { get; set; }
 }

@@ -191,7 +191,7 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
 
         try
         {
-            if (subscriber.Subscriptions.Contains(userChannel))
+            if (!subscriber.Subscriptions.Contains(userChannel))
             {
                 return Result.Failure(new SubscriptionNotFound(subscriberId, userId));
             }
