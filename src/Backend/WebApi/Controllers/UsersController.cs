@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using WebApi.Dto;
 
 namespace WebApi.Controllers;
 
@@ -119,10 +120,23 @@ public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) 
 
     [HttpPost]
     [Authorize]
-    [Route("subscribe/{channelId:guid}")]
-    public async Task<IActionResult> Subscribe()
+    [Route("subscription")]
+    public async Task<IActionResult> ToggleSubscription([FromBody] SubscriptionRequestDto dto)
     {
-        Guid 
+        Guid callerId = User.GetUserId()!.Value;
+        var command = new ToogleSubscriptionCommand(callerId, dto.ChannelId, dto.SubscriptionType);
+
+        Result result = await mediator.Send(command);
+
+        return result switch
+        {
+            { IsSuccess: true } => Ok(),
+            { } error => error.Error switch
+            {
+                SubscriptionNotFound e => NotFound(e.Message),
+                _ => BadRequest(error.Error)
+            }
+        };
     }
 
     private void RemoveToken()
