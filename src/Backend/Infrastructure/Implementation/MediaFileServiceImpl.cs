@@ -49,8 +49,9 @@ internal class MediaFileServiceImpl : IMediaFileService
             creationDate.Year.ToString(),
             creationDate.Month.ToString(),
             creationDate.Day.ToString());
-        string hashName = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
-        string fileName = hashName + extention;
+
+        Guid fileId = Guid.NewGuid();
+        string fileName = fileId.ToString() + extention;
         string filePath = Path.Combine(pathToDirectory, fileName);
 
         try
@@ -83,8 +84,7 @@ internal class MediaFileServiceImpl : IMediaFileService
 
             var mediaFile = new MediaFile
             {
-                Id = Guid.NewGuid(),
-                FileName = hashName,
+                Id = fileId,
                 FilePath = filePath,
                 LoadTime = creationDate,
                 IsAvatar = isAvatar

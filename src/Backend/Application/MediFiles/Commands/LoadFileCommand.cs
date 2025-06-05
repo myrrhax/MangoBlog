@@ -23,7 +23,7 @@ public class LoadFileCommandHandler : IRequestHandler<LoadFileCommand, Result<st
     {
         Result<MediaFile> loadingResult = await _mediaFileService.LoadFileToServer(request.FileStream, request.FileExtention, request.CallerId, request.IsAvatar);
         if (loadingResult.IsSuccess)
-            return Result.Success(loadingResult.Value!.FileName);
+            return Result.Success(loadingResult.Value!.Id.ToString());
 
         return Result.Failure<string>(loadingResult.Error);
     }

@@ -10,14 +10,12 @@ internal class MediaFileConfiguration : IEntityTypeConfiguration<MediaFile>
     {
         builder.HasKey(file => file.Id);
 
-        builder.Property(file => file.FileName)
-            .IsRequired();
-        builder.HasIndex(file => file.FileName)
-            .IsUnique();
-
         builder.Property(file => file.FilePath)
             .IsRequired();
         builder.HasIndex(file => file.FilePath)
             .IsUnique();
+
+        builder.Property(file => file.FileType)
+            .HasConversion<string>();
     }
 }
