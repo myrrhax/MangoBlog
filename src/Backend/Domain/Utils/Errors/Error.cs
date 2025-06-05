@@ -27,3 +27,9 @@ public class RatingNotFound(string postId)
 
 public class RatingAlreadyExists(Guid userId, string postId)
     : Error($"User {userId} already have same rating for post: {postId}");
+
+public class InvalidFileExtention(string extention, string[] validExtentions)
+    : Error($"Cannot load file with extention type: {extention}. Valid extention type: {string.Join(", ", validExtentions)}");
+
+public class FailedToLoadFile(string message)
+    : Error($"An error occurred loading file to server: {message}");
