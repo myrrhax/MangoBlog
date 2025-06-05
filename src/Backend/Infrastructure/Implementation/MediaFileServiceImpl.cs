@@ -1,5 +1,4 @@
-﻿using System.Security.Cryptography;
-using Application.Abstractions;
+﻿using Application.Abstractions;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Utils;
@@ -29,10 +28,15 @@ internal class MediaFileServiceImpl : IMediaFileService
         _logger = logger;
     }
 
+    public async Task<MediaFile?> GetMediaFile(Guid fileId)
+    {
+        return await _context.MediaFiles.FindAsync(fileId);
+    }
+
     public async Task<(Stream, MediaFileType)?> LoadFile(Guid fileId)
     {
-        MediaFile? file = await _context.MediaFiles.FindAsync(fileId);
-        
+        MediaFile? file = await GetMediaFile(fileId);
+
         if (file is null || !File.Exists(file.FilePath))
             return null;
 
@@ -41,9 +45,9 @@ internal class MediaFileServiceImpl : IMediaFileService
     }
 
     // ToDo перенести загрузку в Background Task-у через канал и отправлять уведомления о загрузке
-    public async Task<Result<MediaFile>> LoadFileToServer(Stream fileStream, 
+    public async Task<Result<MediaFile>> LoadFileToServer(Stream fileStream,
         string extention,
-        Guid creatorId, 
+        Guid creatorId,
         bool isAvatar)
     {
         DateTime creationDate = DateTime.UtcNow;
@@ -73,7 +77,7 @@ internal class MediaFileServiceImpl : IMediaFileService
                         Mode = ResizeMode.Crop
                     }));
                 }
-                
+
                 await using FileStream outputStream = File.OpenWrite(filePath);
                 await image.SaveAsJpegAsync(outputStream);
             }

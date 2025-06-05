@@ -11,4 +11,5 @@ public interface IMediaFileService
         Guid creatorId, 
         bool isAvatar);
     Task<(Stream, MediaFileType)?> LoadFile(Guid fileId);
+    Task<MediaFile?> GetMediaFile(Guid fileId);
 }

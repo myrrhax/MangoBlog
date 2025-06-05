@@ -78,8 +78,11 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         Uri.TryCreate(avatarUrl, UriKind.Absolute, out Uri? uri);
         string? avatarName = uri?.Segments?.Last()?.TrimEnd('/');
 
+        if (!Guid.TryParse(avatarName, out Guid id))
+            return null;
+
         return avatarName is not null
-            ? await _mediaFileService.GetMediaFile(avatarName)
+            ? await _mediaFileService.GetMediaFile(id)
             : null;
     }
 
