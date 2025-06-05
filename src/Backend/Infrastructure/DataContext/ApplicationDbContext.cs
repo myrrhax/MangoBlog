@@ -11,6 +11,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Rating> Ratings { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Tag> Tags { get; set; }
+    public DbSet<MediaFile> MediaFiles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

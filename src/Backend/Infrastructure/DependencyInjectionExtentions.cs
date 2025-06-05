@@ -18,6 +18,7 @@ public static class DependencyInjectionExtentions
         services.AddScoped<IArticlesRepository, ArticlesRepositoryImpl>();
         services.AddScoped<ITagsRepository, TagsRepositoryImpl>();
         services.AddScoped<IRatingsRepository, RatingsRepositoryImpl>();
+        services.AddScoped<IMediaFileService, MediaFileServiceImpl>();
 
         return services;
     }

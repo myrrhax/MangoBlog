@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.MediFiles.Commands;
 
-public record LoadFileCommand(Guid CallerId, Stream FileStream, MediaFileType FileType) 
+public record LoadFileCommand(Guid CallerId, Stream FileStream, MediaFileType FileType, bool IsAvatar) 
     : IRequest<Result<MediaFile>>;
 
 public class LoadFileCommandHandler : IRequestHandler<LoadFileCommand, Result<MediaFile>>
@@ -20,6 +20,6 @@ public class LoadFileCommandHandler : IRequestHandler<LoadFileCommand, Result<Me
 
     public async Task<Result<MediaFile>> Handle(LoadFileCommand request, CancellationToken cancellationToken)
     {
-        return await _mediaFileService.LoadFileToServer(request.FileStream, request.CallerId, request.FileType);
+        return await _mediaFileService.LoadFileToServer(request.FileStream, request.CallerId, request.IsAvatar, request.FileType);
     }
 }

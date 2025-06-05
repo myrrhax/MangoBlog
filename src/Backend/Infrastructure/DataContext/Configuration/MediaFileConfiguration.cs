@@ -19,11 +19,5 @@ internal class MediaFileConfiguration : IEntityTypeConfiguration<MediaFile>
             .IsRequired();
         builder.HasIndex(file => file.FilePath)
             .IsUnique();
-
-        builder.HasOne(file => file.Loader)
-            .WithMany(loader => loader.MediaFiles)
-            .HasForeignKey(file => file.LoaderId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -10,10 +10,15 @@ public interface IMediaFileService
     /// Method loads file and returns hashname of file
     /// </summary>
     /// <param name="fileStream">Input file stream</param>
+    /// <param name="extention">File extentions (jpeg, mp4, e.t.c.)</param>
     /// <param name="creatorId">Creator user id</param>
-    /// <param name="type">File type (video/photo)</param>
+    /// <param name="isAvatar">Crops image if true</param>
     /// <returns>File hashname</returns>
-    Task<Result<MediaFile>> LoadFileToServer(Stream fileStream, Guid creatorId, MediaFileType type);
+    Task<Result<MediaFile>> LoadFileToServer(Stream fileStream, 
+        string extention,
+        string url,
+        Guid creatorId, 
+        bool isAvatar);
     Task<Stream?> LoadFile(string url);
     Task<MediaFile?> GetMediaFile(string url);
 }
