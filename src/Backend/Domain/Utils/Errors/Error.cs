@@ -56,3 +56,6 @@ public class IntegrationNotFound(string code)
 
 public class ApiTokenHasNoPermission()
     : Error("Api token doesn't have permissions for publications");
+
+public class VkGroupNotFound()
+    : Error("Vk group is not found");

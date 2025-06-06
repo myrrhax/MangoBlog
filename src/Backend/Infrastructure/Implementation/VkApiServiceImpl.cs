@@ -2,7 +2,9 @@
 using Application.Abstractions;
 using Domain.Utils;
 using Domain.Utils.Errors;
-using Infrastructure.Utils.VkAnswers;
+using Infrastructure.Utils.VkAnswers.GetById;
+using Infrastructure.Utils.VkAnswers.TokenValid;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace Infrastructure.Implementation;
@@ -11,23 +13,23 @@ internal class VkApiServiceImpl : IVkApiService
 {
     private const string PermissionNameForPublications = "wall";
     private readonly HttpClient _httpClient;
+    private readonly ILogger<VkApiServiceImpl> _logger;
 
-    public VkApiServiceImpl(HttpClient httpClient)
+    public VkApiServiceImpl(HttpClient httpClient, ILogger<VkApiServiceImpl> logger)
     {
         _httpClient = httpClient;
+        _logger = logger;
     }
 
-    public async Task<Result> CheckTokenPermissions(string apiToken, string groupId)
+    public async Task<Result> CheckTokenPermissions(string apiToken)
     {
         try
         {
-            var jsonObject = new { accessToken = apiToken };
-            string json = JsonConvert.SerializeObject(jsonObject);
             HttpResponseMessage response = await _httpClient.GetAsync($"groups.getTokenPermissions?v=5.199&access_token={apiToken}");
             response.EnsureSuccessStatusCode();
             string content = await response.Content.ReadAsStringAsync();
 
-            var answer = JsonConvert.DeserializeObject<VkAnswerResponse>(content);
+            var answer = JsonConvert.DeserializeObject<VkTokenValidAnswerResponse>(content);
             IEnumerable<string>? permissions = answer?.Response?.Permissions?.Select(permission => permission.Name);
             if (permissions is null || !permissions!.Contains(PermissionNameForPublications))
             {
@@ -39,6 +41,30 @@ internal class VkApiServiceImpl : IVkApiService
         catch (Exception)
         {
             return Result.Failure(new InvalidApiToken());
+        }
+    }
+
+    public async Task<Result<string>> GetTokenGroupId(string apiToken)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"groups.getById?v=5.199&access_token={apiToken}");
+            response.EnsureSuccessStatusCode();
+            string jsonString = await response.Content.ReadAsStringAsync();
+            var deserializedResponse = JsonConvert.DeserializeObject<GetGroupByIdResponse>(jsonString);
+            IEnumerable<VkGroup>? groups = deserializedResponse?.Response?.Groups;
+
+            if (groups is null || !groups.Any())
+                return Result.Failure<string>(new VkGroupNotFound());
+
+            VkGroup group = groups.First();
+            _logger.LogInformation("New integration for group: {}", group.Name);
+
+            return Result.Success(group.Id.ToString());
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<string>(new InvalidApiToken());
         }
     }
 }
