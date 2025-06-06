@@ -8,7 +8,7 @@ internal class UserIntegrationsConfiguration : IEntityTypeConfiguration<UserInte
 {
     public void Configure(EntityTypeBuilder<UserIntegration> builder)
     {
-        builder.HasKey(userIntegration => new { userIntegration.UserId, userIntegration.IntegrationId });
+        builder.HasKey(userIntegration => userIntegration.Id);
 
         builder.HasOne(userIntegration => userIntegration.User)
             .WithMany(userIntegration => userIntegration.Integrations)
