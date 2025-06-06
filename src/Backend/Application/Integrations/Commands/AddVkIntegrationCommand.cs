@@ -15,11 +15,11 @@ public record AddVkIntegrationCommand(Guid CallerId,
 
 public class AddVkIntegrationCommandHandler : IRequestHandler<AddVkIntegrationCommand, Result<IntegrationDto>>
 {
-    private readonly IVkTokenChecker _tokenChecker;
+    private readonly IVkApiService _tokenChecker;
     private readonly IIntegrationRepository _integrationRepository;
     private readonly IUserRepository _userRepository;
 
-    public AddVkIntegrationCommandHandler(IVkTokenChecker tokenChecker,
+    public AddVkIntegrationCommandHandler(IVkApiService tokenChecker,
         IIntegrationRepository integrationRepository,
         IUserRepository userRepository)
     {
