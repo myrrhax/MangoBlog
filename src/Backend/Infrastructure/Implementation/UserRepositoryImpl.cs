@@ -164,6 +164,8 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
             .Include(user => user.RefreshTokens)
             .Include(user => user.Subscriptions)
             .Include(user => user.Avatar)
+            .Include(user => user.Integrations)
+            .ThenInclude(integrations => integrations.Integration)
             .FirstOrDefaultAsync(user => user.Id == id, cancellationToken);
     }
 
