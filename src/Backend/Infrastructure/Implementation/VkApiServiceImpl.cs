@@ -44,7 +44,7 @@ internal class VkApiServiceImpl : IVkApiService
         }
     }
 
-    public async Task<Result<string>> GetTokenGroupId(string apiToken)
+    public async Task<Result<(string, string)>> GetTokenGroupId(string apiToken)
     {
         try
         {
@@ -55,16 +55,16 @@ internal class VkApiServiceImpl : IVkApiService
             IEnumerable<VkGroup>? groups = deserializedResponse?.Response?.Groups;
 
             if (groups is null || !groups.Any())
-                return Result.Failure<string>(new VkGroupNotFound());
+                return Result.Failure<(string, string)>(new VkGroupNotFound());
 
             VkGroup group = groups.First();
             _logger.LogInformation("New integration for group: {}", group.Name);
 
-            return Result.Success(group.Id.ToString());
+            return Result.Success((group.Id.ToString(), group.Name));
         }
         catch (Exception ex)
         {
-            return Result.Failure<string>(new InvalidApiToken());
+            return Result.Failure<(string, string)>(new InvalidApiToken());
         }
     }
 }

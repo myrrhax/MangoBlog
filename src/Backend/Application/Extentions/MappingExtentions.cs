@@ -60,5 +60,6 @@ internal static class MappingExtentions
             IntegrationType = entity.Integration.IntegrationType.ToString(),
             IsConfirmed = entity.IsConfirmed,
             RoomId = entity.RoomId,
+            RoomName = entity.RoomName,
         };
 }

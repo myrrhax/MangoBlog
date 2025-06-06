@@ -37,20 +37,23 @@ public class AddVkIntegrationCommandHandler : IRequestHandler<AddVkIntegrationCo
         if (tokenPermissionsResult.IsFailure)
             return Result.Failure<IntegrationDto>(tokenPermissionsResult.Error);
 
-        Result<string> groupId = await _vkApiService.GetTokenGroupId(request.ApiToken);
-        if (groupId.IsFailure)
-            return Result.Failure<IntegrationDto>(groupId.Error);
+        var groupInfo = await _vkApiService.GetTokenGroupId(request.ApiToken);
+        if (groupInfo.IsFailure)
+            return Result.Failure<IntegrationDto>(groupInfo.Error);
 
-        UserIntegration? integrationSearch = await _integrationRepository.GetIntegrationGroupId(IntegrationType.VKontakte, groupId.Value!, cancellationToken);
+        string groupId = groupInfo.Value.groupId;
+        string groupName = groupInfo.Value.groupName;
+        UserIntegration? integrationSearch = await _integrationRepository.GetIntegrationGroupId(IntegrationType.VKontakte, groupId, cancellationToken);
 
         if (integrationSearch is not null)
-            return Result.Failure<IntegrationDto>(new IntegrationAlreadyExists(groupId.Value!, IntegrationType.VKontakte));
+            return Result.Failure<IntegrationDto>(new IntegrationAlreadyExists(groupId, IntegrationType.VKontakte));
 
         Integration integration = await _integrationRepository.GetIntegration(IntegrationType.VKontakte, cancellationToken);
         var userIntegration = new UserIntegration(integration,
             user,
             apiToken: request.ApiToken,
-            roomId: groupId.Value!,
+            roomId: groupId,
+            roomName: groupName,
             isConfirmed: true);
         Result insertionResult = await _integrationRepository.AddIntegration(userIntegration, cancellationToken);
 

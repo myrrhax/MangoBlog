@@ -10,6 +10,7 @@ public class UserIntegration
     public string? ConfirmationCode { get; set; }
     public bool IsConfirmed { get; set; }
     public string RoomId { get; set; } = string.Empty;
+    public string RoomName { get; set; } = string.Empty;
 
     public Integration Integration { get; set; } = null!;
     public ApplicationUser User { get; set; } = null!;
@@ -20,7 +21,8 @@ public class UserIntegration
         string? accountId = null,
         string? confirmationCode = null,
         bool isConfirmed = false,
-        string roomId = "")
+        string roomId = "",
+        string roomName = "")
     {
         IntegrationId = integration.Id;
         Integration = integration;
@@ -31,6 +33,7 @@ public class UserIntegration
         ConfirmationCode = confirmationCode;
         IsConfirmed = isConfirmed;
         RoomId = roomId;
+        RoomName = roomName;
     }
 
     public UserIntegration()
