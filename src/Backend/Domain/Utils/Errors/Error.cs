@@ -53,3 +53,6 @@ public class IntegrationAlreadyExists(string roomId, IntegrationType type)
 
 public class IntegrationNotFound(string code)
     : Error($"Integration with confirmation code: {code} not found");
+
+public class ApiTokenHasNoPermission()
+    : Error("Api token doesn't have permissions for publications");
