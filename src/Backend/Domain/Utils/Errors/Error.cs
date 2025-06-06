@@ -45,3 +45,5 @@ public class MediaNotFound(Guid mediaId)
 
 public class InvalidMediaFormat(Guid mediaId, MediaFileType type)
     : Error($"Media file {mediaId} have invalid format: {type.ToString()}");
+
+public class InvalidApiToken() : Error("Invalid token");
