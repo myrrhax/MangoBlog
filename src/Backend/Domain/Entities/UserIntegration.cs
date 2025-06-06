@@ -13,4 +13,28 @@ public class UserIntegration
 
     public Integration Integration { get; set; } = null!;
     public ApplicationUser User { get; set; } = null!;
+
+    public UserIntegration(Integration integration, 
+        ApplicationUser user, 
+        string? apiToken = null,
+        string? accountId = null,
+        string? confirmationCode = null,
+        bool isConfirmed = false,
+        string roomId = "")
+    {
+        IntegrationId = integration.Id;
+        Integration = integration;
+        User = user;
+        UserId = user.Id;
+        ApiToken = apiToken;
+        AccountId = accountId;
+        ConfirmationCode = confirmationCode;
+        IsConfirmed = isConfirmed;
+        RoomId = roomId;
+    }
+
+    public UserIntegration()
+    {
+        
+    }
 }

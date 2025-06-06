@@ -47,3 +47,5 @@ public class InvalidMediaFormat(Guid mediaId, MediaFileType type)
     : Error($"Media file {mediaId} have invalid format: {type.ToString()}");
 
 public class InvalidApiToken() : Error("Invalid token");
+public class IntegrationAlreadyExists(string roomId, IntegrationType type)
+    : Error($"Integration for {type.ToString()} (room: {roomId}) already exists");

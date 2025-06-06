@@ -6,6 +6,8 @@ namespace Application.Abstractions;
 
 public interface IIntegrationRepository
 {
+    Task<Integration> GetIntegration(IntegrationType type, CancellationToken cancellationToken);
     Task<Result> AddIntegration(UserIntegration integration, CancellationToken cancellationToken);
     Task<Result> ConfirmIntegration(Guid UserId, IntegrationType type, CancellationToken cancellationToken);
+    Task<UserIntegration?> GetIntegrationGroupId(IntegrationType type, string groupId, CancellationToken cancellationToken);
 }
