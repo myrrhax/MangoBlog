@@ -51,8 +51,8 @@ public class InvalidApiToken() : Error("Invalid token");
 public class IntegrationAlreadyExists(string roomId, IntegrationType type)
     : Error($"Integration for {type.ToString()} (room: {roomId}) already exists");
 
-public class IntegrationNotFound(string code)
-    : Error($"Integration with confirmation code: {code} not found");
+public class IntegrationNotFound()
+    : Error($"Integration not found");
 
 public class ApiTokenHasNoPermission()
     : Error("Api token doesn't have permissions for publications");

@@ -45,13 +45,39 @@ internal class IntegrationRepositoryImpl(ApplicationDbContext context,
 
             return rows > 0
                 ? Result.Success()
-                : Result.Failure(new IntegrationNotFound(integrationCode));
+                : Result.Failure(new IntegrationNotFound());
         }
         catch (Exception ex)
         {
             logger.LogError("Unable to confirm integration with code: {}. Error: {}", integrationCode, ex.Message);
 
             return Result.Failure(new DatabaseInteractionError("Unable to confirm integration"));
+        }
+    }
+
+    public async Task<Result> DeleteIntegration(Guid userId, IntegrationType type, string roomId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            int rows = await context.UsersIntegrations
+                .Include(integration => integration.Integration)
+                .Where(integration => integration.Integration.IntegrationType == type
+                    && integration.RoomId == roomId
+                    && integration.UserId == userId)
+                .ExecuteDeleteAsync(cancellationToken);
+
+            return rows > 0
+                ? Result.Success()
+                : Result.Failure(new IntegrationNotFound());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Unable to delete integration for user: {} (type - {}). Error: {}", 
+                userId, 
+                type.ToString(),
+                ex.Message);
+
+            return Result.Failure(new DatabaseInteractionError("Unable to delete integration"));
         }
     }
 
