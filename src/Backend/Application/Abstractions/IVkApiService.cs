@@ -2,7 +2,7 @@
 
 namespace Application.Abstractions;
 
-public interface IVkTokenChecker
+public interface IVkApiService
 {
     Task<Result> CheckGroupToken(string apiToken, string groupId);
 }

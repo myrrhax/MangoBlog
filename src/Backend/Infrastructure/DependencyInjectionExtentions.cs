@@ -19,6 +19,7 @@ public static class DependencyInjectionExtentions
         services.AddScoped<ITagsRepository, TagsRepositoryImpl>();
         services.AddScoped<IRatingsRepository, RatingsRepositoryImpl>();
         services.AddScoped<IMediaFileService, MediaFileServiceImpl>();
+        services.AddScoped<IIntegrationRepository, IntegrationRepositoryImpl>();
 
         return services;
     }
@@ -27,6 +28,7 @@ public static class DependencyInjectionExtentions
     {
         services.AddScoped<IPasswordHasher, PasswordHasherImpl>();
         services.AddScoped<ITokenGenerator, TokenGeneratorImpl>();
+        services.AddScoped<IVkApiService, VkApiServiceImpl>();
 
         return services;
     }
