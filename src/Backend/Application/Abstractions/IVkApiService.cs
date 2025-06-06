@@ -4,5 +4,6 @@ namespace Application.Abstractions;
 
 public interface IVkApiService
 {
-    Task<Result> CheckGroupToken(string apiToken, string groupId);
+    Task<Result> CheckTokenPermissions(string apiToken);
+    Task<Result<string>> GetTokenGroupId(string apiToken);
 }

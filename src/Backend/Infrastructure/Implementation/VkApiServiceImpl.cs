@@ -1,7 +1,8 @@
-﻿using Application.Abstractions;
+﻿using System.Net.Http.Json;
+using Application.Abstractions;
 using Domain.Utils;
 using Domain.Utils.Errors;
-using Infrastructure.Utils;
+using Infrastructure.Utils.VkAnswers;
 using Newtonsoft.Json;
 
 namespace Infrastructure.Implementation;
@@ -16,16 +17,18 @@ internal class VkApiServiceImpl : IVkApiService
         _httpClient = httpClient;
     }
 
-    public async Task<Result> CheckGroupToken(string apiToken, string groupId)
+    public async Task<Result> CheckTokenPermissions(string apiToken, string groupId)
     {
         try
         {
-            HttpResponseMessage response = await _httpClient.GetAsync($"groups.getTokenPermissions?access_token={apiToken}&v=5.199");
+            var jsonObject = new { accessToken = apiToken };
+            string json = JsonConvert.SerializeObject(jsonObject);
+            HttpResponseMessage response = await _httpClient.GetAsync($"groups.getTokenPermissions?v=5.199&access_token={apiToken}");
             response.EnsureSuccessStatusCode();
             string content = await response.Content.ReadAsStringAsync();
 
-            var answer = JsonConvert.DeserializeObject<VkTokenPermissionsAnswer>(content);
-            IEnumerable<string>? permissions = answer?.Permissions?.Select(permission => permission.Name);
+            var answer = JsonConvert.DeserializeObject<VkAnswerResponse>(content);
+            IEnumerable<string>? permissions = answer?.Response?.Permissions?.Select(permission => permission.Name);
             if (permissions is null || !permissions!.Contains(PermissionNameForPublications))
             {
                 return Result.Failure(new ApiTokenHasNoPermission());

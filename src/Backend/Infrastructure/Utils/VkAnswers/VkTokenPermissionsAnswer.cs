@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.Utils;
+﻿namespace Infrastructure.Utils.VkAnswers;
 
 internal class VkTokenPermissionsAnswer
 {

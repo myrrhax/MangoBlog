@@ -10,12 +10,11 @@ using MediatR;
 namespace Application.Integrations.Commands;
 
 public record AddVkIntegrationCommand(Guid CallerId, 
-    string ApiToken,
-    string GroupId) : IRequest<Result<IntegrationDto>>;
+    string ApiToken) : IRequest<Result<IntegrationDto>>;
 
 public class AddVkIntegrationCommandHandler : IRequestHandler<AddVkIntegrationCommand, Result<IntegrationDto>>
 {
-    private readonly IVkApiService _tokenChecker;
+    private readonly IVkApiService _vkApiService;
     private readonly IIntegrationRepository _integrationRepository;
     private readonly IUserRepository _userRepository;
 
@@ -23,7 +22,7 @@ public class AddVkIntegrationCommandHandler : IRequestHandler<AddVkIntegrationCo
         IIntegrationRepository integrationRepository,
         IUserRepository userRepository)
     {
-        _tokenChecker = tokenChecker;
+        _vkApiService = tokenChecker;
         _integrationRepository = integrationRepository;
         _userRepository = userRepository;
     }
@@ -34,24 +33,24 @@ public class AddVkIntegrationCommandHandler : IRequestHandler<AddVkIntegrationCo
         if (user is null)
             return Result.Failure<IntegrationDto>(new UserNotFound());
 
-        Task<Result> checkTokenResultTask = _tokenChecker.CheckGroupToken(request.ApiToken, request.GroupId);
-        Task<UserIntegration?> getIntegrationInfoTask = _integrationRepository.GetIntegrationGroupId(IntegrationType.VKontakte, request.GroupId, cancellationToken);
+        Result tokenPermissionsResult = await _vkApiService.CheckTokenPermissions(request.ApiToken);
+        if (tokenPermissionsResult.IsFailure)
+            return Result.Failure<IntegrationDto>(tokenPermissionsResult.Error);
 
-        await Task.WhenAll(checkTokenResultTask, getIntegrationInfoTask);
-        Result tokenResult = checkTokenResultTask.Result;
-        UserIntegration? integrationSearch = getIntegrationInfoTask.Result;
+        Result<string> groupId = await _vkApiService.GetTokenGroupId(request.ApiToken);
+        if (groupId.IsFailure)
+            return Result.Failure<IntegrationDto>(groupId.Error);
+
+        UserIntegration? integrationSearch = await _integrationRepository.GetIntegrationGroupId(IntegrationType.VKontakte, groupId.Value!, cancellationToken);
 
         if (integrationSearch is not null)
-            return Result.Failure<IntegrationDto>(new IntegrationAlreadyExists(request.GroupId, IntegrationType.VKontakte));
-
-        if (tokenResult.IsFailure)
-            return Result.Failure<IntegrationDto>(new InvalidApiToken());
+            return Result.Failure<IntegrationDto>(new IntegrationAlreadyExists(groupId.Value!, IntegrationType.VKontakte));
 
         Integration integration = await _integrationRepository.GetIntegration(IntegrationType.VKontakte, cancellationToken);
         var userIntegration = new UserIntegration(integration,
             user,
             apiToken: request.ApiToken,
-            roomId: request.GroupId,
+            roomId: groupId.Value!,
             isConfirmed: true);
         Result insertionResult = await _integrationRepository.AddIntegration(userIntegration, cancellationToken);
 

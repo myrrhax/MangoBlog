@@ -4,8 +4,6 @@ using Infrastructure.Implementation;
 using Infrastructure.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 
 namespace Infrastructure;
@@ -28,7 +26,10 @@ public static class DependencyInjectionExtentions
     {
         services.AddScoped<IPasswordHasher, PasswordHasherImpl>();
         services.AddScoped<ITokenGenerator, TokenGeneratorImpl>();
-        services.AddScoped<IVkApiService, VkApiServiceImpl>();
+        services.AddHttpClient<IVkApiService, VkApiServiceImpl>(client =>
+        {
+            client.BaseAddress = new Uri("https://api.vk.com/method/");
+        });
 
         return services;
     }
