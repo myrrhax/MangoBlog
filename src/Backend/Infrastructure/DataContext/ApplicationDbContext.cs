@@ -12,6 +12,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Tag> Tags { get; set; }
     public DbSet<MediaFile> MediaFiles { get; set; }
+    public DbSet<Integration> Integrations { get; set; }
+    public DbSet<UserIntegration> UsersIntegrations { get; set; }
+    public DbSet<IntegrationConnectedRooms> ConnectedRooms { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
