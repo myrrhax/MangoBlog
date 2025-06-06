@@ -12,7 +12,7 @@ internal class UserIntegrationsConfiguration : IEntityTypeConfiguration<UserInte
 
         builder.HasOne(userIntegration => userIntegration.User)
             .WithMany(userIntegration => userIntegration.Integrations)
-            .HasForeignKey(userIntegration => userIntegration.IntegrationId);
+            .HasForeignKey(userIntegration => userIntegration.UserId);
 
         builder.HasOne(userIntegration => userIntegration.Integration)
             .WithMany();
