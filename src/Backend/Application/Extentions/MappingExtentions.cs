@@ -34,6 +34,7 @@ internal static class MappingExtentions
             Email = entity.Email,
             Login = entity.Login,
             Role = entity.Role.ToString(),
+            Integrations = entity.Integrations.Select(integration => integration.MapToDto()),
             RegistrationTime = entity.RegistrationTime,
             Subscriptions = entity.Subscriptions.Select(sub => sub.MapToDto())
         };
@@ -51,4 +52,13 @@ internal static class MappingExtentions
             entity.Dislikes,
             reaction?.ToString());
     }
+
+    public static IntegrationDto MapToDto(this UserIntegration entity)
+        => new IntegrationDto
+        {
+            AccountId = entity.AccountId,
+            IntegrationType = entity.Integration.IntegrationType.ToString(),
+            IsConfirmed = entity.IsConfirmed,
+            ConnectedRooms = entity.ConnectedRooms.Select(room => room.RoomId)
+        };
 }

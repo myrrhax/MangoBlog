@@ -8,8 +8,8 @@ public class UserIntegration
     public string AccountId { get; set; } = string.Empty;
     public string ConfirmationCode { get; set; } = string.Empty;
     public bool IsConfirmed { get; set; }
+    public string RoomId { get; set; } = string.Empty;
 
     public Integration Integration { get; set; } = null!;
     public ApplicationUser User { get; set; } = null!;
-    public ICollection<IntegrationConnectedRooms> ConnectedRooms { get; set; } = [];
 }

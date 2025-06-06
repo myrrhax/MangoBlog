@@ -17,7 +17,7 @@ internal class UserIntegrationsConfiguration : IEntityTypeConfiguration<UserInte
         builder.HasOne(userIntegration => userIntegration.Integration)
             .WithMany();
 
-        builder.HasMany(userIntegration => userIntegration.ConnectedRooms)
-            .WithOne(connectedRoom => connectedRoom.UserIntegration);
+        builder.HasIndex(userIntegration => userIntegration.RoomId)
+            .IsUnique();
     }
 }
