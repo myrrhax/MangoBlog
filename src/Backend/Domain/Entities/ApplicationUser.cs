@@ -19,6 +19,7 @@ public class ApplicationUser
     public ICollection<MediaFile> MediaFiles { get; set; } = [];
     public ICollection<ApplicationUser> Subscriptions { get; set; } = [];
     public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
+    public ICollection<UserIntegration> Integrations { get; set; } = [];
 
     public ApplicationUser(string login, string email, string hash, string firstName, string lastName, 
         MediaFile? avatar = default, DateOnly? birthDate = default, Role role = Role.User)
