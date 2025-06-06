@@ -59,6 +59,6 @@ internal static class MappingExtentions
             AccountId = entity.AccountId,
             IntegrationType = entity.Integration.IntegrationType.ToString(),
             IsConfirmed = entity.IsConfirmed,
-            ConnectedRooms = entity.ConnectedRooms.Select(room => room.RoomId)
+            RoomId = entity.RoomId,
         };
 }
