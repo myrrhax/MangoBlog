@@ -5,8 +5,8 @@ public class UserIntegration
     public int IntegrationId { get; set; }
     public Guid UserId { get; set; }
     public string? ApiToken { get; set; }
-    public string AccountId { get; set; } = string.Empty;
-    public string ConfirmationCode { get; set; } = string.Empty;
+    public string? AccountId { get; set; }
+    public string? ConfirmationCode { get; set; }
     public bool IsConfirmed { get; set; }
     public string RoomId { get; set; } = string.Empty;
 
