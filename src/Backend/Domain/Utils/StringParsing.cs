@@ -38,4 +38,12 @@ public static class StringParsing
             "unsub" => SubscriptionType.Unsubscribe,
             _ => throw new ArgumentException("Invalid value for subscription")
         };
+
+    public static IntegrationType ParseIntegrationType(string type)
+        => type.ToLower().Trim() switch
+        {
+            "vk" => IntegrationType.VKontakte,
+            "tg" => IntegrationType.Telegram,
+            _ => throw new ArgumentException("Invalid value for integration type")
+        };
 }
