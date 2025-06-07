@@ -9,5 +9,5 @@ public class UserFullInfoDto : UserDto
     public string Login { get; set; } = string.Empty;
     public DateTime RegistrationTime { get; set; }
     public IEnumerable<UserDto> Subscriptions { get; set; } = [];
-    public IEnumerable<IntegrationDto> Integrations { get; set; } = [];
+    public IntegrationDto? Integration { get; set; }
 }

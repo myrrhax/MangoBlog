@@ -12,9 +12,24 @@ namespace Infrastructure.Implementation;
 internal class IntegrationRepositoryImpl(ApplicationDbContext context,
     ILogger<IntegrationRepositoryImpl> logger) : IIntegrationRepository
 {
-    public Task<Result> AddTelegramIntegration(TelegramIntegration integration, CancellationToken cancellationToken)
+    public async Task<Result> AddTelegramIntegration(TelegramIntegration integration, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        try
+        {
+            await context.TelegramIntegration.AddAsync(integration);
+            await context.SaveChangesAsync();
+
+            logger.LogInformation("Integration successfully added for user: {}", integration.UserId);
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Failed to add tg integration for user: {}. Error: {}", 
+                integration.UserId,
+                ex.Message);
+
+            return Result.Failure(new DatabaseInteractionError("Failed to add new tg integration"));
+        }
     }
 
     public async Task<Result> ConfirmTelegramIntegration(string integrationCode, CancellationToken cancellationToken)
@@ -40,13 +55,12 @@ internal class IntegrationRepositoryImpl(ApplicationDbContext context,
         }
     }
 
-    public async Task<Result> DeleteIntegration(Guid userId, IntegrationType type, string roomId, CancellationToken cancellationToken)
+    public Task<Result> DeleteIntegration(Guid userId, IntegrationType type, string roomId, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    public Task<Integration> GetIntegration(Guid userId, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
+    public Task<TelegramIntegration?> GetTelegramIntegration(Guid userId, CancellationToken cancellationToken)
+        => context.TelegramIntegration
+            .FirstOrDefaultAsync(integration => integration.UserId == userId);
 }

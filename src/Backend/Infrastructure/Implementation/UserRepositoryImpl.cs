@@ -180,8 +180,8 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
             .Include(user => user.RefreshTokens)
             .Include(user => user.Subscriptions)
             .Include(user => user.Avatar)
-            .Include(user => user.Integrations)
-            .ThenInclude(integration => integration.TelegramIntegration)
+            .Include(user => user.Integration)
+            .ThenInclude(integration => integration!.TelegramIntegration)
             .ThenInclude(tgIntegration => tgIntegration!.ConnectedChannels)
             .FirstOrDefaultAsync(user => user.Id == id, cancellationToken);
     }
