@@ -36,6 +36,10 @@ public class RemoveIntegrationCommandHandler : IRequestHandler<RemoveIntegration
         }
 
         IntegrationType type = StringParsing.ParseIntegrationType(request.IntegrationType);
-        return await _integrationRepository.DeleteIntegration(request.CallerId, type, request.RoomId, cancellationToken);
+        return type switch
+        {
+            IntegrationType.Telegram => await _integrationRepository.DeleteTelegramIntegration(request.CallerId, cancellationToken),
+            _ => throw new ArgumentException(nameof(type))
+        };
     }
 }

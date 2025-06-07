@@ -8,7 +8,7 @@ public class TelegramIntegration
     public string? TelegramId { get; set; }
     public ICollection<TelegramChannel> ConnectedChannels { get; set; } = [];
     public string IntegrationCode { get; set; } = string.Empty;
-    public bool IsConnected { get; set; }
+    public bool IsConfirmed { get; set; }
 
     public Integration Integration { get; set; } = null!;
     public ApplicationUser User { get; set; } = null!;

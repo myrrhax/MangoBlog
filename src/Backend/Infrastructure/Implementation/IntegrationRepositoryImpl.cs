@@ -39,9 +39,9 @@ internal class IntegrationRepositoryImpl(ApplicationDbContext context,
             int rows = await context.Integrations
                 .Include(integration => integration.TelegramIntegration)
                 .Where(integration => integration.TelegramIntegration != null)
-                .Where(integration => !integration.TelegramIntegration!.IsConnected
+                .Where(integration => !integration.TelegramIntegration!.IsConfirmed
                     && integration.TelegramIntegration.IntegrationCode == integrationCode)
-                .ExecuteUpdateAsync(userIntegration => userIntegration.SetProperty(prop => prop.TelegramIntegration!.IsConnected, true));
+                .ExecuteUpdateAsync(userIntegration => userIntegration.SetProperty(prop => prop.TelegramIntegration!.IsConfirmed, true));
 
             return rows > 0
                 ? Result.Success()

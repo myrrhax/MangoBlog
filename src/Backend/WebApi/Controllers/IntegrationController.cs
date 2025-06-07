@@ -28,4 +28,17 @@ public class IntegrationController(IMediator mediator) : ControllerBase
             _ => BadRequest(result.Error)
         };
     }
+
+    [HttpPost]
+    [Route("tg")]
+    public async Task<IActionResult> AddTelegramIntegration()
+    {
+        Guid userId = User.GetUserId()!.Value;
+        var command = new AddTelegramIntegrationCommand(userId);
+        Result result = await mediator.Send(command);
+
+        return result.IsSuccess
+            ? Ok()
+            : BadRequest(result.Error);
+    }
 }

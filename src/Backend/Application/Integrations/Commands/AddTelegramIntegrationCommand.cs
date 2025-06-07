@@ -43,7 +43,7 @@ public class AddTelegramIntegrationHandler : IRequestHandler<AddTelegramIntegrat
         {
             Integration = integration,
             User = user,
-            IsConnected = false,
+            IsConfirmed = false,
             IntegrationCode = GenerateIntegrationCode()
         };
 
