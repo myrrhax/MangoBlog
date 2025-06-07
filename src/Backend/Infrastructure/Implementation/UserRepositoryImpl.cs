@@ -98,6 +98,22 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
         }
     }
 
+    public async Task<Result<int>> DeleteExpiredTokens(CancellationToken cancellationToken)
+    {
+        try
+        {
+            int rows = await context.RefreshTokens
+                .Where(token => token.ExpirationDate <= DateTime.UtcNow)
+                .ExecuteDeleteAsync(cancellationToken);
+
+            return Result.Success(rows);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<int>(new DatabaseInteractionError($"Failed to delete expired tokens {ex.Message}"));
+        }
+    }
+
     public async Task<Result> DeleteRefreshToken(RefreshToken token, CancellationToken cancellationToken)
     {
         try

@@ -19,4 +19,5 @@ public interface IUserRepository
     Task<Result> AddSubscription(Guid subscriberId, Guid userId, CancellationToken cancellationToken);
     Task<Result> RemoveSubscription(Guid subscriberId, Guid userId, CancellationToken cancellationToken);
     Task<Result> ChangeAvatar(Guid userId, Guid avatarId, CancellationToken cancellationToken);
+    Task<Result<int>> DeleteExpiredTokens(CancellationToken cancellationToken);
 }
