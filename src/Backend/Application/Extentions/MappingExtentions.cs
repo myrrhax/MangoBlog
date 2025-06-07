@@ -1,5 +1,6 @@
 ﻿using Application.Dto;
 using Application.Dto.Articles;
+using Application.Dto.Integrations;
 using Domain.Entities;
 using Domain.Enums;
 
@@ -34,8 +35,8 @@ internal static class MappingExtentions
             Email = entity.Email,
             Login = entity.Login,
             Role = entity.Role.ToString(),
-            Integrations = entity.Integrations.Select(integration => integration.MapToDto()),
             RegistrationTime = entity.RegistrationTime.ToLocalTime(),
+            Integrations = entity.Integrations.Select(integration => integration.MapToDto()),
             Subscriptions = entity.Subscriptions.Select(sub => sub.MapToDto())
         };
     }
@@ -53,13 +54,15 @@ internal static class MappingExtentions
             reaction?.ToString());
     }
 
-    public static IntegrationDto MapToDto(this UserIntegration entity)
-        => new IntegrationDto
-        {
-            AccountId = entity.AccountId,
-            IntegrationType = entity.Integration.IntegrationType.ToString(),
-            IsConfirmed = entity.IsConfirmed,
-            RoomId = entity.RoomId,
-            RoomName = entity.RoomName,
-        };
+    public static IntegrationDto MapToDto(this Integration entity)
+        => new IntegrationDto(entity.TelegramIntegration?.MapToDto());
+
+    public static TelegramIntegrationDto MapToDto(this TelegramIntegration entity)
+        => new TelegramIntegrationDto(entity.IntegrationCode,
+                entity.TelegramId, 
+                entity.IsConnected,
+                entity.ConnectedChannels.Select(channel => channel.MapToDto()));
+
+    public static TelegramChannelDto MapToDto(this TelegramChannel entity)
+        => new TelegramChannelDto(entity.Name, entity.ChannelId);
 }

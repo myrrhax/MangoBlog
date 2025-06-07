@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Application.Dto.Integrations;
+using Domain.Entities;
 
 namespace Application.Dto;
 
