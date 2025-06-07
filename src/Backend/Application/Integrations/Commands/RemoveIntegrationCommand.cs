@@ -9,8 +9,7 @@ using MediatR;
 namespace Application.Integrations.Commands;
 
 public record RemoveIntegrationCommand(Guid CallerId, 
-    string IntegrationType, 
-    string RoomId) : IRequest<Result>;
+    string IntegrationType) : IRequest<Result>;
 
 public class RemoveIntegrationCommandHandler : IRequestHandler<RemoveIntegrationCommand, Result>
 {

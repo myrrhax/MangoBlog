@@ -13,10 +13,6 @@ public class RemoveIntegrationCommandValidator : AbstractValidator<RemoveIntegra
             .Must(id => id != Guid.Empty)
             .WithMessage("Invalid caller id");
 
-        RuleFor(command => command.RoomId)
-            .NotEmpty()
-            .WithMessage("RoomId is required");
-
         RuleFor(command => command.IntegrationType)
             .Must(type => validIntegrationTypes.Contains(type.ToLower().Trim()))
             .WithMessage($"Invalid integration type. Valid types: [{string.Join(", ", validIntegrationTypes)}]");

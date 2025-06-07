@@ -1,3 +1,3 @@
 ﻿namespace WebApi.Dto;
 
-public record DeleteIntegrationRequest(string RoomId, string IntegrationType);
+public record DeleteIntegrationRequest(string IntegrationType);

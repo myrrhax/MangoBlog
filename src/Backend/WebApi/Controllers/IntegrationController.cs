@@ -18,7 +18,7 @@ public class IntegrationController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DeleteIntegration([FromBody] DeleteIntegrationRequest dto)
     {
         Guid userId = User.GetUserId()!.Value;
-        var command = new RemoveIntegrationCommand(userId, dto.IntegrationType, dto.RoomId);
+        var command = new RemoveIntegrationCommand(userId, dto.IntegrationType);
         Result result = await mediator.Send(command);
 
         return result switch

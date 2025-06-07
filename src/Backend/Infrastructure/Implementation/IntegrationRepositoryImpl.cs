@@ -1,6 +1,5 @@
 ﻿using Application.Abstractions;
 using Domain.Entities;
-using Domain.Enums;
 using Domain.Utils;
 using Domain.Utils.Errors;
 using Infrastructure.DataContext;
@@ -24,7 +23,7 @@ internal class IntegrationRepositoryImpl(ApplicationDbContext context,
         }
         catch (Exception ex)
         {
-            logger.LogError("Failed to add tg integration for user: {}. Error: {}", 
+            logger.LogError("Failed to add tg integration for user: {}. Error: {}",
                 integration.UserId,
                 ex.Message);
 
@@ -55,9 +54,29 @@ internal class IntegrationRepositoryImpl(ApplicationDbContext context,
         }
     }
 
-    public Task<Result> DeleteIntegration(Guid userId, IntegrationType type, string roomId, CancellationToken cancellationToken)
+    public Task<Result> DeleteFromTelegramChannel(Guid userId, string channelId, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
+    }
+
+    public async Task<Result> DeleteTelegramIntegration(Guid userId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            int rows = await context.TelegramIntegration
+                .Where(entity => entity.UserId == userId)
+                .ExecuteDeleteAsync();
+
+            return rows > 0
+                ? Result.Success()
+                : Result.Failure(new IntegrationNotFound());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Failed to delete telegram integration for user with id: {}. Error: {}", userId, ex.Message);
+
+            return Result.Failure(new DatabaseInteractionError("Failed to delete telegram integration"));
+        }
     }
 
     public Task<TelegramIntegration?> GetTelegramIntegration(Guid userId, CancellationToken cancellationToken)
