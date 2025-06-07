@@ -11,15 +11,18 @@ internal class IntegrationConfiguration : IEntityTypeConfiguration<Integration>
     {
         builder.HasKey(integration => integration.Id);
 
-        builder.Property(integration => integration.IntegrationType)
-            .IsRequired()
-            .HasConversion<string>();
-        builder.HasIndex(integration => integration.IntegrationType)
-            .IsUnique();
+        builder.HasOne(entity => entity.User)
+            .WithMany(user => user.Integrations)
+            .HasForeignKey(entity => entity.UserId);
 
-        builder.HasData([
-            new Integration { Id = 1, IntegrationType = IntegrationType.Telegram },
-            new Integration { Id = 2, IntegrationType = IntegrationType.VKontakte },
-        ]);
+        builder.HasOne(entity => entity.TelegramIntegration)
+            .WithOne(tgIntegration => tgIntegration.Integration)
+            .HasForeignKey<Integration>(entity => entity.TelegramIntegrationId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(entity => entity.User)
+            .WithMany(user => user.Integrations)
+            .HasForeignKey(entity => entity.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
