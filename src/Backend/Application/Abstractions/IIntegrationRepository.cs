@@ -6,9 +6,8 @@ namespace Application.Abstractions;
 
 public interface IIntegrationRepository
 {
-    Task<Integration> GetIntegration(IntegrationType type, CancellationToken cancellationToken);
-    Task<Result> AddIntegration(UserIntegration integration, CancellationToken cancellationToken);
+    Task<Integration> GetIntegration(Guid userId, CancellationToken cancellationToken);
+    Task<Result> AddTelegramIntegration(TelegramIntegration integration, CancellationToken cancellationToken);
     Task<Result> ConfirmIntegration(string integrationCode, CancellationToken cancellationToken);
-    Task<UserIntegration?> GetIntegrationGroupId(IntegrationType type, string roomId, CancellationToken cancellationToken);
     Task<Result> DeleteIntegration(Guid userId, IntegrationType type, string roomId, CancellationToken cancellationToken);
 }

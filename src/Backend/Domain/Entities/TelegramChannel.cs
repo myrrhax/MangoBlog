@@ -7,5 +7,5 @@ public class TelegramChannel
     public string RoomName { get; set; } = string.Empty;
     public int TelegramIntegrationId { get; set; }
 
-    public TelegramIntegration Integration { get; set; } = null!
+    public TelegramIntegration Integration { get; set; } = null!;
 }
