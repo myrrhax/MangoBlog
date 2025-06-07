@@ -12,17 +12,13 @@ internal class IntegrationConfiguration : IEntityTypeConfiguration<Integration>
         builder.HasKey(integration => integration.Id);
 
         builder.HasOne(entity => entity.User)
-            .WithMany(user => user.Integrations)
-            .HasForeignKey(entity => entity.UserId);
+            .WithOne(user => user.Integration)
+            .HasForeignKey<Integration>(integration => integration.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(entity => entity.TelegramIntegration)
             .WithOne(tgIntegration => tgIntegration.Integration)
             .HasForeignKey<Integration>(entity => entity.TelegramIntegrationId)
             .OnDelete(DeleteBehavior.SetNull);
-
-        builder.HasOne(entity => entity.User)
-            .WithMany(user => user.Integrations)
-            .HasForeignKey(entity => entity.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
     }
 }
