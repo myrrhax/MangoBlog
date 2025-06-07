@@ -26,10 +26,6 @@ public static class DependencyInjectionExtentions
     {
         services.AddScoped<IPasswordHasher, PasswordHasherImpl>();
         services.AddScoped<ITokenGenerator, TokenGeneratorImpl>();
-        services.AddHttpClient<IVkApiService, VkApiServiceImpl>(client =>
-        {
-            client.BaseAddress = new Uri("https://api.vk.com/method/");
-        });
 
         return services;
     }

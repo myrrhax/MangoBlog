@@ -13,20 +13,6 @@ namespace WebApi.Controllers;
 [Route("api/integrations")]
 public class IntegrationController(IMediator mediator) : ControllerBase
 {
-    [Route("vk-integration")]
-    [HttpPost]
-    public async Task<IActionResult> AddVkIntegration([FromBody] AddVkIntegrationDto dto)
-    {
-        Guid userId = User.GetUserId()!.Value;
-        var command = new AddVkIntegrationCommand(userId, dto.ApiToken);
-        Result result = await mediator.Send(command);
-
-        return result switch
-        {
-            { IsSuccess: true } => Ok(),
-            _ => BadRequest(result.Error)
-        };
-    }
 
     [HttpDelete]
     public async Task<IActionResult> DeleteIntegration([FromBody] DeleteIntegrationRequest dto)
