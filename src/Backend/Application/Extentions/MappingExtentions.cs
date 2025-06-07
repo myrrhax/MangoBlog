@@ -60,7 +60,7 @@ internal static class MappingExtentions
     public static TelegramIntegrationDto MapToDto(this TelegramIntegration entity)
         => new TelegramIntegrationDto(entity.IntegrationCode,
                 entity.TelegramId, 
-                entity.IsConnected,
+                entity.IsConfirmed,
                 entity.ConnectedChannels.Select(channel => channel.MapToDto()));
 
     public static TelegramChannelDto MapToDto(this TelegramChannel entity)
