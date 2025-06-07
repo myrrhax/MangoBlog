@@ -30,6 +30,8 @@ builder.Services
     .AddUseCases();
 #endregion
 
+builder.Services.AddBackgroundJobs();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

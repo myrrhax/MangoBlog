@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
+using WebApi.BackgroundServices;
 
 namespace WebApi;
 
@@ -33,6 +34,13 @@ public static class Extentions
             options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin"));
             options.AddPolicy("UserOnly", policy => policy.RequireRole("user"));
         });
+
+        return services;
+    }
+
+    public static IServiceCollection AddBackgroundJobs(this IServiceCollection services)
+    {
+        services.AddHostedService<ExpiredRefreshTokenDeleteService>();
 
         return services;
     }
