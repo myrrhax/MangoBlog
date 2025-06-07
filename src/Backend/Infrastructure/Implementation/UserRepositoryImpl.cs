@@ -180,6 +180,9 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
             .Include(user => user.RefreshTokens)
             .Include(user => user.Subscriptions)
             .Include(user => user.Avatar)
+            .Include(user => user.Integrations)
+            .ThenInclude(integration => integration.TelegramIntegration)
+            .ThenInclude(tgIntegration => tgIntegration!.ConnectedChannels)
             .FirstOrDefaultAsync(user => user.Id == id, cancellationToken);
     }
 
@@ -194,6 +197,7 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
     public async Task<bool> IsEmailTaken(string email, CancellationToken cancellationToken)
     {
         return await context.Users
+            .AsNoTracking()
             .AnyAsync(user => user.Email == email, cancellationToken);
     }
 
