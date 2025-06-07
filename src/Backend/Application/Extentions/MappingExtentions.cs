@@ -35,7 +35,7 @@ internal static class MappingExtentions
             Login = entity.Login,
             Role = entity.Role.ToString(),
             Integrations = entity.Integrations.Select(integration => integration.MapToDto()),
-            RegistrationTime = entity.RegistrationTime,
+            RegistrationTime = entity.RegistrationTime.ToLocalTime(),
             Subscriptions = entity.Subscriptions.Select(sub => sub.MapToDto())
         };
     }
@@ -47,7 +47,7 @@ internal static class MappingExtentions
             entity.Title,
             entity.Content, 
             entity.Tags, 
-            entity.CreationDate, 
+            entity.CreationDate.ToLocalTime(), 
             entity.Likes, 
             entity.Dislikes,
             reaction?.ToString());
