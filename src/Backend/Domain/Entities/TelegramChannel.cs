@@ -3,9 +3,9 @@
 public class TelegramChannel
 {
     public int Id { get; set; }
-    public string RoomId { get; set; } = string.Empty;
-    public string RoomName { get; set; } = string.Empty;
+    public string ChannelId { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
     public int TelegramIntegrationId { get; set; }
 
-    public TelegramIntegration Integration { get; set; } = null!;
+    public TelegramIntegration TelegramIntegration { get; set; } = null!;
 }
