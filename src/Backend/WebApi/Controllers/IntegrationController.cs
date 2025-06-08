@@ -15,7 +15,6 @@ namespace WebApi.Controllers;
 [Route("api/integrations")]
 public class IntegrationController(IMediator mediator) : ControllerBase
 {
-
     [HttpDelete]
     [Authorize]
     public async Task<IActionResult> DeleteIntegration([FromBody] DeleteIntegrationRequest dto)
@@ -63,6 +62,7 @@ public class IntegrationController(IMediator mediator) : ControllerBase
 
     [HttpGet]
     [Route("tg/{tgId}")]
+    [Authorize]
     public async Task<IActionResult> GetIntegrationInfoByTelegramId([FromRoute] string tgId)
     {
         var query = new GetIntegrationInfoByTelegramIdQuery(tgId);
