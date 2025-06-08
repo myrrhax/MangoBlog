@@ -9,6 +9,7 @@ namespace TelegramBot.Routing;
 
 internal class Router
 {
+    private readonly IServiceProvider _serviceProvider;
     private readonly ContextManager _contextManager;
     private readonly ILogger<Router> _logger;
     private readonly List<HandlerInfo> _handlers;
@@ -21,11 +22,12 @@ internal class Router
         { typeof(ChosenInlineResult), UpdateType.ChosenInlineResult },
     };
 
-    public Router(ContextManager manager, ILogger<Router> logger)
+    public Router(ContextManager manager, ILogger<Router> logger, IServiceProvider serviceProvider)
     {
         _contextManager = manager;
         _logger = logger;
         _handlers = new List<HandlerInfo>();
+        _serviceProvider = serviceProvider;
         InitRoutes();
     }
 
@@ -58,7 +60,7 @@ internal class Router
             if (commandAttribute is null && stateAttribute is null)
                 continue;
 
-            var instance = Activator.CreateInstance(handler);
+            var instance = _serviceProvider.GetService(handler);
             if (instance is null)
                 continue;
 
