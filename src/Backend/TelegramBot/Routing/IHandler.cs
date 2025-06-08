@@ -3,7 +3,7 @@ using TelegramBot.Context;
 
 namespace TelegramBot.Routing;
 
-internal interface IHandler<T> where T : Update
+internal interface IHandler<T>
 {
     Task HandleAsync(BotContext context, T update, CancellationToken cancellationToken);
 }

@@ -34,6 +34,7 @@ internal class BotContext
     {
         if (_userId != userId)
             return false;
-        return _manager.TryRemoveContext(userId);
+        CurrentState = null;
+        return true;
     }
 }
