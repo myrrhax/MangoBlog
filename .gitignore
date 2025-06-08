@@ -82,3 +82,4 @@ TestResults/
 *.bak
 *.tmp
 /src/Backend/WebApi/appsettings.Development.json
+/src/Backend/TelegramBot/static

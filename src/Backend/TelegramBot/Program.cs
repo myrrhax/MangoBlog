@@ -1,19 +1,22 @@
-﻿using DotNetEnv;
+﻿using System.Data;
+using DotNetEnv;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Npgsql;
 using Telegram.Bot;
 using TelegramBot.Api;
 using TelegramBot.Context;
 using TelegramBot.Handlers;
+using TelegramBot.Persistence;
 using TelegramBot.Routing;
 using TelegramBot.Services;
 
-var host = Host.CreateDefaultBuilder(args);
+var hostBuilder = Host.CreateDefaultBuilder(args);
 
 Env.Load();
 
-host.ConfigureServices((context, services) =>
+hostBuilder.ConfigureServices((context, services) =>
 {
     string botToken = Environment.GetEnvironmentVariable("BOT_TOKEN")
         ?? "";
@@ -26,6 +29,15 @@ host.ConfigureServices((context, services) =>
     {
         options.BaseAddress = apiUrl ?? throw new ArgumentNullException(nameof(apiUrl));
     });
+    services.AddScoped<IDbConnection>(options =>
+    {
+        string connectionString = context.Configuration.GetConnectionString("Default")
+            ?? throw new ArgumentNullException(nameof(connectionString));
+        return new NpgsqlConnection(connectionString);
+    });
+
+    services.AddScoped<UsersService>();
+
     services.AddSingleton<ApiService>();
     services.AddTransient<CommandStartHandler>();
 
@@ -34,4 +46,11 @@ host.ConfigureServices((context, services) =>
     services.AddHostedService<BotListenerService>();
 });
 
-await host.Build().RunAsync();
+var host = hostBuilder.Build();
+
+using var scope = host.Services.CreateScope();
+UsersService service = scope.ServiceProvider.GetService<UsersService>() ??
+    throw new ArgumentNullException(nameof(service));
+
+await service.InitializeTable();
+await host.RunAsync();
