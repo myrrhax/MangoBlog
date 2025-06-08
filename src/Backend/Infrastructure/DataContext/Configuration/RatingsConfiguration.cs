@@ -13,5 +13,10 @@ public class RatingsConfiguration : IEntityTypeConfiguration<Rating>
         builder.Property(entity => entity.RatingType)
             .IsRequired()
             .HasConversion<string>();
+
+        builder.HasOne(rating => rating.User)
+            .WithMany()
+            .HasForeignKey(rating => rating.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

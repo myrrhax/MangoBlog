@@ -1,17 +1,26 @@
 using WebApi;
 using Infrastructure;
 using Application.Extentions;
+using Infrastructure.Utils;
+using WebApi.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 #region Register Infrastructure
+var mongoConncetionSettings = builder.Configuration.GetSection("Mongo").Get<MongoConnectionConfig>();
+if (mongoConncetionSettings is null)
+    throw new ArgumentNullException(nameof(mongoConncetionSettings));
+
+builder.Services.Configure<MongoConnectionConfig>(builder.Configuration.GetSection("Mongo"));
+
 builder.Services
     .AddDatabase(builder.Configuration.GetConnectionString("postgres")!)
+    .AddMongoDb(mongoConncetionSettings)
     .AddServices()
     .AddRepositories();
 #endregion
@@ -21,6 +30,8 @@ builder.Services
     .AddValidation()
     .AddUseCases();
 #endregion
+
+builder.Services.AddBackgroundJobs();
 
 var app = builder.Build();
 
@@ -32,8 +43,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseMiddleware<BotWhiteListRoutingMiddleware>();
 app.MapControllers();
 app.Run();

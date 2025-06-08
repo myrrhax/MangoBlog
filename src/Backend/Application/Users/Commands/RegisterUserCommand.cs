@@ -23,13 +23,15 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
     private readonly ITokenGenerator _tokenGenerator;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IValidator<RegisterUserCommand> _validator;
+    private readonly IMediaFileService _mediaFileService;
 
-    public RegisterUserCommandHandler(IUserRepository userRepository, ITokenGenerator tokenGenerator, IPasswordHasher passwordHasher, IValidator<RegisterUserCommand> validator)
+    public RegisterUserCommandHandler(IUserRepository userRepository, ITokenGenerator tokenGenerator, IPasswordHasher passwordHasher, IValidator<RegisterUserCommand> validator, IMediaFileService mediaFileService)
     {
         _userRepository = userRepository;
         _tokenGenerator = tokenGenerator;
         _passwordHasher = passwordHasher;
         _validator = validator;
+        _mediaFileService = mediaFileService;
     }
 
     public async Task<Result<RegistrationResponse>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
@@ -49,10 +51,11 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
             return Result.Failure<RegistrationResponse>(new EmailOrLoginAlreadyTaken(request.Login, request.Email));
 
         string hashedPassword = _passwordHasher.HashPassword(request.Password);
+        MediaFile? avatar = await GetAvatarFromUrl(request.AvatarUrl);
 
         var user = new ApplicationUser(login: request.Login, email: request.Email,
             hash: hashedPassword, firstName: request.FirstName,
-            lastName: request.LastName, avatarUrl: request.AvatarUrl, birthDate: request.BirthDate);
+            lastName: request.LastName, avatar: avatar, birthDate: request.BirthDate);
 
         Result insertionResult = await _userRepository.AddUser(user, cancellationToken);
         if (insertionResult.IsFailure) 
@@ -65,6 +68,22 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         return writeTokenResult.IsSuccess
             ? Result.Success<RegistrationResponse>(new(writeTokenResult.Value.AccessToken, writeTokenResult.Value.RefreshToken, user.MapToFullInfo()))
             : Result.Failure<RegistrationResponse>(new UnableToWriteTokens());
+    }
+
+    private async Task<MediaFile?> GetAvatarFromUrl(string? avatarUrl)
+    {
+        if (avatarUrl is null)
+            return null;
+
+        Uri.TryCreate(avatarUrl, UriKind.Absolute, out Uri? uri);
+        string? avatarName = uri?.Segments?.Last()?.TrimEnd('/');
+
+        if (!Guid.TryParse(avatarName, out Guid id))
+            return null;
+
+        return avatarName is not null
+            ? await _mediaFileService.GetMediaFile(id)
+            : null;
     }
 
     private async Task<bool> VerifyIsLoginOrEmailTaken(string login, string email, CancellationToken cancellationToken)

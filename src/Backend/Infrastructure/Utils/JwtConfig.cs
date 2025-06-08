@@ -8,4 +8,8 @@ public class JwtConfig
     public int ExpirationTimeMinutes { get; set; }
     public int RefreshTokenExpirationDays { get; set; }
     public int RefreshTokenMaxSessionsCount { get; set; }
+    public string CookieName { get; set; } = string.Empty;
+    public int RefreshTokenDeleteTimeoutInHours { get; set; }
+    public string BotTokenClaimName { get; set; } = string.Empty;
+    public HashSet<string> BotWhiteListUrls { get; set; } = [];
 }

@@ -8,6 +8,7 @@ public class UserDto
     public string DisplayedName { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
-    public string? AvatarUrl { get; set; }
+    public string Role { get; set; } = string.Empty;
+    public string? AvatarId { get; set; }
     public DateOnly? BirthDate { get; set; }
 }

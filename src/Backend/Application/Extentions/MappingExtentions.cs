@@ -1,5 +1,8 @@
 ﻿using Application.Dto;
+using Application.Dto.Articles;
+using Application.Dto.Integrations;
 using Domain.Entities;
+using Domain.Enums;
 
 namespace Application.Extentions;
 
@@ -13,8 +16,9 @@ internal static class MappingExtentions
             DisplayedName = entity.DisplayedName,
             FirstName = entity.FirstName,
             LastName = entity.LastName,
-            AvatarUrl = entity.AvatarUrl,
+            AvatarId = entity.Avatar?.Id.ToString(),
             BirthDate = entity.BirthDate,
+            Role = entity.Role.ToString()
         };
     }
 
@@ -26,12 +30,39 @@ internal static class MappingExtentions
             DisplayedName = entity.DisplayedName,
             FirstName = entity.FirstName,
             LastName = entity.LastName,
-            AvatarUrl = entity.AvatarUrl,
+            AvatarId = entity.Avatar?.Id.ToString(),
             BirthDate = entity.BirthDate,
             Email = entity.Email,
             Login = entity.Login,
-            RegistrationTime = entity.RegistrationTime,
+            Role = entity.Role.ToString(),
+            RegistrationTime = entity.RegistrationTime.ToLocalTime(),
+            Integration = entity.Integration?.MapToDto(),
             Subscriptions = entity.Subscriptions.Select(sub => sub.MapToDto())
         };
     }
+
+    public static ArticleDto MapToDto(this Article entity, ApplicationUser? creator, RatingType? reaction = null)
+    {
+        return new ArticleDto(entity.Id, 
+            creator?.MapToDto(),
+            entity.Title,
+            entity.Content, 
+            entity.Tags, 
+            entity.CreationDate.ToLocalTime(), 
+            entity.Likes, 
+            entity.Dislikes,
+            reaction?.ToString());
+    }
+
+    public static IntegrationDto MapToDto(this Integration entity)
+        => new IntegrationDto(entity.User.MapToDto(), entity.TelegramIntegration?.MapToDto());
+
+    public static TelegramIntegrationDto MapToDto(this TelegramIntegration entity)
+        => new TelegramIntegrationDto(entity.IntegrationCode,
+                entity.TelegramId, 
+                entity.IsConfirmed,
+                entity.ConnectedChannels.Select(channel => channel.MapToDto()));
+
+    public static TelegramChannelDto MapToDto(this TelegramChannel entity)
+        => new TelegramChannelDto(entity.Name, entity.ChannelId);
 }

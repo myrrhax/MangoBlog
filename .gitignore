@@ -22,6 +22,7 @@ obj/
 out/
 wwwroot/dist/
 wwwroot/node_modules/
+uploads/
 
 # EF Core
 Migrations/
@@ -81,3 +82,4 @@ TestResults/
 *.bak
 *.tmp
 /src/Backend/WebApi/appsettings.Development.json
+/src/Backend/TelegramBot/static

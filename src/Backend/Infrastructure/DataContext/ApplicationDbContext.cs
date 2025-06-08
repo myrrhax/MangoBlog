@@ -10,6 +10,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ApplicationUser> Users { get; set; }
     public DbSet<Rating> Ratings { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<Tag> Tags { get; set; }
+    public DbSet<MediaFile> MediaFiles { get; set; }
+    public DbSet<Integration> Integrations { get; set; }
+    public DbSet<TelegramIntegration> TelegramIntegration { get; set; }
+    public DbSet<TelegramChannel> TelegramChannels { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
