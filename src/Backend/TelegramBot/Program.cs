@@ -27,7 +27,7 @@ host.ConfigureServices((context, services) =>
         options.BaseAddress = apiUrl ?? throw new ArgumentNullException(nameof(apiUrl));
     });
     services.AddSingleton<ApiService>();
-    services.AddSingleton<CommandStartHandler>();
+    services.AddTransient<CommandStartHandler>();
 
     services.AddSingleton<Router>();
 

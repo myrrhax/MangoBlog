@@ -9,19 +9,19 @@ internal class HandlerInfo
     public string? Command { get; }
     public Type? State { get; }
     public MethodInfo Handler { get; }
-    public object Instance { get; }
+    public Type InstanceType { get; }
     public UpdateType UpdateType { get; }
 
     public HandlerInfo(string? command, 
         Type? state,
         MethodInfo handler,
-        object instance, 
+        Type instanceType, 
         UpdateType updateType)
     {
         Command = command;
         State = state;
         Handler = handler;
-        Instance = instance;
+        InstanceType = instanceType;
         UpdateType = updateType;
     }
 }

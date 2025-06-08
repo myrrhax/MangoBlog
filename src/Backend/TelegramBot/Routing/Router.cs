@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -60,14 +61,10 @@ internal class Router
             if (commandAttribute is null && stateAttribute is null)
                 continue;
 
-            var instance = _serviceProvider.GetService(handler);
-            if (instance is null)
-                continue;
-
             var info = new HandlerInfo(commandAttribute?.Command,
                 stateAttribute?.StateType,
                 handleMethod,
-                instance,
+                handler,
                 updateType);
             _handlers.Add(info);
         }
@@ -104,10 +101,13 @@ internal class Router
             && handler.State == ctx.CurrentState?.GetType());
 
         if (handler is null)
+        {
             _logger.LogInformation("Не найден подходящий хэндлер. Update: {} пропущен", update.Id);
+            return;
+        }
 
-        
-        Task? task = (Task?) handler!.Handler.Invoke(handler!.Instance, [ctx, updateArg, cancellationToken]);
+        var instance = _serviceProvider.GetRequiredService(handler!.InstanceType);
+        Task? task = (Task?) handler!.Handler.Invoke(instance, [ctx, updateArg, cancellationToken]);
         if (task is null)
             return;
 
