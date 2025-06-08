@@ -1,4 +1,6 @@
-﻿using Application.Integrations.Commands;
+﻿using Application.Dto.Integrations;
+using Application.Integrations.Commands;
+using Application.Integrations.Queries;
 using Domain.Utils;
 using Domain.Utils.Errors;
 using MediatR;
@@ -9,12 +11,12 @@ using WebApi.Dto;
 namespace WebApi.Controllers;
 
 [ApiController]
-[Authorize]
 [Route("api/integrations")]
 public class IntegrationController(IMediator mediator) : ControllerBase
 {
 
     [HttpDelete]
+    [Authorize]
     public async Task<IActionResult> DeleteIntegration([FromBody] DeleteIntegrationRequest dto)
     {
         Guid userId = User.GetUserId()!.Value;
@@ -31,6 +33,7 @@ public class IntegrationController(IMediator mediator) : ControllerBase
 
     [HttpPost]
     [Route("tg")]
+    [Authorize]
     public async Task<IActionResult> AddTelegramIntegration()
     {
         Guid userId = User.GetUserId()!.Value;
@@ -40,5 +43,17 @@ public class IntegrationController(IMediator mediator) : ControllerBase
         return result.IsSuccess
             ? Ok()
             : BadRequest(result.Error);
+    }
+
+    [HttpGet]
+    [Route("tg/{tgId}")]
+    public async Task<IActionResult> GetIntegrationInfoByTelegramId([FromRoute] string tgId)
+    {
+        var query = new GetIntegrationInfoByTelegramIdQuery(tgId);
+        IntegrationDto? dto = await mediator.Send(query);
+
+        return dto is null
+            ? NotFound()
+            : Ok(dto);
     }
 }
