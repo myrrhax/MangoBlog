@@ -1,3 +1,3 @@
 ﻿namespace Application.Dto.Integrations;
 
-public record IntegrationDto(TelegramIntegrationDto? Telegram);
+public record IntegrationDto(UserDto user, TelegramIntegrationDto? Telegram);

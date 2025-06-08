@@ -55,7 +55,7 @@ internal static class MappingExtentions
     }
 
     public static IntegrationDto MapToDto(this Integration entity)
-        => new IntegrationDto(entity.TelegramIntegration?.MapToDto());
+        => new IntegrationDto(entity.User.MapToDto(), entity.TelegramIntegration?.MapToDto());
 
     public static TelegramIntegrationDto MapToDto(this TelegramIntegration entity)
         => new TelegramIntegrationDto(entity.IntegrationCode,
