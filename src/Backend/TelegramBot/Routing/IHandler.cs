@@ -5,5 +5,5 @@ namespace TelegramBot.Routing;
 
 internal interface IHandler<T> where T : Update
 {
-    Task HandleAsync(BotContext context, T update);
+    Task HandleAsync(BotContext context, T update, CancellationToken cancellationToken);
 }
