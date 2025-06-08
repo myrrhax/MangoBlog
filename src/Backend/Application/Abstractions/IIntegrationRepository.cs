@@ -6,6 +6,7 @@ namespace Application.Abstractions;
 
 public interface IIntegrationRepository
 {
+    Task<Integration?> GetIntegrationByCode(string code, CancellationToken cancellationToken);
     Task<TelegramIntegration?> GetTelegramIntegration(Guid userId, CancellationToken cancellationToken);
     Task<Result> AddTelegramIntegration(TelegramIntegration integration, CancellationToken cancellationToken);
     Task<Result> ConfirmTelegramIntegration(string integrationCode, CancellationToken cancellationToken);
