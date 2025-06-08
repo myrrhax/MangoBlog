@@ -2,6 +2,7 @@ using WebApi;
 using Infrastructure;
 using Application.Extentions;
 using Infrastructure.Utils;
+using WebApi.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,8 +43,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseMiddleware<BotWhiteListRoutingMiddleware>();
 app.MapControllers();
 app.Run();
