@@ -35,20 +35,19 @@ internal class IntegrationRepositoryImpl(ApplicationDbContext context,
     {
         try
         {
-            int rows = await context.Integrations
-                .Include(integration => integration.TelegramIntegration)
-                .Where(integration => integration.TelegramIntegration != null)
-                .Where(integration => !integration.TelegramIntegration!.IsConfirmed
-                    && integration.TelegramIntegration.IntegrationCode == integrationCode)
+            int rows = await context.TelegramIntegration
+                .Where(integration => !integration.IsConfirmed
+                    && integration.IntegrationCode == integrationCode)
                 .ExecuteUpdateAsync(userIntegration => userIntegration
-                    .SetProperty(prop => prop.TelegramIntegration!.IsConfirmed, true)
-                    .SetProperty(prop => prop.TelegramIntegration!.TelegramId, telegramId));
+                    .SetProperty(prop => prop!.IsConfirmed, true)
+                    .SetProperty(prop => prop!.TelegramId, telegramId));
 
             if (rows == 0)
                 return Result.Failure<Integration>(new IntegrationNotFound());
 
             Integration entity = await context.Integrations
                 .Include(integration => integration.User)
+                .ThenInclude(user => user.Avatar)
                 .Include(integration => integration.TelegramIntegration)
                 .FirstAsync(integration => integration.TelegramIntegration!.IntegrationCode == integrationCode);
 
