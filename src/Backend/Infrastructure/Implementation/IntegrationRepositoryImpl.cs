@@ -31,7 +31,7 @@ internal class IntegrationRepositoryImpl(ApplicationDbContext context,
         }
     }
 
-    public async Task<Result> ConfirmTelegramIntegration(string integrationCode, CancellationToken cancellationToken)
+    public async Task<Result<Integration>> ConfirmTelegramIntegration(string integrationCode, string telegramId, CancellationToken cancellationToken)
     {
         try
         {
@@ -40,17 +40,25 @@ internal class IntegrationRepositoryImpl(ApplicationDbContext context,
                 .Where(integration => integration.TelegramIntegration != null)
                 .Where(integration => !integration.TelegramIntegration!.IsConfirmed
                     && integration.TelegramIntegration.IntegrationCode == integrationCode)
-                .ExecuteUpdateAsync(userIntegration => userIntegration.SetProperty(prop => prop.TelegramIntegration!.IsConfirmed, true));
+                .ExecuteUpdateAsync(userIntegration => userIntegration
+                    .SetProperty(prop => prop.TelegramIntegration!.IsConfirmed, true)
+                    .SetProperty(prop => prop.TelegramIntegration!.TelegramId, telegramId));
 
-            return rows > 0
-                ? Result.Success()
-                : Result.Failure(new IntegrationNotFound());
+            if (rows == 0)
+                return Result.Failure<Integration>(new IntegrationNotFound());
+
+            Integration entity = await context.Integrations
+                .Include(integration => integration.User)
+                .Include(integration => integration.TelegramIntegration)
+                .FirstAsync(integration => integration.TelegramIntegration!.IntegrationCode == integrationCode);
+
+            return Result.Success(entity);
         }
         catch (Exception ex)
         {
             logger.LogError("Unable to confirm integration with code: {}. Error: {}", integrationCode, ex.Message);
 
-            return Result.Failure(new DatabaseInteractionError("Unable to confirm integration"));
+            return Result.Failure<Integration>(new DatabaseInteractionError("Unable to confirm integration"));
         }
     }
 
