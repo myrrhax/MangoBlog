@@ -1,4 +1,5 @@
-﻿using Application.Dto.Integrations;
+﻿using Application.Dto;
+using Application.Dto.Integrations;
 using Application.Integrations.Commands;
 using Application.Integrations.Queries;
 using Domain.Utils;
@@ -50,7 +51,7 @@ public class IntegrationController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> ConfirmTelegramIntegration([FromBody] ConfrimTelegramIntegrationRequest request)
     {
         var command = new ConfirmTelegramIntegrationCommand(request.IntegrationCode, request.TelegramId);
-        Result<IntegrationDto> result = await mediator.Send(command);
+        Result<ConfirmIntegrationResponse> result = await mediator.Send(command);
 
         return result switch
         {
