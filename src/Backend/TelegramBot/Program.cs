@@ -23,6 +23,7 @@ hostBuilder.ConfigureServices((context, services) =>
 
     services.AddSingleton<ITelegramBotClient>(provider => new TelegramBotClient(botToken));
     services.AddSingleton<ContextManager>();
+    services.AddSingleton<ApiService>();
 
     Uri.TryCreate(context.Configuration["API_URL"], UriKind.Absolute, out Uri? apiUrl);
     services.AddHttpClient<ApiService>(options =>
@@ -35,10 +36,8 @@ hostBuilder.ConfigureServices((context, services) =>
             ?? throw new ArgumentNullException(nameof(connectionString));
         return new NpgsqlConnection(connectionString);
     });
-
     services.AddScoped<UsersService>();
 
-    services.AddSingleton<ApiService>();
     services.AddTransient<CommandStartHandler>();
 
     services.AddSingleton<Router>();

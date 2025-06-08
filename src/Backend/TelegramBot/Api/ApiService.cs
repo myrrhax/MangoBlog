@@ -1,5 +1,7 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using TelegramBot.Dto;
 
 namespace TelegramBot.Api;
@@ -18,16 +20,16 @@ internal class ApiService
     public async Task<ConfirmationResponseDto?> ConfirmTelegramIntegration(string integrationCode, string telegramId)
     {
         var body = new { telegramId, integrationCode };
-        string json = JsonSerializer.Serialize(body);
-        var bodyContent = new StringContent(json);
+        string json = JsonConvert.SerializeObject(body);
+        var bodyContent = new StringContent(json, encoding: Encoding.UTF8, "application/json");
 
         try
         {
-            var response = await _httpClient.PostAsync("integrations/tg/confirm", bodyContent);
+            var response = await _httpClient.PostAsync("api/integrations/tg/confirm", bodyContent);
             response.EnsureSuccessStatusCode();
 
             string jsonResponse = await response.Content.ReadAsStringAsync();
-            var responseDto = JsonSerializer.Deserialize<ConfirmationResponseDto>(jsonResponse);
+            var responseDto = JsonConvert.DeserializeObject<ConfirmationResponseDto>(jsonResponse);
 
             return responseDto;
         }

@@ -1,6 +1,6 @@
 ﻿namespace TelegramBot.Persistence.Entites;
 
-public class User
+public class PersistenceUser
 {
     public long TelegramId { get; set; }
     public Guid UserId { get; set; }

@@ -1,6 +1,6 @@
 ﻿namespace TelegramBot.Dto;
 
-internal class UserDto
+public class UserDto
 {
     public Guid Id { get; set; }
     public string DisplayedName { get; set; } = string.Empty;

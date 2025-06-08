@@ -1,5 +1,4 @@
 ﻿namespace TelegramBot.Dto;
 
-internal record ConfirmationResponseDto(string BotToken, 
-    UserDto User, 
-    TelegramChannelDto Telegram);
+public record ConfirmationResponseDto(string BotToken, 
+    IntegrationDto Integration);
