@@ -13,9 +13,19 @@ internal class ContextManager
         _telegramBotClient = telegramBotClient;
     }
 
-    public bool TryAddContext(string userId, IState? initialState = null)
+    public bool TryAddContext(string userId, out BotContext? context, IState? initialState = null)
     {
-        return _states.TryAdd(userId, new BotContext(this, _telegramBotClient, userId, initialState));
+        context = new BotContext(this, _telegramBotClient, userId, initialState);
+        if (_states.TryAdd(userId, context))
+            return true;
+
+        return false;
+    }
+
+    public BotContext TryGetOrAddContext(string userId, IState? initialState = null)
+    {
+        var context = new BotContext(this, _telegramBotClient, userId, initialState);
+        return _states.GetOrAdd(userId, context);
     }
 
     public BotContext? GetContext(string userId)

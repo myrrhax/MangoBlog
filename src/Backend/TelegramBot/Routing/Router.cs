@@ -88,17 +88,21 @@ internal class Router
                 return;
         }
 
-        BotContext? ctx = _contextManager.GetContext(userId);
+        BotContext ctx = _contextManager.TryGetOrAddContext(userId);
 
         HandlerInfo? handler = _handlers.FirstOrDefault(handler => handler.Command == command?.ToLower()
             && handler.UpdateType == update.Type
-            && handler.State == ctx?.CurrentState?.GetType());
+            && handler.State == ctx.CurrentState?.GetType());
 
         if (handler is null)
             _logger.LogInformation("Не найден подходящий хэндлер. Update: {} пропущен", update.Id);
 
         Task? task = (Task?) handler!.Handler.Invoke(handler!.Instance, [ctx, update, cancellationToken]);
-        if (task is not null)
-            await task;
+        if (task is null)
+            return;
+
+        await task;
+        if (ctx.CurrentState is null)
+            _contextManager.TryRemoveContext(userId);
     }
 }
