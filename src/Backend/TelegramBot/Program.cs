@@ -2,9 +2,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Telegram.Bot;
-using TelegramBot;
 using TelegramBot.Context;
 using TelegramBot.Routing;
+using TelegramBot.Services;
 
 var host = Host.CreateDefaultBuilder(args);
 

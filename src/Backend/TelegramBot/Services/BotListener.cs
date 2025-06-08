@@ -4,7 +4,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using TelegramBot.Routing;
 
-namespace TelegramBot;
+namespace TelegramBot.Services;
 
 internal class BotListenerService : BackgroundService
 {
