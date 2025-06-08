@@ -10,4 +10,5 @@ public class JwtConfig
     public int RefreshTokenMaxSessionsCount { get; set; }
     public string CookieName { get; set; } = string.Empty;
     public int RefreshTokenDeleteTimeoutInHours { get; set; }
+    public string BotTokenClaimName { get; set; } = string.Empty;
 }
