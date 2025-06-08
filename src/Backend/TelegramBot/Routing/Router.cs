@@ -32,16 +32,21 @@ internal class Router
     private void InitRoutes()
     {
         Assembly assembly = Assembly.GetExecutingAssembly();
+
         IEnumerable<Type> handlers = assembly.GetTypes()
-            .Where(type => type.IsGenericType 
-                && type.GetGenericTypeDefinition() == typeof(IHandler<>));
+            .Where(type => !type.IsAbstract && !type.IsInterface)
+            .Where(type => type.GetInterfaces()
+                .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IHandler<>)));
 
         foreach (Type handler in handlers)
         {
             MethodInfo? handleMethod = handler.GetMethod("HandleAsync");
             if (handleMethod is null)
                 continue;
-            Type argType = handler.GetGenericArguments()[0];
+
+            var interfaceType = handler.GetInterfaces()
+                .First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IHandler<>));
+            Type argType = interfaceType.GetGenericArguments()[0];
             if (!UpdateTypeMap.TryGetValue(argType, out UpdateType updateType))
                 continue;
             
@@ -74,6 +79,7 @@ internal class Router
     {
         string userId;
         string? command = null;
+        object updateArg;
         switch (update.Type)
         {
             case UpdateType.Message:
@@ -82,6 +88,7 @@ internal class Router
                     ?? msg.SenderChat!.Id.ToString();
                 if (msg.Text is not null && msg.Text.StartsWith("/"))
                     command = msg.Text.Split(" ")[0];
+                updateArg = msg;
                 break;
             default:
                 _logger.LogInformation("Update: {} пропущен", update.Id);
@@ -97,7 +104,8 @@ internal class Router
         if (handler is null)
             _logger.LogInformation("Не найден подходящий хэндлер. Update: {} пропущен", update.Id);
 
-        Task? task = (Task?) handler!.Handler.Invoke(handler!.Instance, [ctx, update, cancellationToken]);
+        
+        Task? task = (Task?) handler!.Handler.Invoke(handler!.Instance, [ctx, updateArg, cancellationToken]);
         if (task is null)
             return;
 

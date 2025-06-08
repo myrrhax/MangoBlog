@@ -2,22 +2,22 @@
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using TelegramBot.Context;
+using TelegramBot.Routing;
 
 namespace TelegramBot;
 
 internal class BotListenerService : BackgroundService
 {
     private readonly ITelegramBotClient _tgBot;
-    private readonly ContextManager _ctxManager;
+    private readonly Router _router;
     private readonly ILogger<BotListenerService> _logger;
 
     public BotListenerService(ITelegramBotClient tgBot,
-        ContextManager ctxManager, 
+        Router router, 
         ILogger<BotListenerService> logger)
     {
         _tgBot = tgBot;
-        _ctxManager = ctxManager;
+        _router = router;
         _logger = logger;
     }
 
@@ -32,7 +32,7 @@ internal class BotListenerService : BackgroundService
 
     private async Task HandleUpdate(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
-
+        await _router.RouteAsync(update, cancellationToken);
     }
 
     private Task HandleError(ITelegramBotClient telegramBotClient,
