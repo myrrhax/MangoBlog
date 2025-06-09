@@ -72,7 +72,7 @@ class ArticlesStore {
 
     async rateArticle(id, rating) {
         try {
-            await api.post(`/articles/${id}/rate`, { rating });
+            await api.post(`/ratings`, { postId: id, ratingType: rating });
         } catch (error) {
             throw new Error(error.response?.data?.message || 'Failed to rate article');
         }
