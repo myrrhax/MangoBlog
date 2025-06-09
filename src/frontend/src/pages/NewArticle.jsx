@@ -16,7 +16,9 @@ import EditorJS from '@editorjs/editorjs';
 import Header from '@editorjs/header';
 import Paragraph from '@editorjs/paragraph';
 import List from '@editorjs/list';
+import Image from '@editorjs/image';
 import { articlesStore } from '../stores/articlesStore';
+import { mediaService } from '../services/mediaService';
 
 const NewArticle = observer(() => {
     const navigate = useNavigate();
@@ -25,6 +27,7 @@ const NewArticle = observer(() => {
     const [tags, setTags] = useState([]);
     const [currentTag, setCurrentTag] = useState('');
     const [error, setError] = useState(null);
+    const [media, setMedia] = useState([]);
 
     useEffect(() => {
         const initEditor = async () => {
@@ -47,6 +50,33 @@ const NewArticle = observer(() => {
                         list: {
                             class: List,
                             inlineToolbar: ['bold', 'italic', 'link'],
+                        },
+                        image: {
+                            class: Image,
+                            config: {
+                                uploader: {
+                                    uploadByFile(file) {
+                                        return new Promise((resolve, reject) => {
+                                            const formData = new FormData();
+                                            formData.append('file', file);
+                                            formData.append('isAvatar', false);
+                                            
+                                            mediaService.loadMedia(formData)
+                                                .then(response => {
+                                                    resolve({
+                                                        success: 1,
+                                                        file: {
+                                                            url: mediaService.makeImageUrl(response.data.id)
+                                                        }
+                                                    });
+                                                })
+                                                .catch(error => {
+                                                    reject(error);
+                                                });
+                                        });
+                                    }
+                                }
+                            }
                         }
                     },
                     inlineToolbar: ['bold', 'italic', 'link'],
@@ -73,6 +103,14 @@ const NewArticle = observer(() => {
             }
         };
     }, []);
+
+    const uploadMedia = async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('isAvatar', false);
+        const response = await mediaService.loadMedia(formData);
+        setMedia([...media, response.data]);
+    };
 
     const handleAddTag = (event) => {
         if (event.key === 'Enter' && currentTag.trim()) {
@@ -171,7 +209,6 @@ const NewArticle = observer(() => {
                                 className="prose lg:prose-xl max-w-none [&_h1]:text-4xl [&_h2]:text-3xl [&_h3]:text-2xl [&_h4]:text-xl"
                             />
                         </Box>
-
 
                         <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
                             <Button

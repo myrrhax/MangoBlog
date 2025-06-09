@@ -82,6 +82,12 @@ export const authService = {
             'Content-Type': 'application/json',
         },
     }),
+    getMedia: (id) => api.get(`/media/${id}`),
+    loadMedia: (formData) => api.post('/media/upload', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        }
+    })
 };
 
 export default api; 

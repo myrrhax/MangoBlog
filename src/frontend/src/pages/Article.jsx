@@ -12,7 +12,7 @@ import {
     Chip,
     Skeleton,
 } from '@mui/material';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';  
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
 import ThumbDownOutlinedIcon from '@mui/icons-material/ThumbDownOutlined';
@@ -21,7 +21,7 @@ import { authStore } from '../stores/authStore';
 import ArticleView from '../components/ArticleView';
 import SnackbarNotification from '../components/SnackbarNotification';
 import useNotificationSnackbar from '../hooks/useNotificationSnackbar';
-import { getMedia } from '../services/media';
+import { mediaService } from '../services/mediaService';
 
 const Article = observer(() => {
     const { id } = useParams();
@@ -113,7 +113,7 @@ const Article = observer(() => {
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                                 <Avatar
                                     src={article.creator?.avatarId 
-                                        ? getMedia(article.creator.avatarId)
+                                        ? mediaService.getMedia(article.creator.avatarId)
                                         : '/default-avatar.png'}
                                     alt={article.creator?.displayedName || 'Anonymous'}
                                     sx={{ width: 48, height: 48, mr: 2 }}

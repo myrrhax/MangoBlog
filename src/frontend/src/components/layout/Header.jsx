@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
 import { authStore } from '../../stores/authStore';
-import { getMedia } from '../../services/media';
+import { mediaService } from '../../services/mediaService';
 
 const Header = observer(() => {
     const navigate = useNavigate();
@@ -50,7 +50,7 @@ const Header = observer(() => {
                                     <span className="sr-only">Open user menu</span>
                                     {user?.avatarId ? (
                                         <img 
-                                            src={getMedia(user.avatarId)} 
+                                            src={mediaService.getMedia(user.avatarId)} 
                                             alt={user?.displayedName || 'User'} 
                                             className="h-8 w-8 rounded-full" 
                                         />
