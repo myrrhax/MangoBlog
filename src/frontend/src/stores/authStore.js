@@ -41,11 +41,11 @@ class AuthStore {
         this.error = error;
     }
 
-    async login(email, password) {
+    async login(login, password) {
         this.setLoading(true);
         this.setError(null);
         try {
-            const response = await authService.login({ email, password });
+            const response = await authService.login({ login, password });
             const { accessToken } = response.data;
             localStorage.setItem('accessToken', accessToken);
             await this.checkAuth();
