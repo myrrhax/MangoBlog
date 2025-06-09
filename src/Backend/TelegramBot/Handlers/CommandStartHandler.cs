@@ -29,11 +29,31 @@ internal class CommandStartHandler : IHandler<Message>
     {
         if (update.Text is null)
             return;
-        string[] messageSplit = update.Text.Split(' ');
-        if (messageSplit.Length == 1)
-            await AnswerInformation(context, update, cancellationToken);
-        else if (messageSplit.Length == 2)
-            await AnswerWithConfirmation(context, update, messageSplit[1], cancellationToken);
+
+        PersistenceUser? user = await _usersService.GetUserByTelegramId(update.From!.Id);
+
+        if (user is null)
+        {
+            string[] messageSplit = update.Text.Split(' ');
+            if (messageSplit.Length == 1)
+                await AnswerInformation(context, update, cancellationToken);
+            else if (messageSplit.Length == 2)
+                await AnswerWithConfirmation(context, update, messageSplit[1], cancellationToken);
+        }
+        else
+        {
+            await AnswerAuthorizedUser(context, update.Chat.Id, update.From.FirstName);
+        }
+    }
+
+    private async Task AnswerAuthorizedUser(BotContext ctx, ChatId chatId, string name)
+    {
+        string answer = $"Здравствуйте, <b>{name}!</b>. Выберите комманду:";
+
+        await ctx.Bot.SendMessage(chatId, 
+            answer, 
+            parseMode: ParseMode.Html, 
+            replyMarkup: Keyboards.UserInegrationKeyboard);
     }
 
     private async Task AnswerInformation(BotContext context, Message msg, CancellationToken cancellationToken)
@@ -70,8 +90,8 @@ internal class CommandStartHandler : IHandler<Message>
         }
 
         await context.Bot.SendMessage(msg.Chat.Id, 
-            "✅ Ваша интеграция добавлена", 
-            replyMarkup: Keyboards.UserInegrationKeyboard);
+            "✅ Ваша интеграция добавлена");
+        await AnswerAuthorizedUser(context, msg.Chat.Id, msg.From.FirstName);
     }
 
     private Stream LoadLogo()

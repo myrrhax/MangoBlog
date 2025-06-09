@@ -38,7 +38,7 @@ internal class UsersService
     public async Task<PersistenceUser?> GetUserByTelegramId(long telegramId)
     {
         const string sql = """
-            SELECT (telegram_id AS TelegramId, user_id AS UserId, api_token AS AccessToken)
+            SELECT telegram_id AS TelegramId, user_id AS UserId, api_token AS AccessToken
             FROM users
             WHERE telegram_id = @telegramId
             LIMIT 1
