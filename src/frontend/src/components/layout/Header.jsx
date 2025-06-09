@@ -1,80 +1,83 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
-import {
-    AppBar,
-    Toolbar,
-    IconButton,
-    Typography,
-    Menu,
-    MenuItem,
-    Avatar,
-    Container,
-} from '@mui/material';
 import { authStore } from '../../stores/authStore';
 
 const Header = observer(() => {
     const navigate = useNavigate();
-    const [anchorEl, setAnchorEl] = useState(null);
-
-    const handleMenu = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const handleProfile = () => {
-        handleClose();
+        setIsMenuOpen(false);
         navigate('/profile');
     };
 
     const handleIntegrations = () => {
-        handleClose();
+        setIsMenuOpen(false);
         navigate('/integrations');
     };
 
     const handleLogout = () => {
-        handleClose();
+        setIsMenuOpen(false);
         authStore.logout();
         navigate('/login');
     };
 
     return (
-        <AppBar position="static" color="default" elevation={1}>
-            <Container maxWidth="lg">
-                <Toolbar disableGutters>
-                    <Typography
-                        variant="h6"
-                        component="div"
-                        sx={{ flexGrow: 1, cursor: 'pointer' }}
-                        onClick={() => navigate('/')}
-                    >
-                        Mango Blog
-                    </Typography>
-                    <IconButton
-                        size="large"
-                        onClick={handleMenu}
-                        color="inherit"
-                    >
-                        <Avatar
-                            alt={authStore.user?.email}
-                            src="/static/images/avatar/2.jpg"
-                        />
-                    </IconButton>
-                    <Menu
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl)}
-                        onClose={handleClose}
-                    >
-                        <MenuItem onClick={handleProfile}>Profile</MenuItem>
-                        <MenuItem onClick={handleIntegrations}>Integrations</MenuItem>
-                        <MenuItem onClick={handleLogout}>Logout</MenuItem>
-                    </Menu>
-                </Toolbar>
-            </Container>
-        </AppBar>
+        <header className="bg-white shadow">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between h-16">
+                    <div className="flex">
+                        <div className="flex-shrink-0 flex items-center">
+                            <h1 
+                                className="text-xl font-bold text-gray-900 cursor-pointer"
+                                onClick={() => navigate('/')}
+                            >
+                                Mango Blog
+                            </h1>
+                        </div>
+                    </div>
+                    <div className="flex items-center">
+                        <div className="ml-3 relative">
+                            <div>
+                                <button
+                                    type="button"
+                                    className="bg-white rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                >
+                                    <span className="sr-only">Open user menu</span>
+                                    <div className="h-8 w-8 rounded-full bg-green-600 flex items-center justify-center text-white">
+                                        {authStore.user?.email?.[0]?.toUpperCase() || 'U'}
+                                    </div>
+                                </button>
+                            </div>
+                            {isMenuOpen && (
+                                <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                    <button
+                                        onClick={handleProfile}
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                    >
+                                        Profile
+                                    </button>
+                                    <button
+                                        onClick={handleIntegrations}
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                    >
+                                        Integrations
+                                    </button>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
     );
 });
 
