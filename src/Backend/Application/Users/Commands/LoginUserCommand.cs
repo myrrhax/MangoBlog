@@ -9,7 +9,7 @@ using MediatR;
 
 namespace Application.Users.Commands;
 
-public record LoginUserCommand(string Login, string Password, string ConfirmPassword) : IRequest<Result<LoginResponse>>;
+public record LoginUserCommand(string Login, string Password) : IRequest<Result<LoginResponse>>;
 
 public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, Result<LoginResponse>>
 {
