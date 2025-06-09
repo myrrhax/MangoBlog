@@ -108,21 +108,22 @@ internal class Router
 
         BotContext ctx = _contextManager.TryGetOrAddContext(userId);
 
-        IEnumerable<HandlerInfo> handlers = _handlers.Where(handler => handler.UpdateType == update.Type
-            && handler.State == ctx.CurrentState?.GetType());
+        List<HandlerInfo> validHandlers = _handlers.Where(handler => handler.UpdateType == update.Type
+            && handler.State == ctx.CurrentState?.GetType())
+            .ToList();
 
         HandlerInfo? handler = null;
         if (update.Type == UpdateType.Message && command is not null)
         {
-            handler = _handlers.FirstOrDefault(handler => handler.Command == command);
+            handler = validHandlers.FirstOrDefault(handler => handler.Command == command);
         }
         else if (update.Type == UpdateType.CallbackQuery && callbackQuery is not null)
         {
-            handler = _handlers.FirstOrDefault(handler => handler.Query == callbackQuery);
+            handler = validHandlers.FirstOrDefault(handler => handler.Query == callbackQuery);
         }
         else
         {
-            handler = _handlers.FirstOrDefault();
+            handler = validHandlers.FirstOrDefault();
         }
 
         if (handler is null)

@@ -9,7 +9,7 @@ internal class StateAttribute : Attribute
 
     public StateAttribute(Type stateType)
     {
-        if (!typeof(IState).IsAssignableFrom(stateType))
+        if (!typeof(State).IsAssignableFrom(stateType))
             throw new ArgumentException($"{stateType.Name} needs to implement IState interface");
 
         StateType = stateType;

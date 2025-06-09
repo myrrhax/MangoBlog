@@ -2,9 +2,9 @@
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using TelegramBot.Context;
+using TelegramBot.Context.States;
 using TelegramBot.Routing;
 using TelegramBot.Routing.Attributes;
-using TelegramBot.States;
 using TelegramBot.Utils;
 
 namespace TelegramBot.Handlers;
@@ -18,6 +18,6 @@ internal class AddChannelHandler : IHandler<CallbackQuery>
         await context.Bot.AnswerCallbackQuery(update.Id);
 
         await context.Bot.SendMessage(update.From.Id, MessageAnswer, parseMode: ParseMode.Html);
-        context.UpdateState(new UserChatInputState(), update.From.Id.ToString());
+        context.UpdateState(new UserChatInputState(context), update.From.Id.ToString());
     }
 }
