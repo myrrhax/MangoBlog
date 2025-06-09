@@ -32,7 +32,7 @@ public class MediaController(IMediator mediator) : ControllerBase
         Result<string> loadingResult = await mediator.Send(command);
 
         return loadingResult.IsSuccess
-            ? CreatedAtAction(nameof(GetFile), new { name = loadingResult.Value }, new { fileName = loadingResult.Value})
+            ? CreatedAtAction(nameof(GetFile), new { id = loadingResult.Value }, new { id = loadingResult.Value})
             : BadRequest(loadingResult.Error);
     }
 
