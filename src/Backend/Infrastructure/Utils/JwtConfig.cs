@@ -12,4 +12,5 @@ public class JwtConfig
     public int RefreshTokenDeleteTimeoutInHours { get; set; }
     public string BotTokenClaimName { get; set; } = string.Empty;
     public HashSet<string> BotWhiteListUrls { get; set; } = [];
+    public HashSet<string> UserBlackList { get; set; } = [];
 }

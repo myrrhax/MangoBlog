@@ -31,6 +31,28 @@ internal class IntegrationRepositoryImpl(ApplicationDbContext context,
         }
     }
 
+    public async Task<Result> AttachTelegramChannelToIntegration(Guid userId, TelegramChannel channel, CancellationToken cancellationToken)
+    {
+        TelegramIntegration? integration = await context.TelegramIntegration
+            .FirstOrDefaultAsync(entity => entity.UserId == userId);
+        if (integration is null)
+            return Result.Failure(new IntegrationNotFound());
+
+        integration.ConnectedChannels.Add(channel);
+        try
+        {
+            await context.SaveChangesAsync();
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("An error occurred attaching channel. Error: {}", ex.Message);
+
+            return Result.Failure(new DatabaseInteractionError("Failed to add channel"));
+        }
+    }
+
     public async Task<Result<Integration>> ConfirmTelegramIntegration(string integrationCode, string telegramId, CancellationToken cancellationToken)
     {
         try
