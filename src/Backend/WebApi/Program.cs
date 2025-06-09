@@ -33,6 +33,18 @@ builder.Services
 
 builder.Services.AddBackgroundJobs();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowClient", policy =>
+    {
+        policy.AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()
+            .WithOrigins(builder.Configuration["ClientUrl"] 
+                ?? throw new ArgumentNullException("Client url"));
+    });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -40,7 +52,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseCors("AllowClient");
 app.UseHttpsRedirection();
 
 app.UseRouting();
