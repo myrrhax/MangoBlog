@@ -211,6 +211,7 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
     public async Task<Dictionary<string, ApplicationUser?>> LoadAuthors(Dictionary<string, Guid> authorIds, CancellationToken cancellationToken)
     {
         List<ApplicationUser> users = await context.Users
+            .Include(author => author.Avatar)
             .Where(user => authorIds.Values.Contains(user.Id))
             .ToListAsync();
 
