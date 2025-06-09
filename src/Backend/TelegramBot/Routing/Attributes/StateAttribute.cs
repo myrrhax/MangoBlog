@@ -1,17 +1,16 @@
-﻿using TelegramBot.Context;
-
-namespace TelegramBot.Routing.Attributes;
+﻿namespace TelegramBot.Routing.Attributes;
 
 [AttributeUsage(AttributeTargets.Method)]
 internal class StateAttribute : Attribute
 {
-    public Type StateType { get; }
+    public Type Type { get; }
+    public Enum Value { get; }
 
-    public StateAttribute(Type stateType)
+    public StateAttribute(Type type, object value)
     {
-        if (!typeof(IState).IsAssignableFrom(stateType))
-            throw new ArgumentException($"{stateType.Name} needs to implement IState interface");
-
-        StateType = stateType;
+        Type = type;
+        if (value is not Enum en)
+            throw new ArgumentException($"{nameof(value)} must be Enum");
+        Value = en;
     }
 }

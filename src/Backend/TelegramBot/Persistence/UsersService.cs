@@ -35,6 +35,28 @@ internal class UsersService
         }
     }
 
+    public async Task<PersistenceUser?> GetUserByTelegramId(long telegramId)
+    {
+        const string sql = """
+            SELECT telegram_id AS TelegramId, user_id AS UserId, api_token AS AccessToken
+            FROM users
+            WHERE telegram_id = @telegramId
+            LIMIT 1
+            """;
+        try
+        {
+            PersistenceUser? user = await _dbConnection.QuerySingleAsync<PersistenceUser>(sql, new { telegramId });
+
+            return user;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to select user from database with tg id: {}. Error: {}", telegramId, ex.Message);
+
+            return null;
+        }
+    }
+
     public async Task InitializeTable()
     {
         const string sql = """
