@@ -97,7 +97,8 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
         }
     }
 
-    public async Task<IEnumerable<Article>> GetArticles(IEnumerable<string> tags,
+    public async Task<(IEnumerable<Article>, int)> GetArticles(
+        IEnumerable<string> tags,
         string query,
         int page,
         int pageSize,
@@ -105,8 +106,8 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
         SortType popularitySort,
         Guid? authorId = null)
     {
-        var pipeline = new List<BsonDocument>();
         var matchFilter = new BsonDocument();
+
         if (!string.IsNullOrWhiteSpace(query))
         {
             matchFilter.Add("Title", new BsonDocument("$regex", query).Add("$options", "i"));
@@ -122,9 +123,15 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
         {
             matchFilter.Add("CreatorId", authorId.Value.ToString());
         }
-        pipeline.Add(new BsonDocument("$match", matchFilter));
 
-        // project
+        long totalCount = await _articles.CountDocumentsAsync(matchFilter);
+        int totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+        var pipeline = new List<BsonDocument>
+    {
+        new BsonDocument("$match", matchFilter)
+    };
+
         if (popularitySort != SortType.None)
         {
             pipeline.Add(new BsonDocument("$addFields", new BsonDocument("totalVotes", new BsonDocument("$add", new BsonArray { "$Likes", "$Dislikes" }))));
@@ -148,15 +155,18 @@ internal class ArticlesRepositoryImpl : IArticlesRepository
         pipeline.Add(new BsonDocument("$skip", (page - 1) * pageSize));
         pipeline.Add(new BsonDocument("$limit", pageSize));
 
-        List<BsonDocument> rawDocs = await _articles.Aggregate<BsonDocument>(pipeline).ToListAsync();
+        var rawDocs = await _articles.Aggregate<BsonDocument>(pipeline).ToListAsync();
+
         var articles = rawDocs.Select(doc =>
         {
             doc.Remove("totalVotes");
             var mapped = BsonSerializer.Deserialize<ArticleDocument>(doc);
             return mapped.MapToEntity();
         });
-        return articles;
+
+        return (articles, totalPages);
     }
+
 
     public async Task<IEnumerable<Article>> GetUserArticles(Guid userId)
     {

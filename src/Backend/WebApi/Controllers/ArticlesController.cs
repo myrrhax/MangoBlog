@@ -51,11 +51,18 @@ public class ArticlesController(IMediator mediator) : ControllerBase
         [FromQuery] int pageSize = 10)
     {
         var command = new GetArticlesQuery(tags, query, sortByDate, sortByPopularity, authorId, page, pageSize);
-        Result<IEnumerable<ArticleDto>> result = await mediator.Send(command);
+        Result<(IEnumerable<ArticleDto>, int)> result = await mediator.Send(command);
 
-        return result.IsSuccess
-            ? (result.Value!.Any() ? Ok(result.Value) : NotFound())
-            : BadRequest(result.Error);
+        if (result.IsSuccess)
+        {
+            (var articles, int count) = result.Value!;
+
+            return articles.Any()
+                ? Ok(new { articles, totalCount = count })
+                : NotFound();
+        }
+
+        return BadRequest(result.Error);
     }
 
     [HttpGet]

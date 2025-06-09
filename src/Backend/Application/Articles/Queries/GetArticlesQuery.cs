@@ -16,9 +16,9 @@ public record GetArticlesQuery(IEnumerable<string>? Tags = null,
     string? SortByPopularity = null,
     Guid? AuthorId = null,
     int Page = 1,
-    int PageSize = 10) : IRequest<Result<IEnumerable<ArticleDto>>>;
+    int PageSize = 10) : IRequest<Result<(IEnumerable<ArticleDto>, int)>>;
 
-public class GetArticlesQueryHandler : IRequestHandler<GetArticlesQuery, Result<IEnumerable<ArticleDto>>>
+public class GetArticlesQueryHandler : IRequestHandler<GetArticlesQuery, Result<(IEnumerable<ArticleDto>, int)>>
 {
     private readonly IArticlesRepository _articleRepository;
     private readonly IValidator<GetArticlesQuery> _validator;
@@ -36,17 +36,17 @@ public class GetArticlesQueryHandler : IRequestHandler<GetArticlesQuery, Result<
         _ratingRepository = ratingRepository;
     }
 
-    public async Task<Result<IEnumerable<ArticleDto>>> Handle(GetArticlesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<(IEnumerable<ArticleDto>, int)>> Handle(GetArticlesQuery request, CancellationToken cancellationToken)
     {
         var validationResult = _validator.Validate(request);
 
         if (validationResult.Errors.Any())
         {
             var validationError = new ApplicationValidationError(validationResult.Errors.ToErrorsDictionary());
-            return Result.Failure<IEnumerable<ArticleDto>>(validationError);
+            return Result.Failure<(IEnumerable<ArticleDto>, int)>(validationError);
         }
 
-        IEnumerable<Article> articles = await _articleRepository.GetArticles(page: request.Page,
+        (var articles, int count) = await _articleRepository.GetArticles(page: request.Page,
             pageSize: request.PageSize,
             query: request.Query ?? string.Empty,
             creationDateSort: StringParsing.ParseSortType(request.SortByDate ?? string.Empty),
@@ -63,6 +63,6 @@ public class GetArticlesQueryHandler : IRequestHandler<GetArticlesQuery, Result<
             return article.MapToDto(creator);
         });
 
-        return Result.Success(dtos);
+        return Result.Success((dtos, count));
     }
 }
