@@ -53,7 +53,7 @@ class ArticlesStore {
             };
 
             const response = await api.get('/articles', { params });
-            this.setArticles(response.data.items);
+            this.setArticles(response.data.articles);
             this.setTotalPages(response.data.totalPages);
         } catch (error) {
             this.setError(error.response?.data?.message || 'Failed to fetch articles');
