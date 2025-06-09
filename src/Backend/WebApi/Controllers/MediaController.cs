@@ -11,7 +11,6 @@ using WebApi.Dto;
 namespace WebApi.Controllers;
 
 [ApiController]
-[Authorize]
 [Route("api/media")]
 public class MediaController(IMediator mediator) : ControllerBase
 {
@@ -19,6 +18,7 @@ public class MediaController(IMediator mediator) : ControllerBase
     private const string VideoResultType = "video/mp4";
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> LoadFile([FromForm] MediaUploadDto dto)
     {
         if (dto.File is null || dto.File.Length == 0)
