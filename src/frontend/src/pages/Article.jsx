@@ -18,7 +18,7 @@ import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
 import ThumbDownOutlinedIcon from '@mui/icons-material/ThumbDownOutlined';
 import { articlesStore } from '../stores/articlesStore';
 import { authStore } from '../stores/authStore';
-import Output from 'editorjs-react-renderer';
+import ArticleView from '../components/ArticleView';
 
 const Article = observer(() => {
     const { id } = useParams();
@@ -157,7 +157,7 @@ const Article = observer(() => {
                             </Box>
 
                             <Box sx={{ mb: 3 }}>
-                                <Output data={article.content} />
+                                <ArticleView data={article.content} />
                             </Box>
 
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
