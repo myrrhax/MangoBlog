@@ -14,14 +14,17 @@ class AuthStore {
 
     async checkAuth() {
         const token = localStorage.getItem('accessToken');
-        if (token) {
-            try {
-                const response = await authService.getCurrentUser();
-                this.setUser(response.data);
-                this.setAuthenticated(true);
-            } catch (error) {
-                this.logout();
-            }
+
+        if (!token) {
+            return;
+        }
+
+        try {
+            const response = await authService.getCurrentUser();
+            this.setUser(response.data);
+            this.setAuthenticated(true);
+        } catch (error) {
+            this.logout();
         }
     }
 

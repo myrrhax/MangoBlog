@@ -48,12 +48,17 @@ const Header = observer(() => {
                                     onClick={() => setIsMenuOpen(!isMenuOpen)}
                                 >
                                     <span className="sr-only">Open user menu</span>
-                                    <div className="h-8 w-8 rounded-full bg-green-600 flex items-center justify-center text-white">
-                                        <img src={user?.avatarId 
-                                            ? getMedia(user.avatarId)
-                                            : '/default-avatar.png'} 
-                                            alt="avatar" className="h-8 w-8 rounded-full" />
-                                    </div>
+                                    {user?.avatarId ? (
+                                        <img 
+                                            src={getMedia(user.avatarId)} 
+                                            alt={user?.displayedName || 'User'} 
+                                            className="h-8 w-8 rounded-full" 
+                                        />
+                                    ) : (
+                                        <div className="h-8 w-8 rounded-full bg-green-600 flex items-center justify-center text-white">
+                                            {user?.displayedName?.[0]?.toUpperCase() || 'U'}
+                                        </div>
+                                    )}
                                 </button>
                             </div>
                             {isMenuOpen && (
