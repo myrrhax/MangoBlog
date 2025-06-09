@@ -57,15 +57,20 @@ internal class Router
                 .GetCustomAttribute(typeof(CommandAttribute), false);
             var stateAttribute = (StateAttribute?) handleMethod
                 .GetCustomAttribute(typeof(StateAttribute), false);
+            var callbackQueryAttribute = (CallbackQueryDataAttribute?)handleMethod.
+                GetCustomAttribute(typeof(CallbackQueryDataAttribute), false);
 
-            if (commandAttribute is null && stateAttribute is null)
+            if (commandAttribute is null 
+                && stateAttribute is null
+                && callbackQueryAttribute is null)
                 continue;
 
             var info = new HandlerInfo(commandAttribute?.Command,
                 stateAttribute?.StateType,
                 handleMethod,
                 handler,
-                updateType);
+                updateType,
+                callbackQueryAttribute?.Query);
             _handlers.Add(info);
         }
 
@@ -78,6 +83,7 @@ internal class Router
     {
         string userId;
         string? command = null;
+        string? callbackQuery = null;
         object updateArg;
         switch (update.Type)
         {
@@ -89,6 +95,12 @@ internal class Router
                     command = msg.Text.Split(" ")[0];
                 updateArg = msg;
                 break;
+            case UpdateType.CallbackQuery:
+                CallbackQuery query = update.CallbackQuery!;
+                userId = query.From!.Id.ToString();
+                callbackQuery = query.Data;
+                updateArg = query;
+                break;
             default:
                 _logger.LogInformation("Update: {} пропущен", update.Id);
                 return;
@@ -96,16 +108,28 @@ internal class Router
 
         BotContext ctx = _contextManager.TryGetOrAddContext(userId);
 
-        HandlerInfo? handler = _handlers.FirstOrDefault(handler => handler.Command == command?.ToLower()
-            && handler.UpdateType == update.Type
+        IEnumerable<HandlerInfo> handlers = _handlers.Where(handler => handler.UpdateType == update.Type
             && handler.State == ctx.CurrentState?.GetType());
+
+        HandlerInfo? handler = null;
+        if (update.Type == UpdateType.Message && command is not null)
+        {
+            handler = _handlers.FirstOrDefault(handler => handler.Command == command);
+        }
+        else if (update.Type == UpdateType.CallbackQuery && callbackQuery is not null)
+        {
+            handler = _handlers.FirstOrDefault(handler => handler.Query == callbackQuery);
+        }
+        else
+        {
+            handler = _handlers.FirstOrDefault();
+        }
 
         if (handler is null)
         {
             _logger.LogInformation("Не найден подходящий хэндлер. Update: {} пропущен", update.Id);
             return;
         }
-
         var instance = _serviceProvider.GetRequiredService(handler!.InstanceType);
         Task? task = (Task?) handler!.Handler.Invoke(instance, [ctx, updateArg, cancellationToken]);
         if (task is null)

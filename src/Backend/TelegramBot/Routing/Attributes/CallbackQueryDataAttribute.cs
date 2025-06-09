@@ -5,7 +5,7 @@ internal class CallbackQueryDataAttribute : Attribute
 {
     public string Query { get; }
 
-    public CallbackQueryDataAttribute(string query)
+    public CallbackQueryDataAttribute(string query = "")
     {
         Query = query;
     }

@@ -4,5 +4,5 @@ namespace TelegramBot.Context;
 
 internal interface IState
 {
-    Task Handle(BotContext context, Update update);
+    Task Handle(BotContext context);
 }
