@@ -5,6 +5,7 @@ import { theme } from './theme';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Home from './pages/Home';
+import Article from './pages/Article';
 import MainLayout from './components/layout/MainLayout';
 import AuthLayout from './components/layout/AuthLayout';
 import { authStore } from './stores/authStore';
@@ -66,6 +67,14 @@ const App = observer(() => {
                         element={
                             <PrivateRoute>
                                 <div>Integrations Page (Coming Soon)</div>
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/article/:id"
+                        element={
+                            <PrivateRoute>
+                                <Article />
                             </PrivateRoute>
                         }
                     />

@@ -8,7 +8,6 @@ class ArticlesStore {
     totalPages = 0;
     currentPage = 1;
     filters = {
-        tags: [],
         query: '',
         sortByDate: 'none',
         sortByPopularity: 'none',
@@ -59,6 +58,23 @@ class ArticlesStore {
             this.setError(error.response?.data?.message || 'Failed to fetch articles');
         } finally {
             this.setLoading(false);
+        }
+    }
+
+    async fetchArticle(id) {
+        try {
+            const response = await api.get(`/articles/${id}`);
+            return response.data.data;
+        } catch (error) {
+            throw new Error(error.response?.data?.message || 'Failed to fetch article');
+        }
+    }
+
+    async rateArticle(id, rating) {
+        try {
+            await api.post(`/articles/${id}/rate`, { rating });
+        } catch (error) {
+            throw new Error(error.response?.data?.message || 'Failed to rate article');
         }
     }
 }

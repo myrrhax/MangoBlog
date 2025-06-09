@@ -21,8 +21,10 @@ import {
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import { articlesStore } from '../stores/articlesStore';
+import { useNavigate } from 'react-router-dom';
 
 const Home = observer(() => {
+    const navigate = useNavigate();
     useEffect(() => {
         articlesStore.fetchArticles();
     }, [articlesStore.currentPage, articlesStore.filters]);
@@ -41,11 +43,6 @@ const Home = observer(() => {
 
     const handleSortByPopularityChange = (event) => {
         articlesStore.setFilters({ sortByPopularity: event.target.value });
-    };
-
-    const handleTagChange = (event) => {
-        const tags = event.target.value;
-        articlesStore.setFilters({ tags });
     };
 
     return (
@@ -88,29 +85,6 @@ const Home = observer(() => {
                             </Select>
                         </FormControl>
                     </Grid>
-                    <Grid item xs={12}>
-                        <FormControl fullWidth>
-                            <InputLabel>Tags</InputLabel>
-                            <Select
-                                multiple
-                                value={articlesStore.filters.tags}
-                                label="Tags"
-                                onChange={handleTagChange}
-                                renderValue={(selected) => (
-                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                        {selected.map((value) => (
-                                            <Chip key={value} label={value} />
-                                        ))}
-                                    </Box>
-                                )}
-                            >
-                                <MenuItem value="technology">Technology</MenuItem>
-                                <MenuItem value="science">Science</MenuItem>
-                                <MenuItem value="art">Art</MenuItem>
-                                <MenuItem value="music">Music</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>
                 </Grid>
             </Box>
 
@@ -129,7 +103,7 @@ const Home = observer(() => {
                     <Grid container spacing={3}>
                         {articlesStore.articles.map((article) => (
                             <Grid item xs={12} md={6} lg={4} key={article.id}>
-                                <Card>
+                                <Card onClick={() => navigate(`/article/${article.id}`)}>
                                     <CardContent>
                                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                                             <Avatar
