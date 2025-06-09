@@ -42,7 +42,7 @@ public class BotWhiteListRoutingMiddleware
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
             return;
         }
-        else if (!isBotToken && endpoint != null && _jwtConfig.UserBlackList.Contains(endpoint.RoutePattern!.RawText!))
+        else if (!isBotToken && endpoint != null && _jwtConfig.BotWhiteListUrls.Contains(endpoint.RoutePattern!.RawText!))
         {
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
             return;
