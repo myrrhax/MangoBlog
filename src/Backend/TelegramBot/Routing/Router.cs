@@ -66,7 +66,7 @@ internal class Router
                 continue;
 
             var info = new HandlerInfo(commandAttribute?.Command,
-                stateAttribute?.StateType,
+                stateAttribute?.Value,
                 handleMethod,
                 handler,
                 updateType,
@@ -108,9 +108,20 @@ internal class Router
 
         BotContext ctx = _contextManager.TryGetOrAddContext(userId);
 
-        List<HandlerInfo> validHandlers = _handlers.Where(handler => handler.UpdateType == update.Type
-            && handler.State == ctx.CurrentState?.GetType())
-            .ToList();
+        List<HandlerInfo> validHandlers;
+        if (ctx.CurrentState != null)
+        {
+            validHandlers = _handlers
+                .Where(handler => handler.UpdateType == update.Type && handler.State != null && handler.State.Equals(ctx.CurrentState))
+                .ToList();
+        }
+        else
+        {
+            validHandlers = _handlers
+                .Where(handler => handler.UpdateType == update.Type)
+                .ToList();
+        }
+
 
         HandlerInfo? handler = null;
         if (update.Type == UpdateType.Message && command is not null)

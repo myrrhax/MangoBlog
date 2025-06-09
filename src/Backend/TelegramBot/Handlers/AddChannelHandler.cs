@@ -12,12 +12,13 @@ namespace TelegramBot.Handlers;
 internal class AddChannelHandler : IHandler<CallbackQuery>
 {
     private const string MessageAnswer = "Для того,чтобы добавить канал для интеграции добавьте меня в свой канал <b>с правами Администратора</b>. После чего перешлите мне сообщение с вашего канала";
+    
     [CallbackQueryData(Keyboards.AddChannelQuery)]
     public async Task HandleAsync(BotContext context, CallbackQuery update, CancellationToken cancellationToken)
     {
         await context.Bot.AnswerCallbackQuery(update.Id);
 
         await context.Bot.SendMessage(update.From.Id, MessageAnswer, parseMode: ParseMode.Html);
-        context.UpdateState(new UserChatInputState(context), update.From.Id.ToString());
+        context.CurrentState = UserAddIntegrationChatState.ChatInput;
     }
 }
