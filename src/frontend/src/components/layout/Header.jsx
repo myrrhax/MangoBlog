@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
 import { authStore } from '../../stores/authStore';
+import { getMedia } from '../../services/media';
 
 const Header = observer(() => {
     const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const { user } = authStore;
 
     const handleProfile = () => {
         setIsMenuOpen(false);
@@ -47,7 +49,10 @@ const Header = observer(() => {
                                 >
                                     <span className="sr-only">Open user menu</span>
                                     <div className="h-8 w-8 rounded-full bg-green-600 flex items-center justify-center text-white">
-                                        {authStore.user?.email?.[0]?.toUpperCase() || 'U'}
+                                        <img src={user?.avatarId 
+                                            ? getMedia(user.avatarId)
+                                            : '/default-avatar.png'} 
+                                            alt="avatar" className="h-8 w-8 rounded-full" />
                                     </div>
                                 </button>
                             </div>

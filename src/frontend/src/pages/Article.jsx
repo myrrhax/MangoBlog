@@ -19,6 +19,9 @@ import ThumbDownOutlinedIcon from '@mui/icons-material/ThumbDownOutlined';
 import { articlesStore } from '../stores/articlesStore';
 import { authStore } from '../stores/authStore';
 import ArticleView from '../components/ArticleView';
+import SnackbarNotification from '../components/SnackbarNotification';
+import useNotificationSnackbar from '../hooks/useNotificationSnackbar';
+import { getMedia } from '../services/media';
 
 const Article = observer(() => {
     const { id } = useParams();
@@ -26,7 +29,8 @@ const Article = observer(() => {
     const [article, setArticle] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const { isAuthenticated } = authStore;
+    const { isAuthenticated, user } = authStore;
+    const { isOpen, setIsOpen, message, setMessage } = useNotificationSnackbar();
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -50,33 +54,21 @@ const Article = observer(() => {
         fetchArticle();
     }, [id, isAuthenticated, navigate]);
 
-    const handleLike = async () => {
-        if (!isAuthenticated) {
-            navigate('/login');
+    const handleChangeRating = async (rating) => {
+        if (article.creator.id === user.id) {
+            setMessage('You cannot rate your own article');
+            setIsOpen(true);
             return;
         }
-        try {
-            await articlesStore.rateArticle(id, 'like');
-            const updatedArticle = await articlesStore.fetchArticle(id);
-            setArticle(updatedArticle);
-        } catch (err) {
-            setError(err.message);
-        }
-    };
 
-    const handleDislike = async () => {
-        if (!isAuthenticated) {
-            navigate('/login');
-            return;
-        }
         try {
-            await articlesStore.rateArticle(id, 'dislike');
+            await articlesStore.rateArticle(id, rating);
             const updatedArticle = await articlesStore.fetchArticle(id);
             setArticle(updatedArticle);
         } catch (err) {
             setError(err.message);
         }
-    };
+    }
 
     if (error) {
         return (
@@ -88,6 +80,7 @@ const Article = observer(() => {
 
     return (
         <Box sx={{ maxWidth: 800, mx: 'auto', py: 4 }}>
+            <SnackbarNotification open={isOpen} setOpen={setIsOpen} message={message} />
             <Card>
                 <CardContent>
                     {isLoading ? (
@@ -120,7 +113,7 @@ const Article = observer(() => {
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                                 <Avatar
                                     src={article.creator?.avatarId 
-                                        ? `https://localhost:7117/api/media/${article.creator.avatarId}`
+                                        ? getMedia(article.creator.avatarId)
                                         : '/default-avatar.png'}
                                     alt={article.creator?.displayedName || 'Anonymous'}
                                     sx={{ width: 48, height: 48, mr: 2 }}
@@ -162,7 +155,7 @@ const Article = observer(() => {
 
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                    <IconButton onClick={handleLike} color={article.userRating === 'like' ? 'primary' : 'default'}>
+                                    <IconButton onClick={() => handleChangeRating('like')} color={article.userRating === 'Like' ? 'primary' : 'default'}>
                                         {article.userRating === 'like' ? <ThumbUpIcon /> : <ThumbUpOutlinedIcon />}
                                     </IconButton>
                                     <Typography variant="body1">
@@ -170,7 +163,7 @@ const Article = observer(() => {
                                     </Typography>
                                 </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                    <IconButton onClick={handleDislike} color={article.userRating === 'dislike' ? 'primary' : 'default'}>
+                                    <IconButton onClick={() => handleChangeRating('dislike')} color={article.userRating === 'Dislike' ? 'primary' : 'default'}>
                                         {article.userRating === 'dislike' ? <ThumbDownIcon /> : <ThumbDownOutlinedIcon />}
                                     </IconButton>
                                     <Typography variant="body1">

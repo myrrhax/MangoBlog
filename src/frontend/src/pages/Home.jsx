@@ -22,6 +22,7 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import { articlesStore } from '../stores/articlesStore';
 import { useNavigate } from 'react-router-dom';
+import { getMedia } from '../services/media';
 
 const Home = observer(() => {
     const navigate = useNavigate();
@@ -108,7 +109,7 @@ const Home = observer(() => {
                                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                                             <Avatar
                                                 src={article.creator.avatarId 
-                                                    ? `https://localhost:7117/api/media/${article.creator.avatarId}`
+                                                    ? getMedia(article.creator.avatarId)
                                                     : '/default-avatar.png'}
                                                 alt={article.creator.displayedName}
                                                 sx={{ width: 40, height: 40, mr: 2 }}
