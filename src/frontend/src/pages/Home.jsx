@@ -17,7 +17,9 @@ import {
     CircularProgress,
     Alert,
     Avatar,
+    Button,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import { articlesStore } from '../stores/articlesStore';
@@ -49,8 +51,8 @@ const Home = observer(() => {
     return (
         <Box>
             <Box sx={{ mb: 4 }}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12} md={4}>
+                <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={12} md={3}>
                         <TextField
                             fullWidth
                             label="Search"
@@ -58,7 +60,7 @@ const Home = observer(() => {
                             onChange={handleQueryChange}
                         />
                     </Grid>
-                    <Grid item xs={12} md={4}>
+                    <Grid item xs={12} md={3}>
                         <FormControl fullWidth>
                             <InputLabel>Sort by Date</InputLabel>
                             <Select
@@ -72,7 +74,7 @@ const Home = observer(() => {
                             </Select>
                         </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={4}>
+                    <Grid item xs={12} md={3}>
                         <FormControl fullWidth>
                             <InputLabel>Sort by Popularity</InputLabel>
                             <Select
@@ -85,6 +87,16 @@ const Home = observer(() => {
                                 <MenuItem value="desc">Most Popular</MenuItem>
                             </Select>
                         </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={3} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <Button
+                            variant="contained"
+                            color="success"
+                            startIcon={<AddIcon />}
+                            onClick={() => navigate('/article/new')}
+                        >
+                            Add Post
+                        </Button>
                     </Grid>
                 </Grid>
             </Box>

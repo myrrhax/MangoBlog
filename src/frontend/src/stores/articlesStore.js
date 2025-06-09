@@ -77,6 +77,15 @@ class ArticlesStore {
             throw new Error(error.response?.data?.message || 'Failed to rate article');
         }
     }
+
+    async createArticle(articleData) {
+        try {
+            const response = await api.post('/articles', articleData);
+            return response.data;
+        } catch (error) {
+            throw new Error(error.response?.data?.message || 'Failed to create article');
+        }
+    }
 }
 
 export const articlesStore = new ArticlesStore(); 
