@@ -16,7 +16,10 @@ import {
     Pagination,
     CircularProgress,
     Alert,
+    Avatar,
 } from '@mui/material';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import { articlesStore } from '../stores/articlesStore';
 
 const Home = observer(() => {
@@ -128,14 +131,31 @@ const Home = observer(() => {
                             <Grid item xs={12} md={6} lg={4} key={article.id}>
                                 <Card>
                                     <CardContent>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                            <Avatar
+                                                src={article.creator.avatarId 
+                                                    ? `https://localhost:7117/api/media/${article.creator.avatarId}`
+                                                    : '/default-avatar.png'}
+                                                alt={article.creator.displayedName}
+                                                sx={{ width: 40, height: 40, mr: 2 }}
+                                            />
+                                            <Box>
+                                                <Typography variant="subtitle1">
+                                                    {article.creator.displayedName}
+                                                </Typography>
+                                                <Typography variant="caption" color="text.secondary">
+                                                    {new Date(article.creatioDate).toLocaleString('ru-RU', {
+                                                        year: 'numeric',
+                                                        month: 'long',
+                                                        day: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </Typography>
+                                            </Box>
+                                        </Box>
                                         <Typography variant="h6" gutterBottom>
                                             {article.title}
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                                            By {article.creator?.email || 'Anonymous'}
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                                            {new Date(article.creationDate).toLocaleDateString()}
                                         </Typography>
                                         <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
                                             {article.tags.map((tag) => (
@@ -151,13 +171,19 @@ const Home = observer(() => {
                                                 />
                                             ))}
                                         </Stack>
-                                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <Typography variant="body2">
-                                                Likes: {article.likes}
-                                            </Typography>
-                                            <Typography variant="body2">
-                                                Dislikes: {article.dislikes}
-                                            </Typography>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                <ThumbUpIcon fontSize="small" color="action" />
+                                                <Typography variant="body2">
+                                                    {article.likes}
+                                                </Typography>
+                                            </Box>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                <ThumbDownIcon fontSize="small" color="action" />
+                                                <Typography variant="body2">
+                                                    {article.dislikes}
+                                                </Typography>
+                                            </Box>
                                         </Box>
                                     </CardContent>
                                 </Card>
