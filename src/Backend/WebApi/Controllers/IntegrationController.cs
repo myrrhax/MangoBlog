@@ -72,4 +72,18 @@ public class IntegrationController(IMediator mediator) : ControllerBase
             ? NotFound()
             : Ok(dto);
     }
+
+    [HttpPost]
+    [Authorize]
+    [Route("tg/add-channel")]
+    public async Task<IActionResult> AttachChannelToUser([FromBody] AttachTelegramChannelDto dto)
+    {
+        Guid id = User.GetUserId()!.Value;
+        var command = new AddTelegramChatToIntegrationCommand(id, dto.ChatId, dto.ChatName);
+        Result result = await mediator.Send(command);
+
+        return result.IsSuccess
+            ? Ok()
+            : NotFound();
+    }
 }

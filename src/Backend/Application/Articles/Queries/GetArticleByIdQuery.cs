@@ -36,6 +36,6 @@ public class GetArticleByIdQueryHandler : IRequestHandler<GetArticleByIdQuery, A
             ? null
             : await _ratingsRepository.GetUserRating(request.UserId.Value, request.ArticleId, cancellationToken);
 
-        return article.MapToDto(creator);
+        return article.MapToDto(creator, userReaction.HasValue ? userReaction.Value : null);
     }
 }

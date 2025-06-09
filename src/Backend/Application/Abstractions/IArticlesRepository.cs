@@ -15,7 +15,7 @@ public interface IArticlesRepository
     Task<IEnumerable<Article>> GetUserArticles(Guid userId);
     Task<Result> DeleteArtcile(string artcileId);
     Task<IEnumerable<Article>> LoadArticles(IEnumerable<string> ids);
-    Task<IEnumerable<Article>> GetArticles(IEnumerable<string> tags,
+    Task<(IEnumerable<Article> Articles, int TotalCount)> GetArticles(IEnumerable<string> tags,
         string query,
         int page,
         int pageSize,

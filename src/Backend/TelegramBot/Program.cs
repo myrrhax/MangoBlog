@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Reflection;
 using DotNetEnv;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,7 +39,16 @@ hostBuilder.ConfigureServices((context, services) =>
     });
     services.AddScoped<UsersService>();
 
-    services.AddTransient<CommandStartHandler>();
+    IEnumerable<Type> handlers = Assembly.GetExecutingAssembly()
+        .GetTypes()
+        .Where(type => !type.IsAbstract && !type.IsInterface)
+        .Where(type => type.GetInterfaces()
+            .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IHandler<>)));
+
+    foreach (var handler in handlers)
+    {
+        services.AddScoped(handler);
+    }
 
     services.AddSingleton<Router>();
 
