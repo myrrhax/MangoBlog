@@ -17,7 +17,8 @@ internal static class MappingExtentions
             document.Tags,
             document.Likes,
             document.Dislikes,
-            document.CreationDate);
+            document.CreationDate,
+            document.CoverImageId);
     }
 
     public static ArticleDocument ToDocument(this Article article)
@@ -36,6 +37,7 @@ internal static class MappingExtentions
             Content = BsonDocument.Parse(JsonConvert.SerializeObject(article.Content)),
             Likes = article.Likes,
             Dislikes = article.Dislikes,
+            CoverImageId = article.CoverImageId
         };
     }
 }

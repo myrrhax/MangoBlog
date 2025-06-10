@@ -11,6 +11,7 @@ public class ApplicationUser
     public string PasswordHash { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
+    public string? Description { get; set; }
     public Guid? AvatarId { get; set; }
     public MediaFile? Avatar { get; set; }
     public DateOnly? BirthDate { get; set; }
