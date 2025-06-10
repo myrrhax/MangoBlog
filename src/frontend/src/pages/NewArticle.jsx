@@ -10,7 +10,7 @@ import {
     Typography,
     Chip,
     Stack,
-    Alert,
+    Alert, Avatar,
 } from '@mui/material';
 import EditorJS from '@editorjs/editorjs';
 import Header from '@editorjs/header';
@@ -20,6 +20,7 @@ import Image from '@editorjs/image';
 import { articlesStore } from '../stores/articlesStore';
 import { mediaService } from '../services/mediaService';
 import Editor from '../components/EditorJS/Editor';
+import VisuallyHiddenInput from "../components/forms/VisuallyHiddenInput.jsx";
 
 const NewArticle = observer(() => {
     const navigate = useNavigate();
@@ -28,14 +29,19 @@ const NewArticle = observer(() => {
     const [tags, setTags] = useState([]);
     const [currentTag, setCurrentTag] = useState('');
     const [error, setError] = useState(null);
-    const [media, setMedia] = useState([]);
+    const [cover, setCover] = useState('');
 
     const uploadMedia = async (file) => {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('isAvatar', false);
-        const response = await mediaService.loadMedia(formData);
-        setMedia([...media, response.data]);
+        try {
+            const response = await mediaService.loadMedia(formData);
+            return response.data.id;
+        } catch (error) {
+            setError(error.message);
+            return null;
+        }
     };
 
     const handleAddTag = (event) => {
@@ -68,10 +74,18 @@ const NewArticle = observer(() => {
 
         try {
             const editorData = await editorRef.current.save();
+            let coverId = null;
+            if (cover !== null) {
+                coverId = await uploadMedia(cover);
+                if (coverId === null) {
+                    return;
+                }
+            }
             await articlesStore.createArticle({
                 title: title.trim(),
                 content: editorData,
                 tags,
+                coverImageId: coverId,
             });
             navigate('/');
         } catch (err) {
@@ -94,6 +108,35 @@ const NewArticle = observer(() => {
                     )}
 
                     <form onSubmit={handleSubmit}>
+                        <Box component="label" sx={{ cursor: 'pointer', display: 'block', position: 'relative' }}>
+                            <Box
+                                component="img"
+                                src={cover !== '' ? cover : 'https://via.placeholder.com/600x300?text=Выберите+изображение'}
+                                alt="Cover"
+                                sx={{
+                                    width: '100%',
+                                    height: '300px',
+                                    objectFit: 'cover',
+                                    borderRadius: 2,
+                                }}
+                            />
+                            <VisuallyHiddenInput
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files[0];
+                                    if (file) {
+                                        const reader = new FileReader();
+                                        reader.onloadend = () => {
+                                            setCover(reader.result);
+                                        };
+                                        reader.readAsDataURL(file);
+                                        setCover(e);
+                                    }
+                                }}
+                            />
+                        </Box>
+
                         <TextField
                             fullWidth
                             label="Title"
@@ -102,6 +145,13 @@ const NewArticle = observer(() => {
                             margin="normal"
                             required
                         />
+
+                        <Box sx={{ mt: 2, mb: 2 }}>
+                            <Typography variant="subtitle1" gutterBottom>
+                                Content
+                            </Typography>
+                            <Editor />
+                        </Box>
 
                         <Box sx={{ mt: 2, mb: 2 }}>
                             <Typography variant="subtitle1" gutterBottom>
@@ -124,13 +174,6 @@ const NewArticle = observer(() => {
                                     />
                                 ))}
                             </Stack>
-                        </Box>
-
-                        <Box sx={{ mt: 2, mb: 2 }}>
-                            <Typography variant="subtitle1" gutterBottom>
-                                Content
-                            </Typography>
-                            <Editor />
                         </Box>
 
                         <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>

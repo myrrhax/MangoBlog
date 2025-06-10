@@ -16,18 +16,7 @@ import { styled } from '@mui/material/styles';
 import useRegistrationForm from "../../hooks/useRegistrationForm.jsx";
 import FormInputField from "../forms/FormInputField..jsx";
 import {Link} from "react-router-dom";
-
-const VisuallyHiddenInput = styled('input')({
-    clip: 'rect(0 0 0 0)',
-    clipPath: 'inset(50%)',
-    height: 1,
-    overflow: 'hidden',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    whiteSpace: 'nowrap',
-    width: 1,
-});
+import VisuallyHiddenInput from "../forms/VisuallyHiddenInput.jsx";
 
 const StyledDateInput = styled('input')({
     width: '100%',
