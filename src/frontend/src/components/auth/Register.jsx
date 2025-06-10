@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { observer } from 'mobx-react-lite';
 import { authStore } from '../../stores/authStore';
 import {
@@ -15,6 +15,7 @@ import {
 import { styled } from '@mui/material/styles';
 import useRegistrationForm from "../../hooks/useRegistrationForm.jsx";
 import FormInputField from "../forms/FormInputField..jsx";
+import {Link} from "react-router-dom";
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -76,7 +77,7 @@ const Register = observer(() => {
     const today = new Date();
     const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate()); 
     const maxDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
-    const [formik] = useRegistrationForm(minDate, maxDate);
+    const [formik, onPasswordChange] = useRegistrationForm(minDate, maxDate);
 
     const formatDateForInput = (date) => {
         return date.toISOString().split('T')[0];
@@ -91,6 +92,14 @@ const Register = observer(() => {
             reader.readAsDataURL(file);
         }
     };
+
+    useEffect(() => {
+        authStore.clearErrors();
+
+        return () => {
+            authStore.clearErrors();
+        }
+    }, []);
 
     return (
         <Container component="main" maxWidth="xs">
@@ -164,8 +173,8 @@ const Register = observer(() => {
                         label={"Имя"}
                         value={formik.values.firstName}
                         onChange={formik.handleChange}
-                        error={formik.touched.firstName && Boolean(formik.errors.firstName)}
-                        helperText={formik.touched.firstName && formik.errors.firstName}
+                        error={formik.touched.firstName && Boolean(formik.errors.firstName) || authStore.validationErrors.firstName}
+                        helperText={formik.touched.firstName && formik.errors.firstName || authStore.validationErrors.firstName}
                     />
 
                     <FormInputField
@@ -174,8 +183,8 @@ const Register = observer(() => {
                         label={"Фамилия"}
                         value={formik.values.lastName}
                         onChange={formik.handleChange}
-                        error={formik.touched.lastName && Boolean(formik.errors.lastName)}
-                        helperText={formik.touched.lastName && formik.errors.lastName}
+                        error={formik.touched.lastName && Boolean(formik.errors.lastName) || authStore.validationErrors.lastName}
+                        helperText={formik.touched.lastName && formik.errors.lastName || authStore.validationErrors.lastName}
                     />
 
                     <Box sx={{ mt: 2 }}>
@@ -201,8 +210,8 @@ const Register = observer(() => {
                         label={"Логин"}
                         value={formik.values.login}
                         onChange={formik.handleChange}
-                        error={formik.touched.login && Boolean(formik.errors.login)}
-                        helperText={formik.touched.login && formik.errors.login}
+                        error={formik.touched.login && Boolean(formik.errors.login) || authStore.validationErrors.login}
+                        helperText={formik.touched.login && formik.errors.login || authStore.validationErrors.login}
                     />
 
                     <FormInputField
@@ -212,8 +221,8 @@ const Register = observer(() => {
                         type={"email"}
                         value={formik.values.email}
                         onChange={formik.handleChange}
-                        error={formik.touched.email && Boolean(formik.errors.email)}
-                        helperText={formik.touched.email && formik.errors.email}
+                        error={formik.touched.email && Boolean(formik.errors.email) || authStore.validationErrors.email}
+                        helperText={formik.touched.email && formik.errors.email || authStore.validationErrors.email}
                     />
 
                     <FormInputField
@@ -222,9 +231,9 @@ const Register = observer(() => {
                         label={"Пароль"}
                         type={"password"}
                         value={formik.values.password}
-                        onChange={formik.handleChange}
-                        error={formik.touched.password && Boolean(formik.errors.password)}
-                        helperText={formik.touched.password && formik.errors.password}
+                        onChange={onPasswordChange}
+                        error={formik.touched.password && Boolean(formik.errors.password) || authStore.validationErrors.password}
+                        helperText={formik.touched.password && formik.errors.password || authStore.validationErrors.password}
                     />
 
                     <FormInputField
@@ -265,7 +274,7 @@ const Register = observer(() => {
                                 },
                             }}
                         >
-                            Already have an account? Sign In
+                            Уже есть аккаунт? Войти.
                         </MuiLink>
                     </Box>
                 </Box>

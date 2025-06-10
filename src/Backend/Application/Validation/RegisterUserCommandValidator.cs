@@ -5,7 +5,6 @@ namespace Application.Validation;
 
 public class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
 {
-    public const string ValidLoginRegex = "^[a-zA-Z]+$";
     private const int MinAge = 3;
     private const int MaxAge = 110;
     private const string ValidNameFormatRegex = "^([А-Яа-яЁё]+|[A-Za-z]+)$";
@@ -16,9 +15,7 @@ public class RegisterUserCommandValidator : AbstractValidator<RegisterUserComman
             .MinimumLength(4)
             .WithMessage("Login is too short")
             .MaximumLength(15)
-            .WithMessage("Login is too long")
-            .Matches(ValidLoginRegex)
-            .WithMessage("Login must contain only letters of the English alphabet");
+            .WithMessage("Login is too long");
 
         RuleFor(command => command.Email)
             .EmailAddress()

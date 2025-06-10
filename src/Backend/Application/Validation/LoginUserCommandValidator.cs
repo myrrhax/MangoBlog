@@ -11,9 +11,7 @@ public class LoginUserCommandValidator : AbstractValidator<LoginUserCommand>
             .MinimumLength(4)
             .WithMessage("Login is too short")
             .MaximumLength(15)
-            .WithMessage("Login is too long")
-            .Matches(RegisterUserCommandValidator.ValidLoginRegex)
-            .WithMessage("Login must contain only letters of the English alphabet");
+            .WithMessage("Login is too long");
 
         RuleFor(command => command.Password)
             .MinimumLength(5)

@@ -77,7 +77,6 @@ class AuthStore {
                 if (error.response.data.errors) {
                     this.parseValidationErrors(error.response.data.errors);
                 }
-            } else {
                 this.setError(error.response.data.message ?? 'Registration failed');
             }
             return false;
@@ -92,19 +91,25 @@ class AuthStore {
         this.setAuthenticated(false);
     }
 
+    clearErrors() {
+        this.error = null;
+        this.validationErrors = [];
+    }
+
     updateUserInfo(response) {
         const { user, accessToken } = response.data;
         localStorage.setItem('accessToken', accessToken);
         this.isAuthenticated = true;
         this.user = user;
+        this.clearErrors();
     }
 
     parseValidationErrors(errors) {
-        this.validationErrors.login = errors.Login;
-        this.validationErrors.password = errors.Password;
-        this.validationErrors.email = errors.Email;
-        this.validationErrors.FirstName = errors.FirstName;
-        this.validationErrors.LastName = errors.LastName;
+        this.validationErrors.login = errors.Login ? errors.Login.join('\n') : null;
+        this.validationErrors.password = errors.Password ? errors.Password.join('\n') : null;
+        this.validationErrors.email = errors.Email ? errors.Email.join('\n') : null;
+        this.validationErrors.FirstName = errors.FirstName ? errors.FirstName.join('\n') : null;
+        this.validationErrors.LastName = errors.LastName ? errors.LastName.join('\n') : null;
     }
 }
 

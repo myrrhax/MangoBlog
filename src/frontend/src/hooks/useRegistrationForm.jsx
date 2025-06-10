@@ -84,7 +84,12 @@ const useRegistrationForm = (minDate, maxDate) => {
         },
     });
 
-    return [formik];
+    const onPasswordChange = (value) => {
+        formik.handleChange(value);
+        authStore.validationErrors.password = null;
+    }
+
+    return [formik, onPasswordChange];
 }
 
 export default useRegistrationForm;
