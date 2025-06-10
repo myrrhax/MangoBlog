@@ -33,11 +33,6 @@ const Article = observer(() => {
     const { isOpen, setIsOpen, message, setMessage } = useNotificationSnackbar();
 
     useEffect(() => {
-        if (!isAuthenticated) {
-            navigate('/login');
-            return;
-        }
-
         const fetchArticle = async () => {
             try {
                 setIsLoading(true);

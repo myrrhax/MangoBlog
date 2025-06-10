@@ -30,13 +30,11 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        // If error is 401 and we haven't tried to refresh token yet
         if (error.response.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
             try {
-                // Try to refresh token
-                const response = await api.post('/auth/refresh');
+                const response = await api.post('/users/refresh');
                 const { accessToken } = response.data;
                 
                 // Store new access token
@@ -57,37 +55,6 @@ api.interceptors.response.use(
     }
 );
 
-export const authService = {
-    login: (credentials) => api.post('/users/login', credentials, {
-        withCredentials: true,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    }),
-    register: (userData) => api.post('/users/register', userData, {
-        withCredentials: true,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    }),
-    refreshToken: () => api.post('/users/refresh', {
-        withCredentials: true,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    }),
-    getCurrentUser: () => api.get('/users/me', {
-        withCredentials: true,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    }),
-    getMedia: (id) => api.get(`/media/${id}`),
-    loadMedia: (formData) => api.post('/media/upload', formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data',
-        }
-    })
-};
+
 
 export default api; 

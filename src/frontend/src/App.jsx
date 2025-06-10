@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
-import { CssBaseline, ThemeProvider } from '@mui/material';
+import { CssBaseline, ThemeProvider, CircularProgress, Box } from '@mui/material';
 import { theme } from './theme';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
@@ -10,6 +10,7 @@ import NewArticle from './pages/NewArticle';
 import MainLayout from './components/layout/MainLayout';
 import AuthLayout from './components/layout/AuthLayout';
 import { authStore } from './stores/authStore';
+import { useEffect, useState } from 'react';
 
 const PrivateRoute = observer(({ children }) => {
     if (!authStore.isAuthenticated) {
@@ -26,6 +27,34 @@ const AuthRoute = observer(({ children }) => {
 });
 
 const App = observer(() => {
+    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            await authStore.checkAuth();
+            setIsCheckingAuth(false);
+        };
+        checkAuth();
+    }, []);
+
+    if (isCheckingAuth) {
+        return (
+            <ThemeProvider theme={theme}>
+                <CssBaseline />
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        minHeight: '100vh'
+                    }}
+                >
+                    <CircularProgress />
+                </Box>
+            </ThemeProvider>
+        );
+    }
+
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />

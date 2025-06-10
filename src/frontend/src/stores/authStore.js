@@ -9,7 +9,6 @@ class AuthStore {
 
     constructor() {
         makeAutoObservable(this);
-        this.checkAuth();
     }
 
     async checkAuth() {
