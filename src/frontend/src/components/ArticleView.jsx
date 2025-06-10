@@ -1,8 +1,8 @@
 import React from 'react';
 import { Box, Typography, List, ListItem, ListItemText, Checkbox } from '@mui/material';
+import DOMPurify from "dompurify";
 
 const ArticleView = ({ data }) => {
-    console.log(data);
     const renderBlock = (block) => {
         switch (block.type) {
             case 'header':
@@ -17,9 +17,8 @@ const ArticleView = ({ data }) => {
                 );
             case 'paragraph':
                 return (
-                    <Typography paragraph>
-                        {block.data.text}
-                    </Typography>
+                    <Typography paragraph
+                        dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(block.data.text) }} />
                 );
             case 'image':
                 return (

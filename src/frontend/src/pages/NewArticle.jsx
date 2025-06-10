@@ -30,15 +30,14 @@ const NewArticle = observer(() => {
     const [currentTag, setCurrentTag] = useState('');
     const [error, setError] = useState(null);
     const [cover, setCover] = useState('');
+    const [coverFile, setCoverFile] = useState(null);
 
     const uploadMedia = async (file) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('isAvatar', false);
         try {
-            const response = await mediaService.loadMedia(formData);
+            const response = await mediaService.loadMedia(file, false);
             return response.data.id;
         } catch (error) {
+            console.log(error);
             setError(error.message);
             return null;
         }
@@ -76,7 +75,7 @@ const NewArticle = observer(() => {
             const editorData = await editorRef.current.save();
             let coverId = null;
             if (cover !== null) {
-                coverId = await uploadMedia(cover);
+                coverId = await uploadMedia(coverFile);
                 if (coverId === null) {
                     return;
                 }
@@ -131,7 +130,7 @@ const NewArticle = observer(() => {
                                             setCover(reader.result);
                                         };
                                         reader.readAsDataURL(file);
-                                        setCover(e);
+                                        setCoverFile(file);
                                     }
                                 }}
                             />
@@ -150,7 +149,7 @@ const NewArticle = observer(() => {
                             <Typography variant="subtitle1" gutterBottom>
                                 Content
                             </Typography>
-                            <Editor />
+                            <Editor editorRef={editorRef} />
                         </Box>
 
                         <Box sx={{ mt: 2, mb: 2 }}>

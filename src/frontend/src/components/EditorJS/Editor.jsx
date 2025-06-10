@@ -1,10 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import EditorJS from '@editorjs/editorjs';
 import { EDITOR_JS_CONFIG } from './EditorConfig';
 
-const Editor = ({ onChange, initialData, readOnly = false }) => {
-    const editorRef = useRef(null);
-
+const Editor = ({ onChange, initialData, readOnly = false, editorRef }) => {
     useEffect(() => {
         if (!editorRef.current) {
             editorRef.current = new EditorJS({
@@ -24,7 +22,7 @@ const Editor = ({ onChange, initialData, readOnly = false }) => {
                 editorRef.current.destroy();
             }
         };
-    }, [onChange, initialData, readOnly]);
+    }, [onChange, initialData, readOnly, editorRef]);
 
     return (
         <div 
