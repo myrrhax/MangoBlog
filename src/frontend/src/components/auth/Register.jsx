@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
-import { useFormik } from 'formik';
 import { observer } from 'mobx-react-lite';
-import { useNavigate, Link } from 'react-router-dom';
 import { authStore } from '../../stores/authStore';
 import {
     Box,
     Avatar,
-    TextField,
     Button,
     Typography,
     Container,
@@ -16,8 +13,8 @@ import {
     Link as MuiLink,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import {mediaService} from "../../services/mediaService.js";
 import useRegistrationForm from "../../hooks/useRegistrationForm.jsx";
+import FormInputField from "../forms/FormInputField..jsx";
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -161,28 +158,20 @@ const Register = observer(() => {
                         </Typography>
                     </Box>
 
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        id="firstName"
-                        label="First Name"
-                        name="firstName"
-                        autoComplete="given-name"
+                    <FormInputField
+                        id={"firstName"}
+                        name={"firstName"}
+                        label={"Имя"}
                         value={formik.values.firstName}
                         onChange={formik.handleChange}
                         error={formik.touched.firstName && Boolean(formik.errors.firstName)}
                         helperText={formik.touched.firstName && formik.errors.firstName}
                     />
 
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        id="lastName"
-                        label="Last Name"
-                        name="lastName"
-                        autoComplete="family-name"
+                    <FormInputField
+                        id={"lastName"}
+                        name={"lastName"}
+                        label={"Фамилия"}
                         value={formik.values.lastName}
                         onChange={formik.handleChange}
                         error={formik.touched.lastName && Boolean(formik.errors.lastName)}
@@ -206,58 +195,43 @@ const Register = observer(() => {
                         )}
                     </Box>
 
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        id="login"
-                        label="Login"
-                        name="login"
-                        autoComplete="username"
+                    <FormInputField
+                        id={"login"}
+                        name={"login"}
+                        label={"Логин"}
                         value={formik.values.login}
                         onChange={formik.handleChange}
                         error={formik.touched.login && Boolean(formik.errors.login)}
                         helperText={formik.touched.login && formik.errors.login}
                     />
 
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        name="email"
-                        label="Email"
-                        type="email"
-                        id="email"
-                        autoComplete="email"
+                    <FormInputField
+                        id={"email"}
+                        name={"email"}
+                        label={"Почта"}
+                        type={"email"}
                         value={formik.values.email}
                         onChange={formik.handleChange}
                         error={formik.touched.email && Boolean(formik.errors.email)}
+                        helperText={formik.touched.email && formik.errors.email}
                     />
 
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        name="password"
-                        label="Password"
-                        type="password"
-                        id="password"
-                        autoComplete="new-password"
+                    <FormInputField
+                        id={"password"}
+                        name={"password"}
+                        label={"Пароль"}
+                        type={"password"}
                         value={formik.values.password}
                         onChange={formik.handleChange}
                         error={formik.touched.password && Boolean(formik.errors.password)}
                         helperText={formik.touched.password && formik.errors.password}
                     />
 
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        name="confirmPassword"
-                        label="Confirm Password"
-                        type="password"
-                        id="confirmPassword"
-                        autoComplete="new-password"
+                    <FormInputField
+                        id={"confirmPassword"}
+                        name={"confirmPassword"}
+                        label={"Подтвердите пароль"}
+                        type={"password"}
                         value={formik.values.confirmPassword}
                         onChange={formik.handleChange}
                         error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
