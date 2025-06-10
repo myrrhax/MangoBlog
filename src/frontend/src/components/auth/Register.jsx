@@ -13,9 +13,11 @@ import {
     Paper,
     Alert,
     CircularProgress,
-    Link as MuiLink
+    Link as MuiLink,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import {mediaService} from "../../services/mediaService.js";
+import useRegistrationForm from "../../hooks/useRegistrationForm.jsx";
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -29,10 +31,59 @@ const VisuallyHiddenInput = styled('input')({
     width: 1,
 });
 
-const Register = observer(() => {
-    const navigate = useNavigate();
-    const [avatarPreview, setAvatarPreview] = useState(null);
+const StyledDateInput = styled('input')({
+    width: '100%',
+    padding: '16.5px 14px',
+    marginTop: '10px',
+    marginBottom: '10px',
+    border: '1px solid rgba(0, 0, 0, 0.23)',
+    borderRadius: '4px',
+    fontSize: '1rem',
+    fontFamily: 'inherit',
+    '&:hover': {
+        borderColor: 'rgba(0, 0, 0, 0.87)',
+    },
+    '&:focus': {
+        outline: 'none',
+        borderColor: '#1976d2',
+        borderWidth: '2px',
+    },
+    '&:focus-visible': {
+        outline: 'none',
+    },
+});
 
+const InputLabel = styled('label')({
+    display: 'block',
+    marginBottom: '8px',
+    color: 'rgba(0, 0, 0, 0.6)',
+    fontSize: '0.875rem',
+    fontWeight: 400,
+    lineHeight: 1.43,
+    letterSpacing: '0.01071em',
+});
+
+const ErrorText = styled('p')({
+    color: '#d32f2f',
+    margin: '3px 14px 0',
+    fontSize: '0.75rem',
+    textAlign: 'left',
+    fontFamily: '"Roboto","Helvetica","Arial",sans-serif',
+    fontWeight: 400,
+    lineHeight: 1.66,
+    letterSpacing: '0.03333em',
+});
+
+const Register = observer(() => {
+    const [avatarPreview, setAvatarPreview] = useState('');
+    const today = new Date();
+    const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate()); 
+    const maxDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+    const [formik] = useRegistrationForm(minDate, maxDate);
+
+    const formatDateForInput = (date) => {
+        return date.toISOString().split('T')[0];
+    };
     const handleAvatarChange = (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -43,43 +94,6 @@ const Register = observer(() => {
             reader.readAsDataURL(file);
         }
     };
-
-    const formik = useFormik({
-        initialValues: {
-            login: '',
-            password: '',
-            confirmPassword: '',
-            avatar: null,
-        },
-        validate: (values) => {
-            const errors = {};
-            if (!values.login) {
-                errors.login = 'Required';
-            }
-            if (!values.password) {
-                errors.password = 'Required';
-            } else if (values.password.length < 6) {
-                errors.password = 'Password must be at least 6 characters';
-            }
-            if (!values.confirmPassword) {
-                errors.confirmPassword = 'Required';
-            } else if (values.password !== values.confirmPassword) {
-                errors.confirmPassword = 'Passwords do not match';
-            }
-            return errors;
-        },
-        onSubmit: async (values) => {
-            const success = await authStore.register(
-                values.login,
-                values.password,
-                values.confirmPassword,
-                values.avatar
-            );
-            if (success) {
-                navigate('/login');
-            }
-        },
-    });
 
     return (
         <Container component="main" maxWidth="xs">
@@ -120,7 +134,7 @@ const Register = observer(() => {
                         }}
                     >
                         <Avatar
-                            src={avatarPreview}
+                            src={(avatarPreview === '' ? null : avatarPreview)}
                             sx={{
                                 width: 120,
                                 height: 120,
@@ -151,6 +165,51 @@ const Register = observer(() => {
                         margin="normal"
                         required
                         fullWidth
+                        id="firstName"
+                        label="First Name"
+                        name="firstName"
+                        autoComplete="given-name"
+                        value={formik.values.firstName}
+                        onChange={formik.handleChange}
+                        error={formik.touched.firstName && Boolean(formik.errors.firstName)}
+                        helperText={formik.touched.firstName && formik.errors.firstName}
+                    />
+
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="lastName"
+                        label="Last Name"
+                        name="lastName"
+                        autoComplete="family-name"
+                        value={formik.values.lastName}
+                        onChange={formik.handleChange}
+                        error={formik.touched.lastName && Boolean(formik.errors.lastName)}
+                        helperText={formik.touched.lastName && formik.errors.lastName}
+                    />
+
+                    <Box sx={{ mt: 2 }}>
+                        <InputLabel htmlFor="birthDate">Birth Date *</InputLabel>
+                        <StyledDateInput
+                            id="birthDate"
+                            name="birthDate"
+                            type="date"
+                            value={formik.values.birthDate}
+                            onChange={formik.handleChange}
+                            required
+                            min={formatDateForInput(minDate)}
+                            max={formatDateForInput(maxDate)}
+                        />
+                        {formik.touched.birthDate && formik.errors.birthDate && (
+                            <ErrorText>{formik.errors.birthDate}</ErrorText>
+                        )}
+                    </Box>
+
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
                         id="login"
                         label="Login"
                         name="login"
@@ -159,6 +218,20 @@ const Register = observer(() => {
                         onChange={formik.handleChange}
                         error={formik.touched.login && Boolean(formik.errors.login)}
                         helperText={formik.touched.login && formik.errors.login}
+                    />
+
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        name="email"
+                        label="Email"
+                        type="email"
+                        id="email"
+                        autoComplete="email"
+                        value={formik.values.email}
+                        onChange={formik.handleChange}
+                        error={formik.touched.email && Boolean(formik.errors.email)}
                     />
 
                     <TextField

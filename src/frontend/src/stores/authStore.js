@@ -1,11 +1,13 @@
 import { makeAutoObservable } from 'mobx';
 import { authService } from '../services/authService';
+import { mediaService } from '../services/mediaService';
 
 class AuthStore {
     user = null;
     isAuthenticated = false;
     isLoading = false;
     error = null;
+    validationErrors = [];
 
     constructor() {
         makeAutoObservable(this);
@@ -48,9 +50,7 @@ class AuthStore {
         this.setError(null);
         try {
             const response = await authService.login({ login, password });
-            const { accessToken } = response.data;
-            localStorage.setItem('accessToken', accessToken);
-            await this.checkAuth();
+            this.updateUserInfo(response.data);
             return true;
         } catch (error) {
             this.setError(error.response?.data?.message || 'Login failed');
@@ -60,22 +60,26 @@ class AuthStore {
         }
     }
 
-    async register(email, password, confirmPassword, avatar) {
+    async register(login, password, email, firstName, lastName, birthDate, avatarId = null) {
         this.setLoading(true);
         this.setError(null);
         try {
-            const formData = new FormData();
-            formData.append('email', email);
-            formData.append('password', password);
-            formData.append('confirmPassword', confirmPassword);
-            if (avatar) {
-                formData.append('avatar', avatar);
-            }
-
-            await authService.register(formData);
-            return true;
+            const response = await authService.register({login: login,
+                password: password,
+                email: email,
+                firstName: firstName,
+                lastName: lastName,
+                birthDate: birthDate,
+                avatarId: avatarId});
+            this.updateUserInfo(response.data);
         } catch (error) {
-            this.setError(error.response?.data?.message || 'Registration failed');
+            if (error.response.status === 400) {
+                if (error.response.data.errors) {
+                    this.parseValidationErrors(error.response.data.errors);
+                }
+            } else {
+                this.setError(error.response.data.message ?? 'Registration failed');
+            }
             return false;
         } finally {
             this.setLoading(false);
@@ -86,6 +90,21 @@ class AuthStore {
         localStorage.removeItem('accessToken');
         this.setUser(null);
         this.setAuthenticated(false);
+    }
+
+    updateUserInfo(response) {
+        const { user, accessToken } = response.data;
+        localStorage.setItem('accessToken', accessToken);
+        this.isAuthenticated = true;
+        this.user = user;
+    }
+
+    parseValidationErrors(errors) {
+        this.validationErrors.login = errors.Login;
+        this.validationErrors.password = errors.Password;
+        this.validationErrors.email = errors.Email;
+        this.validationErrors.FirstName = errors.FirstName;
+        this.validationErrors.LastName = errors.LastName;
     }
 }
 

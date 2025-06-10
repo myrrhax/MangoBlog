@@ -27,11 +27,7 @@ export const EDITOR_JS_TOOLS = {
             uploader: {
                 uploadByFile(file) {
                     return new Promise((resolve, reject) => {
-                        const formData = new FormData();
-                        formData.append('file', file);
-                        formData.append('isAvatar', false);
-                        
-                        mediaService.loadMedia(formData)
+                        mediaService.loadMedia(file)
                             .then(response => {
                                 resolve({
                                     success: 1,
