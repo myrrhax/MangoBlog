@@ -22,6 +22,7 @@ class AuthStore {
 
         try {
             const response = await authService.getCurrentUser();
+            console.log(response);
             this.setUser(response.data);
             this.setAuthenticated(true);
         } catch (error) {
@@ -72,7 +73,10 @@ class AuthStore {
                 birthDate: birthDate,
                 avatarId: avatarId});
             this.updateUserInfo(response.data);
+
+            return true;
         } catch (error) {
+            console.log(error);
             if (error.response.status === 400) {
                 if (error.response.data.errors) {
                     this.parseValidationErrors(error.response.data.errors);
@@ -96,8 +100,8 @@ class AuthStore {
         this.validationErrors = [];
     }
 
-    updateUserInfo(response) {
-        const { user, accessToken } = response.data;
+    updateUserInfo(data) {
+        const { user, accessToken } = data;
         localStorage.setItem('accessToken', accessToken);
         this.isAuthenticated = true;
         this.user = user;
