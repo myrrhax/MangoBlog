@@ -12,6 +12,8 @@ internal class ArticleDocument
     
     public string Title { get; set; } = string.Empty;
     public BsonDocument Content { get; set; } = null!;
+    [BsonRepresentation(BsonType.String)]
+    public Guid? CoverImageId { get; set; }
     
     [BsonRepresentation(BsonType.String)]
     public Guid CreatorId { get; set; }

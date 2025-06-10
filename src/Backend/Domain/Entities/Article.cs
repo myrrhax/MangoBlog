@@ -4,6 +4,7 @@ public class Article
 {
     public string Id { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
+    public Guid? CoverImageId { get; set; }
     public Dictionary<string, object> Content { get; set; } = [];
     public Guid CreatorId { get; set; }
     public DateTime CreationDate { get; set; }
