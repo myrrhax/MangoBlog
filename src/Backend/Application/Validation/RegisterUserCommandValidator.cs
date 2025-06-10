@@ -24,11 +24,6 @@ public class RegisterUserCommandValidator : AbstractValidator<RegisterUserComman
             .EmailAddress()
             .WithMessage("Invalid email");
 
-        RuleFor(command => command.AvatarUrl)
-            .Must(url => Uri.TryCreate(url, UriKind.Absolute, out var _))
-            .When(command => command.AvatarUrl is not null)
-            .WithMessage("Invalid image url");
-
         RuleFor(command => command.BirthDate)
             .Must(IsAgeValid)
             .WithMessage("Invalid birth date");

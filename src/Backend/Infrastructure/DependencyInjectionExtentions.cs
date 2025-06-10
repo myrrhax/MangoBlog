@@ -46,6 +46,8 @@ public static class DependencyInjectionExtentions
             return factory.CreateConnection();
         });
 
+        services.AddScoped<IPublisher, Publisher>();
+
         return services;
     }
 
