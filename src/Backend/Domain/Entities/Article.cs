@@ -13,7 +13,8 @@ public class Article
     public int Dislikes { get; set; }
 
     public Article(string id, string title, Dictionary<string, object> content, 
-        Guid creatorId, ICollection<string> tags, int likes, int dislikes, DateTime? creationDate = null)
+        Guid creatorId, ICollection<string> tags, int likes, int dislikes,
+        DateTime? creationDate = null, Guid? coverImageId = null)
     {
         Id = id;
         Title = title;
@@ -23,6 +24,7 @@ public class Article
         CreationDate = creationDate ?? DateTime.UtcNow;
         Likes = likes;
         Dislikes = dislikes;
+        CoverImageId = coverImageId;
     }
 
     public Article()

@@ -51,7 +51,8 @@ internal static class MappingExtentions
             entity.CreationDate.ToLocalTime(), 
             entity.Likes, 
             entity.Dislikes,
-            reaction?.ToString());
+            reaction?.ToString(),
+            entity.CoverImageId);
     }
 
     public static IntegrationDto MapToDto(this Integration entity)
