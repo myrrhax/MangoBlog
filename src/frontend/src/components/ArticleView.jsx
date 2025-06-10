@@ -1,7 +1,8 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, List, ListItem, ListItemText, Checkbox } from '@mui/material';
 
 const ArticleView = ({ data }) => {
+    console.log(data);
     const renderBlock = (block) => {
         switch (block.type) {
             case 'header':
@@ -20,8 +21,53 @@ const ArticleView = ({ data }) => {
                         {block.data.text}
                     </Typography>
                 );
+            case 'image':
+                return (
+                    <Box sx={{ my: 2 }}>
+                        <img src={block.data.file.url} alt={block.data.caption} />
+                    </Box>
+                );
+            case 'list':
+                const ListComponent = block.data.style === 'ordered' ? 'ol' : 'ul';
+                return (
+                    <List component={ListComponent}>
+                        {block.data.items.map((item, index) => (
+                            <ListItem key={index}>
+                                {block.data.style === 'checklist' && (
+                                    <Checkbox
+                                        checked={item.meta.checked || false}
+                                        disabled
+                                        sx={{ mr: 1 }}
+                                    />
+                                )}
+                                <ListItemText 
+                                    primary={item.content}
+                                    sx={{
+                                        '& .MuiListItemText-primary': {
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1
+                                        }
+                                    }}
+                                />
+                                {block.data.style === 'marked' && (
+                                    <Box
+                                        component="span"
+                                        sx={{
+                                            width: 8,
+                                            height: 8,
+                                            borderRadius: '50%',
+                                            backgroundColor: 'primary.main',
+                                            display: 'inline-block',
+                                            marginRight: 1
+                                        }}
+                                    />
+                                )}
+                            </ListItem>
+                        ))}
+                    </List>
+                );
             case 'video':
-                // Extract video ID from YouTube URL
                 const getYouTubeId = (url) => {
                     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
                     const match = url.match(regExp);

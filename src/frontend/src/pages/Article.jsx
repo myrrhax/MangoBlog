@@ -113,7 +113,7 @@ const Article = observer(() => {
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                                 <Avatar
                                     src={article.creator?.avatarId 
-                                        ? mediaService.getMedia(article.creator.avatarId)
+                                        ? mediaService.makeImageUrl(article.creator.avatarId)
                                         : '/default-avatar.png'}
                                     alt={article.creator?.displayedName || 'Anonymous'}
                                     sx={{ width: 48, height: 48, mr: 2 }}

@@ -50,7 +50,7 @@ const Header = observer(() => {
                                     <span className="sr-only">Open user menu</span>
                                     {user?.avatarId ? (
                                         <img 
-                                            src={mediaService.getMedia(user.avatarId)} 
+                                            src={mediaService.makeImageUrl(user.avatarId)} 
                                             alt={user?.displayedName || 'User'} 
                                             className="h-8 w-8 rounded-full" 
                                         />

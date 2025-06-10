@@ -55,7 +55,8 @@ class ArticlesStore {
             this.setArticles(response.data.articles);
             this.setTotalPages(response.data.totalPages);
         } catch (error) {
-            this.setError(error.response?.data?.message || 'Failed to fetch articles');
+            this.setArticles([]);
+            this.setTotalPages(0);
         } finally {
             this.setLoading(false);
         }
