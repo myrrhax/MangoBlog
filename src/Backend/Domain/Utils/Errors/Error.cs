@@ -46,6 +46,9 @@ public class MediaNotFound(Guid mediaId)
 public class InvalidMediaFormat(Guid mediaId, MediaFileType type)
     : Error($"Media file {mediaId} have invalid format: {type.ToString()}");
 
+public class MediaIsNotAvatar()
+    : Error($"Media file must be an avatar");
+
 public class InvalidApiToken() : Error("Invalid token");
 
 public class IntegrationAlreadyExists(string type, Guid userId)

@@ -2,6 +2,7 @@
 using Application.Dto;
 using Application.Extentions;
 using Domain.Entities;
+using Domain.Enums;
 using Domain.Utils;
 using Domain.Utils.Errors;
 using FluentValidation;
@@ -54,6 +55,15 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         MediaFile? avatar = request.AvatarId.HasValue
             ? await _mediaFileService.GetMediaFile(request.AvatarId.Value)
             : null;
+
+        if (avatar is { IsAvatar: false })
+        {
+            return Result.Failure<RegistrationResponse>(new MediaIsNotAvatar());
+        }
+        else if (avatar is { FileType: MediaFileType.Video })
+        {
+            return Result.Failure<RegistrationResponse>(new InvalidMediaFormat(avatar.Id, MediaFileType.Video));
+        }
 
         var user = new ApplicationUser(login: request.Login, email: request.Email,
             hash: hashedPassword, firstName: request.FirstName,
