@@ -3,6 +3,7 @@ using Infrastructure;
 using Application.Extentions;
 using Infrastructure.Utils;
 using WebApi.Middlewares;
+using Application.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,6 +53,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+using var scope = app.Services.CreateScope();
+var publisher = scope.ServiceProvider.GetRequiredService<IPublisher>();
+publisher.PublishMessage("1123", "Привет!");
+
 app.UseCors("AllowClient");
 app.UseHttpsRedirection();
 

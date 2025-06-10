@@ -53,6 +53,7 @@ hostBuilder.ConfigureServices((context, services) =>
     services.AddSingleton<Router>();
 
     services.AddHostedService<BotListenerService>();
+    services.AddHostedService<PublicationsListener>();
 });
 
 var host = hostBuilder.Build();
