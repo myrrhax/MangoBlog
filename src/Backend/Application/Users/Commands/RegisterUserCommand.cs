@@ -15,7 +15,7 @@ public record RegisterUserCommand(string Login,
     string FirstName, 
     string LastName,
     DateOnly BirthDate,
-    string? AvatarUrl = null) : IRequest<Result<RegistrationResponse>>;
+    Guid? AvatarId = null) : IRequest<Result<RegistrationResponse>>;
 
 public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Result<RegistrationResponse>>
 {
@@ -51,7 +51,9 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
             return Result.Failure<RegistrationResponse>(new EmailOrLoginAlreadyTaken(request.Login, request.Email));
 
         string hashedPassword = _passwordHasher.HashPassword(request.Password);
-        MediaFile? avatar = await GetAvatarFromUrl(request.AvatarUrl);
+        MediaFile? avatar = request.AvatarId.HasValue
+            ? await _mediaFileService.GetMediaFile(request.AvatarId.Value)
+            : null;
 
         var user = new ApplicationUser(login: request.Login, email: request.Email,
             hash: hashedPassword, firstName: request.FirstName,
@@ -68,22 +70,6 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
         return writeTokenResult.IsSuccess
             ? Result.Success<RegistrationResponse>(new(writeTokenResult.Value.AccessToken, writeTokenResult.Value.RefreshToken, user.MapToFullInfo()))
             : Result.Failure<RegistrationResponse>(new UnableToWriteTokens());
-    }
-
-    private async Task<MediaFile?> GetAvatarFromUrl(string? avatarUrl)
-    {
-        if (avatarUrl is null)
-            return null;
-
-        Uri.TryCreate(avatarUrl, UriKind.Absolute, out Uri? uri);
-        string? avatarName = uri?.Segments?.Last()?.TrimEnd('/');
-
-        if (!Guid.TryParse(avatarName, out Guid id))
-            return null;
-
-        return avatarName is not null
-            ? await _mediaFileService.GetMediaFile(id)
-            : null;
     }
 
     private async Task<bool> VerifyIsLoginOrEmailTaken(string login, string email, CancellationToken cancellationToken)
