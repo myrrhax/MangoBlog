@@ -60,11 +60,19 @@ class AuthStore {
         }
     }
 
-    async register(email, password, confirmPassword) {
+    async register(email, password, confirmPassword, avatar) {
         this.setLoading(true);
         this.setError(null);
         try {
-            await authService.register({ email, password, confirmPassword });
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('password', password);
+            formData.append('confirmPassword', confirmPassword);
+            if (avatar) {
+                formData.append('avatar', avatar);
+            }
+
+            await authService.register(formData);
             return true;
         } catch (error) {
             this.setError(error.response?.data?.message || 'Registration failed');

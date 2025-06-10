@@ -7,10 +7,10 @@ export const authService = {
             'Content-Type': 'application/json',
         },
     }),
-    register: (userData) => api.post('/users/register', userData, {
+    register: (formData) => api.post('/users/register', formData, {
         withCredentials: true,
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'multipart/form-data',
         },
     }),
     refreshToken: () => api.post('/users/refresh', {
