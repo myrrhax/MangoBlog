@@ -19,7 +19,7 @@ public class ArticlesController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> CreateArtcile([FromBody] CreateArticleRequest request)
     {
         Guid userId = User.GetUserId() ?? Guid.Empty;
-        CreateArticleCommand command = new(request.Title, request.Content, userId, request.Tags);
+        CreateArticleCommand command = new(request.Title, request.Content, userId, request.Tags, request.CoverImageId);
         Result<ArticleDto> result =  await mediator.Send(command);
 
         return result.IsSuccess
