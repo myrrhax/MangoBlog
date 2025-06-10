@@ -2,6 +2,7 @@
 using Application.Dto.Articles;
 using Application.Extentions;
 using Domain.Entities;
+using Domain.Enums;
 using Domain.Utils;
 using Domain.Utils.Errors;
 using FluentValidation;
@@ -12,7 +13,8 @@ namespace Application.Articles.Commands;
 public record CreateArticleCommand(string Title, 
     Dictionary<string, dynamic> Content, 
     Guid CreatorId, 
-    IEnumerable<string> Tags) : IRequest<Result<ArticleDto>>;
+    IEnumerable<string> Tags,
+    Guid? CoverImageId = null) : IRequest<Result<ArticleDto>>;
 
 public class CreateArticleCommandHandler : IRequestHandler<CreateArticleCommand, Result<ArticleDto>>
 {
@@ -20,16 +22,19 @@ public class CreateArticleCommandHandler : IRequestHandler<CreateArticleCommand,
     private readonly IArticlesRepository _articlesRepository;
     private readonly ITagsRepository _tagsRepository;
     private readonly IValidator<CreateArticleCommand> _validator;
+    private readonly IMediaFileService _mediaFileService;
 
     public CreateArticleCommandHandler(IUserRepository userRepository,
         IArticlesRepository articlesRepository,
         ITagsRepository tagsRepository,
-        IValidator<CreateArticleCommand> validator)
+        IValidator<CreateArticleCommand> validator,
+        IMediaFileService mediaFileService)
     {
         _userRepository = userRepository;
         _articlesRepository = articlesRepository;
         _tagsRepository = tagsRepository;
         _validator = validator;
+        _mediaFileService = mediaFileService;
     }
 
     public async Task<Result<ArticleDto>> Handle(CreateArticleCommand request, CancellationToken cancellationToken)
@@ -41,6 +46,16 @@ public class CreateArticleCommandHandler : IRequestHandler<CreateArticleCommand,
         ApplicationUser? creator = await _userRepository.GetUserById(request.CreatorId, cancellationToken);
         if (creator is null)
             return Result.Failure<ArticleDto>(new UserNotFound());
+
+        MediaFile? file = request.CoverImageId.HasValue
+            ? await _mediaFileService.GetMediaFile(request.CoverImageId.Value)
+            : null;
+
+        if (request.CoverImageId.HasValue &&
+            file is { FileType: MediaFileType.Video })
+        {
+            return Result.Failure<ArticleDto>(new InvalidMediaFormat(request.CoverImageId.Value, MediaFileType.Video));
+        }
 
         Result<IEnumerable<Tag>> tagInsertionResult = await _tagsRepository.AddTagsIfAbsent(request.Tags, cancellationToken);
         if (tagInsertionResult.IsFailure) // insertion error
@@ -55,6 +70,7 @@ public class CreateArticleCommandHandler : IRequestHandler<CreateArticleCommand,
             CreationDate = DateTime.UtcNow,
             Likes = 0,
             Dislikes = 0,
+            CoverImageId = request.CoverImageId,
         };
 
         Result articleInsertionResult = await _articlesRepository.CreateArticle(article);

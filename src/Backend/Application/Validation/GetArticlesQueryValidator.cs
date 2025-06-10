@@ -5,7 +5,7 @@ namespace Application.Validation;
 
 public class GetArticlesQueryValidator : AbstractValidator<GetArticlesQuery>
 {
-    public static readonly string[] ValidSortTypes = ["asc", "desc", ""];
+    public static readonly string[] ValidSortTypes = ["asc", "desc", "none"];
     public GetArticlesQueryValidator()
     {
         RuleFor(article => article.Page)
@@ -24,12 +24,12 @@ public class GetArticlesQueryValidator : AbstractValidator<GetArticlesQuery>
         RuleFor(article => article.SortByDate)
             .Must(IsSortTypeValid!)
             .When(article => article.SortByDate is not null)
-            .WithMessage("Invalid sort type. Valid types: {asc, desc, ''}");
+            .WithMessage("Invalid sort type. Valid types: {asc, desc, 'none'}");
 
         RuleFor(article => article.SortByPopularity)
             .Must(IsSortTypeValid!)
             .When(article => article.SortByPopularity is not null)
-            .WithMessage("Invalid sort type. Valid types: {asc, desc, ''}");
+            .WithMessage("Invalid sort type. Valid types: {asc, desc, 'none'}");
     }
 
     private bool IsSortTypeValid(string type)

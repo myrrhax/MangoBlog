@@ -11,4 +11,5 @@ public record ArticleDto(string Id,
     DateTime CreatioDate,
     int Likes,
     int Dislikes,
-    string? UserRating = null);
+    string? UserRating = null,
+    Guid? CoverImageId = null);
