@@ -10,5 +10,5 @@ public class Publication
     public List<Guid> MediaIds { get; set; } = [];
     public DateTime CreationDate { get; set; }
     public DateTime PublicationTime { get; set; }
-    public bool IsPublished { get; set; }
+    public List<IntegrationPublishInfo> IntegrationPublishInfos { get; set; } = [];
 }

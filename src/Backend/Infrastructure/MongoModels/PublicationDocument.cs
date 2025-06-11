@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using Domain.Entities;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Infrastructure.MongoModels;
@@ -14,4 +15,5 @@ internal class PublicationDocument
     public DateTime CreationDate { get; set; }
     public DateTime PublicationTime { get; set; }
     public bool IsPublished { get; set; }
+    public List<IntegrationPublicationInfoDocument> IntegrationPublishInfos { get; set; } = [];
 }
