@@ -54,10 +54,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-using var scope = app.Services.CreateScope();
-var publisher = scope.ServiceProvider.GetRequiredService<IQueuePublisher>();
-publisher.PublishMessage("1123", "Привет!");
-
 app.UseCors("AllowClient");
 app.UseHttpsRedirection();
 
