@@ -41,7 +41,18 @@ internal class ApiService
         }
     }
 
-    public async Task<byte[]> GetMediaFi
+    public async Task<Stream?> GetMediaFile(Guid fileId)
+    {
+        try
+        {
+            byte[] response = await _httpClient.GetByteArrayAsync("api/media/" + fileId);
+            return new MemoryStream(response);
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+    }
 
     public async Task<ConfirmationResponseDto?> ConfirmTelegramIntegration(string integrationCode, string telegramId)
     {

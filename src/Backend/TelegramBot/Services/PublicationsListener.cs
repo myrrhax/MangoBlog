@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Domain.Entities;
+using Domain.Enums;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -8,6 +9,8 @@ using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Telegram.Bot;
+using Telegram.Bot.Types;
+using TelegramBot.Api;
 using TelegramBot.Utils;
 
 namespace TelegramBot.Services;
@@ -18,16 +21,19 @@ internal class PublicationsListener : BackgroundService
     private readonly ILogger<PublicationsListener> _logger;
     private readonly ITelegramBotClient _bot;
     private readonly IServiceProvider _serviceProvider;
+    private readonly ApiService _apiService;
 
-    public PublicationsListener(IConfiguration configuration, 
+    public PublicationsListener(IConfiguration configuration,
         ILogger<PublicationsListener> logger,
         ITelegramBotClient bot,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        ApiService apiService)
     {
         _configuration = configuration;
         _logger = logger;
         _bot = bot;
         _serviceProvider = serviceProvider;
+        _apiService = apiService;
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -69,7 +75,7 @@ internal class PublicationsListener : BackgroundService
             var publication = JsonConvert.DeserializeObject<Publication>(json);
             if (publication is not null)
             {
-                _logger.LogInformation("Новая публикация: {}", publication?.PublicationId);
+                _logger.LogInformation("Новая публикация: {}", publication.PublicationId);
                 await PublishToChats(publication);
             }
         };
@@ -101,7 +107,16 @@ internal class PublicationsListener : BackgroundService
         {
             try
             {
-                await _bot.SendMessage(chatId, publication.Content);
+                if (publication.MediaFiles.Any())
+                {
+                    List<IAlbumInputMedia> album = await GetMediaAlbum(publication.MediaFiles, publication.Content);
+
+                    await _bot.SendMediaGroup(chatId, album);
+                }
+                else
+                {
+                    await _bot.SendMessage(chatId, publication.Content);
+                }
                 successfullyPublishedRoomsIds.Add(chatId.ToString());
             }
             catch (Exception ex)
@@ -109,5 +124,29 @@ internal class PublicationsListener : BackgroundService
                 _logger.LogError("Failed to send a message to chat: {}. Reason: {}", chatId, ex.Message);
             }
         }
+    }
+
+    private async Task<List<IAlbumInputMedia>> GetMediaAlbum(IEnumerable<(Guid Id, MediaFileType Type)> medias, string caption)
+    {
+        var result = new List<IAlbumInputMedia>();
+
+        foreach (var mediasItem in medias)
+        {
+            using Stream? fs = await _apiService.GetMediaFile(mediasItem.Id);
+            if (fs is null)
+                continue;
+
+            InputMedia media = mediasItem.Type == MediaFileType.Photo
+                ? new InputMediaPhoto(fs)
+                : new InputMediaVideo(fs);
+
+            if (!result.Any())
+            {
+                media.Caption = caption;
+            }
+            result.Add((IAlbumInputMedia) media);
+        }
+
+        return result;
     }
 }
