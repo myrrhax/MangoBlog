@@ -65,3 +65,6 @@ public class VkGroupNotFound()
 
 public class NoChannlesToPublish(Guid userId)
     : Error($"User {userId} has no linked channels to publish");
+
+public class SomeChannelsAreAbsent()
+    : Error("Some channels are absent");

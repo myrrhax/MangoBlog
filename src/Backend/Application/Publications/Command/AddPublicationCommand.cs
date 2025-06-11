@@ -63,7 +63,8 @@ public class AddPublicationCommandHandler : IRequestHandler<AddPublicationComman
         Dictionary<string, string>? channelNames = null;
         if (insertionResult.IsSuccess)
         {
-            IEnumerable<string> channelIds = statuses.Select(status => status.RoomId);
+            List<string> channelIds = statuses.Select(status => status.RoomId)
+                .ToList();
             Result<Dictionary<string, string>> getChannelNamesResult = await _integrationRepository.GetChannelNamesFromIds(channelIds, cancellationToken);
             if (getChannelNamesResult.IsSuccess)
                 channelNames = getChannelNamesResult.Value;
