@@ -71,3 +71,6 @@ public class SomeChannelsAreAbsent()
 
 public class FailedToPublishAMessage()
     : Error("An error occurred publishing message. Try again later");
+
+public class SomeMediasAreAbsent()
+    : Error("Some media files are absent");

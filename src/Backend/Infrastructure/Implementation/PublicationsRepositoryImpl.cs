@@ -31,7 +31,7 @@ internal class PublicationsRepositoryImpl : IPublicationsRepository
             .ToList();
         var document = new PublicationDocument(publication.UserId,
             publication.Content,
-            publication.MediaIds,
+            publication.MediaFiles,
             publication.CreationDate,
             integrationsInfoDocument,
             publication.PublicationTime);

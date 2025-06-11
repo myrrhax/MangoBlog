@@ -19,13 +19,19 @@ public class AddPublicationCommandHandler : IRequestHandler<AddPublicationComman
     private readonly IUserRepository _userRepository;
     private readonly IIntegrationRepository _integrationRepository;
     private readonly IQueuePublisher _publisher;
+    private readonly IMediaFileService _mediaFileService;
 
-    public AddPublicationCommandHandler(IPublicationsRepository publicationsRepository, IUserRepository userRepository, IIntegrationRepository integrationRepository, IQueuePublisher publisher)
+    public AddPublicationCommandHandler(IPublicationsRepository publicationsRepository,
+        IUserRepository userRepository,
+        IIntegrationRepository integrationRepository,
+        IQueuePublisher publisher,
+        IMediaFileService mediaFileService)
     {
         _publicationsRepository = publicationsRepository;
         _userRepository = userRepository;
         _integrationRepository = integrationRepository;
         _publisher = publisher;
+        _mediaFileService = mediaFileService;
     }
 
     public async Task<Result<PublicationDto>> Handle(AddPublicationCommand request, CancellationToken cancellationToken)
@@ -39,6 +45,13 @@ public class AddPublicationCommandHandler : IRequestHandler<AddPublicationComman
         if (!linkedChannels.Any())
             return Result.Failure<PublicationDto>(new NoChannlesToPublish(user.Id));
 
+        Result<IEnumerable<MediaFile>> getMediaFilesResult = await _mediaFileService.GetMediaFiles(request.MediaIds.ToList());
+
+        if (getMediaFilesResult.IsFailure)
+            return Result.Failure<PublicationDto>(new SomeMediasAreAbsent());
+
+        var medias = getMediaFilesResult.Value!.Select(file => (file.Id, file.FileType))
+            .ToList();
         List<RoomPublishStatus> statuses = linkedChannels.Select(channel => new RoomPublishStatus()
         {
             IsPublished = false,
@@ -54,7 +67,7 @@ public class AddPublicationCommandHandler : IRequestHandler<AddPublicationComman
         var publication = new Publication()
         {
             Content = request.Content,
-            MediaIds = request.MediaIds.ToList(),
+            MediaFiles = medias,
             UserId = request.UserId,
             CreationDate = DateTime.UtcNow,
             PublicationTime = request.PublicationDate,

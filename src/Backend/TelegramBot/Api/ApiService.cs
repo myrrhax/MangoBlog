@@ -41,6 +41,8 @@ internal class ApiService
         }
     }
 
+    public async Task<byte[]> GetMediaFi
+
     public async Task<ConfirmationResponseDto?> ConfirmTelegramIntegration(string integrationCode, string telegramId)
     {
         var body = new { telegramId, integrationCode };
