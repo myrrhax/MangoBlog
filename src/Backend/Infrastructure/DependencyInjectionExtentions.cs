@@ -20,6 +20,7 @@ public static class DependencyInjectionExtentions
         services.AddScoped<IRatingsRepository, RatingsRepositoryImpl>();
         services.AddScoped<IMediaFileService, MediaFileServiceImpl>();
         services.AddScoped<IIntegrationRepository, IntegrationRepositoryImpl>();
+        services.AddScoped<IPublicationsRepository, PublicationsRepositoryImpl>();
 
         return services;
     }
@@ -29,7 +30,7 @@ public static class DependencyInjectionExtentions
         services.AddScoped<IPasswordHasher, PasswordHasherImpl>();
         services.AddScoped<ITokenGenerator, TokenGeneratorImpl>();
 
-        services.AddSingleton<IConnection>(sp =>
+        services.AddSingleton(sp =>
         {
             IConfiguration config = sp.GetRequiredService<IConfiguration>();
             string host = config["RabbitMq:Host"] ?? "localhost";
