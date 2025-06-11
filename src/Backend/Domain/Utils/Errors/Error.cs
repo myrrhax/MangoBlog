@@ -62,3 +62,6 @@ public class ApiTokenHasNoPermission()
 
 public class VkGroupNotFound()
     : Error("Vk group is not found");
+
+public class NoChannlesToPublish(Guid userId)
+    : Error($"User {userId} has no linked channels to publish");

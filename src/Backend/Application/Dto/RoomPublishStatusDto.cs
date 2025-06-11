@@ -2,5 +2,5 @@
 
 public record RoomPublishStatusDto(string RoomId,
     string? MessageId,
-    string ChannelName,
+    string? ChannelName,
     bool IsPublished);

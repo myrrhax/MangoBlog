@@ -13,7 +13,6 @@ internal class PublicationDocument
     public string Content { get; set; } = string.Empty;
     public List<Guid> MediaIds { get; set; } = [];
     public DateTime CreationDate { get; set; }
-    public DateTime PublicationTime { get; set; }
-    public bool IsPublished { get; set; }
+    public DateTime? PublicationTime { get; set; }
     public List<IntegrationPublicationInfoDocument> IntegrationPublishInfos { get; set; } = [];
 }
