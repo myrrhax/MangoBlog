@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Infrastructure.Utils;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -11,14 +12,14 @@ internal class PublicationDocument
     [BsonRepresentation(BsonType.String)]
     public Guid UserId { get; set; }
     public string Content { get; set; } = string.Empty;
-    public List<Guid> MediaIds { get; set; } = [];
+    public List<MediaFileTuple> Media { get; set; } = [];
     public DateTime CreationDate { get; set; }
     public DateTime? PublicationTime { get; set; }
     public List<IntegrationPublicationInfoDocument> IntegrationPublishInfos { get; set; } = [];
 
     public PublicationDocument(Guid userId,
         string content,
-        List<Guid> mediaIds,
+        List<MediaFileTuple> media,
         DateTime creationDate,
         List<IntegrationPublicationInfoDocument> infoDocuments,
         DateTime? publicationTime = null)
@@ -26,7 +27,7 @@ internal class PublicationDocument
         PublicationId = ObjectId.GenerateNewId();
         UserId = userId;
         Content = content;
-        MediaIds = mediaIds;
+        Media = media;
         CreationDate = creationDate;
         PublicationTime = publicationTime;
         IntegrationPublishInfos = infoDocuments;

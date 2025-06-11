@@ -45,7 +45,7 @@ public class AddPublicationCommandHandler : IRequestHandler<AddPublicationComman
         if (!linkedChannels.Any())
             return Result.Failure<PublicationDto>(new NoChannlesToPublish(user.Id));
 
-        Result<IEnumerable<MediaFile>> getMediaFilesResult = await _mediaFileService.GetMediaFiles(request.MediaIds.ToList());
+        Result<List<MediaFile>> getMediaFilesResult = await _mediaFileService.GetMediaFiles(request.MediaIds.ToList());
 
         if (getMediaFilesResult.IsFailure)
             return Result.Failure<PublicationDto>(new SomeMediasAreAbsent());
