@@ -27,10 +27,11 @@ hostBuilder.ConfigureServices((context, services) =>
     services.AddSingleton<ApiService>();
 
     Uri.TryCreate(context.Configuration["API_URL"], UriKind.Absolute, out Uri? apiUrl);
-    services.AddHttpClient<ApiService>(options =>
+    var httpBuilder = services.AddHttpClient<ApiService>(options =>
     {
         options.BaseAddress = apiUrl ?? throw new ArgumentNullException(nameof(apiUrl));
     });
+
     services.AddScoped<IDbConnection>(options =>
     {
         string connectionString = context.Configuration.GetConnectionString("Default")

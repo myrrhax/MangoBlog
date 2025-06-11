@@ -91,62 +91,73 @@ internal class PublicationsListener : BackgroundService
         return Task.CompletedTask;
     }
 
-    private async Task PublishToChats(Publication publication)
-    {
-        IntegrationPublishInfo? tgOnly = publication.IntegrationPublishInfos
-            .FirstOrDefault(info => info.IntegrationType == Domain.Enums.IntegrationType.Telegram);
-
-        if (tgOnly is null)
-            return;
-        IEnumerable<RoomPublishStatus> unpublishedRooms = tgOnly.PublishStatuses
-            .Where(status => !status.IsPublished);
-
-        IEnumerable<long> chatIds = unpublishedRooms.Select(status => long.Parse(status.RoomId));
-        List<string> successfullyPublishedRoomsIds = new();
-        foreach (long chatId in chatIds)
+        private async Task PublishToChats(Publication publication)
         {
-            try
-            {
-                if (publication.MediaFiles.Any())
-                {
-                    List<IAlbumInputMedia> album = await GetMediaAlbum(publication.MediaFiles, publication.Content);
+            IntegrationPublishInfo? tgOnly = publication.IntegrationPublishInfos
+                .FirstOrDefault(info => info.IntegrationType == IntegrationType.Telegram);
 
-                    await _bot.SendMediaGroup(chatId, album);
-                }
-                else
-                {
-                    await _bot.SendMessage(chatId, publication.Content);
-                }
-                successfullyPublishedRoomsIds.Add(chatId.ToString());
-            }
-            catch (Exception ex)
+            if (tgOnly is null)
+                return;
+            IEnumerable<RoomPublishStatus> unpublishedRooms = tgOnly.PublishStatuses
+                .Where(status => !status.IsPublished);
+
+            IEnumerable<long> chatIds = unpublishedRooms.Select(status => long.Parse(status.RoomId));
+            List<string> successfullyPublishedRoomsIds = new();
+
+            var mediaBytes = await GetMediaAlbum(publication.MediaFiles);
+            foreach (long chatId in chatIds)
             {
-                _logger.LogError("Failed to send a message to chat: {}. Reason: {}", chatId, ex.Message);
+                try
+                {
+                    if (publication.MediaFiles.Any())
+                    {
+                        await SendMediaAlbum(mediaBytes, publication.Content, chatId);
+                    }
+                    else
+                    {
+                        await _bot.SendMessage(chatId, publication.Content);
+                    }
+                    successfullyPublishedRoomsIds.Add(chatId.ToString());
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError("Failed to send a message to chat: {}. Reason: {}", chatId, ex.Message);
+                }
             }
         }
-    }
 
-    private async Task<List<IAlbumInputMedia>> GetMediaAlbum(IEnumerable<(Guid Id, MediaFileType Type)> medias, string caption)
+    private async Task<Dictionary<Guid, (MediaFileType Type, byte[] Bytes)>> GetMediaAlbum(IEnumerable<(Guid Id, MediaFileType Type)> medias)
     {
-        var result = new List<IAlbumInputMedia>();
+        var result = new Dictionary<Guid, (MediaFileType, byte[])>();
 
         foreach (var mediasItem in medias)
         {
-            using Stream? fs = await _apiService.GetMediaFile(mediasItem.Id);
-            if (fs is null)
+            byte[]? bytes = await _apiService.GetMediaFile(mediasItem.Id);
+            if (bytes is null)
                 continue;
-
-            InputMedia media = mediasItem.Type == MediaFileType.Photo
-                ? new InputMediaPhoto(fs)
-                : new InputMediaVideo(fs);
-
-            if (!result.Any())
-            {
-                media.Caption = caption;
-            }
-            result.Add((IAlbumInputMedia) media);
+            result[mediasItem.Id] = (mediasItem.Type, bytes);
         }
 
         return result;
+    }
+
+    private async Task SendMediaAlbum(Dictionary<Guid, (MediaFileType Type, byte[] Bytes)> medias, string caption, long chatId)
+    {
+        var album = new List<IAlbumInputMedia>();
+        foreach (Guid id in medias.Keys)
+        {
+            var mediasItem = medias[id];
+            var ms = new MemoryStream(mediasItem.Bytes);
+            InputMedia media = mediasItem.Type == MediaFileType.Photo
+                ? new InputMediaPhoto(ms)
+                : new InputMediaVideo(ms);
+            if (!album.Any())
+            {
+                media.Caption = caption;
+            }
+            album.Add((IAlbumInputMedia)media);
+        }
+
+        await _bot.SendMediaGroup(chatId, album);
     }
 }

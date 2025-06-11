@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using TelegramBot.Dto;
@@ -12,7 +13,7 @@ internal class ApiService
     private readonly HttpClient _httpClient;
     private readonly ILogger<ApiService> _logger;
 
-    public ApiService(HttpClient httpClient, ILogger<ApiService> logger)
+    public ApiService(HttpClient httpClient, ILogger<ApiService> logger, IConfiguration configuration)
     {
         _httpClient = httpClient;
         _logger = logger;
@@ -41,12 +42,14 @@ internal class ApiService
         }
     }
 
-    public async Task<Stream?> GetMediaFile(Guid fileId)
+    public async Task<byte[]?> GetMediaFile(Guid fileId)
     {
         try
         {
-            byte[] response = await _httpClient.GetByteArrayAsync("api/media/" + fileId);
-            return new MemoryStream(response);
+            var response = await _httpClient.GetAsync("api/media/" + fileId);
+            response.EnsureSuccessStatusCode();
+            byte[] bytes = await response.Content.ReadAsByteArrayAsync();
+            return bytes;
         }
         catch (Exception ex)
         {
