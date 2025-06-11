@@ -1,4 +1,5 @@
-﻿using Domain.Enums;
+﻿using Domain.Entities;
+using Domain.Enums;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -8,5 +9,5 @@ internal class IntegrationPublicationInfoDocument
 {
     [BsonRepresentation(BsonType.String)]
     public IntegrationType IntegrationType { get; set; }
-    public BsonDocument RoomMessagesIds { get; set; } = null!;
+    public List<RoomPublishStatus> PublishStatuses { get; set; } = [];
 }
