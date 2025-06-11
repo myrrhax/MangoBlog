@@ -18,12 +18,14 @@ public class AddPublicationCommandHandler : IRequestHandler<AddPublicationComman
     private readonly IPublicationsRepository _publicationsRepository;
     private readonly IUserRepository _userRepository;
     private readonly IIntegrationRepository _integrationRepository;
+    private readonly IQueuePublisher _publisher;
 
-    public AddPublicationCommandHandler(IPublicationsRepository publicationsRepository, IUserRepository userRepository, IIntegrationRepository integrationRepository)
+    public AddPublicationCommandHandler(IPublicationsRepository publicationsRepository, IUserRepository userRepository, IIntegrationRepository integrationRepository, IQueuePublisher publisher)
     {
         _publicationsRepository = publicationsRepository;
         _userRepository = userRepository;
         _integrationRepository = integrationRepository;
+        _publisher = publisher;
     }
 
     public async Task<Result<PublicationDto>> Handle(AddPublicationCommand request, CancellationToken cancellationToken)
@@ -68,6 +70,14 @@ public class AddPublicationCommandHandler : IRequestHandler<AddPublicationComman
             Result<Dictionary<string, string>> getChannelNamesResult = await _integrationRepository.GetChannelNamesFromIds(channelIds, cancellationToken);
             if (getChannelNamesResult.IsSuccess)
                 channelNames = getChannelNamesResult.Value;
+        }
+
+        if (insertionResult.IsSuccess && publication.PublicationTime is null)
+        {
+            Result publishResilt = _publisher.Publish(publication);
+
+            if (publishResilt.IsFailure)
+                return Result.Failure<PublicationDto>(new FailedToPublishAMessage());
         }
 
         return insertionResult.IsSuccess

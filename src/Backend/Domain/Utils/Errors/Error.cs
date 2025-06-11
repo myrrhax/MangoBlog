@@ -68,3 +68,6 @@ public class NoChannlesToPublish(Guid userId)
 
 public class SomeChannelsAreAbsent()
     : Error("Some channels are absent");
+
+public class FailedToPublishAMessage()
+    : Error("An error occurred publishing message. Try again later");
