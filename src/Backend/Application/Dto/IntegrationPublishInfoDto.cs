@@ -3,4 +3,4 @@
 namespace Application.Dto;
 
 public record IntegrationPublishInfoDto(string IntegrationType,
-    IEnumerable<RoomPublishStatus> RoomStatuses);
+    IEnumerable<RoomPublishStatusDto> RoomStatuses);

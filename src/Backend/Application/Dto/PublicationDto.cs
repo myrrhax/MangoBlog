@@ -5,5 +5,5 @@ public record PublicationDto(string Id,
     string Content,
     IEnumerable<Guid> MediaIds,
     DateTime CreationDate,
-    DateTime PublicationTime,
+    DateTime? PublicationTime,
     IEnumerable<IntegrationPublishInfoDto> Integrations);

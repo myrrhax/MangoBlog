@@ -66,4 +66,23 @@ internal static class MappingExtentions
 
     public static TelegramChannelDto MapToDto(this TelegramChannel entity)
         => new TelegramChannelDto(entity.Name, entity.ChannelId);
+
+    public static PublicationDto MapToDto(this Publication entity, Dictionary<string, string> channelNames)
+        => new PublicationDto(entity.PublicationId,
+            entity.UserId,
+            entity.Content,
+            entity.MediaIds,
+            entity.CreationDate.ToLocalTime(),
+            entity.PublicationTime,
+            entity.IntegrationPublishInfos.Select(info => info.MapToDto(channelNames)));
+
+    public static IntegrationPublishInfoDto MapToDto(this IntegrationPublishInfo entity, Dictionary<string, string> channelNames)
+        => new IntegrationPublishInfoDto(entity.IntegrationType.ToString(),
+            entity.PublishStatuses.Select(status => status.MapToDto(channelNames[status.RoomId])));
+
+    public static RoomPublishStatusDto MapToDto(this RoomPublishStatus entity, string channelName)
+        => new RoomPublishStatusDto(entity.RoomId,
+            entity.MessageId,
+            channelName,
+            entity.IsPublished);
 }
