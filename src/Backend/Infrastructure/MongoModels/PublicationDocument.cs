@@ -1,10 +1,13 @@
-﻿using Domain.Enums;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
-namespace Domain.Entities;
+namespace Infrastructure.MongoModels;
 
-public class Publication
+internal class PublicationDocument
 {
-    public string PublicationId { get; set; } = string.Empty;
+    [BsonId]
+    public ObjectId PublicationId { get; set; }
+    [BsonRepresentation(BsonType.String)]
     public Guid UserId { get; set; }
     public string Content { get; set; } = string.Empty;
     public List<Guid> MediaIds { get; set; } = [];
