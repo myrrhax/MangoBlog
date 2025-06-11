@@ -48,6 +48,7 @@ public class AddPublicationCommandHandler : IRequestHandler<AddPublicationComman
         var tgPublish = new IntegrationPublishInfo()
         {
             IntegrationType = Domain.Enums.IntegrationType.Telegram,
+            UserId = user.Integration!.TelegramIntegration!.TelegramId!,
             PublishStatuses = statuses,
         };
         var publication = new Publication()
