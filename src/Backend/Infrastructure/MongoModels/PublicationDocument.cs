@@ -15,4 +15,25 @@ internal class PublicationDocument
     public DateTime CreationDate { get; set; }
     public DateTime? PublicationTime { get; set; }
     public List<IntegrationPublicationInfoDocument> IntegrationPublishInfos { get; set; } = [];
+
+    public PublicationDocument(Guid userId,
+        string content,
+        List<Guid> mediaIds,
+        DateTime creationDate,
+        List<IntegrationPublicationInfoDocument> infoDocuments,
+        DateTime? publicationTime = null)
+    {
+        PublicationId = ObjectId.GenerateNewId();
+        UserId = userId;
+        Content = content;
+        MediaIds = mediaIds;
+        CreationDate = creationDate;
+        PublicationTime = publicationTime;
+        IntegrationPublishInfos = infoDocuments;
+    }
+
+    public PublicationDocument()
+    {
+        
+    }
 }

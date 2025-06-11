@@ -40,4 +40,11 @@ internal static class MappingExtentions
             CoverImageId = article.CoverImageId
         };
     }
+
+    public static IntegrationPublicationInfoDocument MapToDocument(this IntegrationPublishInfo entity)
+        => new IntegrationPublicationInfoDocument()
+        {
+            IntegrationType = entity.IntegrationType,
+            PublishStatuses = entity.PublishStatuses,
+        };
 }
