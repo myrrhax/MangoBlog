@@ -33,6 +33,17 @@ internal class MediaFileServiceImpl : IMediaFileService
         return await _context.MediaFiles.FindAsync(fileId);
     }
 
+    public async Task<Result<List<MediaFile>>> GetMediaFiles(List<Guid> ids)
+    {
+        var entities = await _context.MediaFiles
+            .Where(entity => ids.Contains(entity.Id))
+            .ToListAsync();
+
+        return entities.Count == ids.Count
+            ? Result.Success(entities)
+            : Result.Failure<List<MediaFile>>(new SomeMediasAreAbsent());
+    }
+
     public async Task<(Stream, MediaFileType)?> LoadFile(Guid fileId)
     {
         MediaFile? file = await GetMediaFile(fileId);

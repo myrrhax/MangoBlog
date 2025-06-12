@@ -3,6 +3,7 @@ using Infrastructure;
 using Application.Extentions;
 using Infrastructure.Utils;
 using WebApi.Middlewares;
+using Application.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,6 +53,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseCors("AllowClient");
 app.UseHttpsRedirection();
 

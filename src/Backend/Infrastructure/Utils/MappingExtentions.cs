@@ -1,6 +1,8 @@
 ﻿using System.Reflection.Metadata;
 using Domain.Entities;
+using Domain.Enums;
 using Infrastructure.MongoModels;
+using Infrastructure.Utils;
 using MongoDB.Bson;
 using Newtonsoft.Json;
 
@@ -40,4 +42,14 @@ internal static class MappingExtentions
             CoverImageId = article.CoverImageId
         };
     }
+
+    public static IntegrationPublicationInfoDocument MapToDocument(this IntegrationPublishInfo entity)
+        => new IntegrationPublicationInfoDocument()
+        {
+            IntegrationType = entity.IntegrationType,
+            PublishStatuses = entity.PublishStatuses,
+        };
+
+    public static MediaFileTuple MapToMediaTuple(this (Guid Id, MediaFileType Type) entity)
+        => new MediaFileTuple() { MediaId = entity.Id, Type = entity.Type };
 }

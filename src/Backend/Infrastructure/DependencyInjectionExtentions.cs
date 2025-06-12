@@ -3,8 +3,10 @@ using Infrastructure.DataContext;
 using Infrastructure.Implementation;
 using Infrastructure.Utils;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
+using RabbitMQ.Client;
 
 namespace Infrastructure;
 
@@ -18,6 +20,7 @@ public static class DependencyInjectionExtentions
         services.AddScoped<IRatingsRepository, RatingsRepositoryImpl>();
         services.AddScoped<IMediaFileService, MediaFileServiceImpl>();
         services.AddScoped<IIntegrationRepository, IntegrationRepositoryImpl>();
+        services.AddScoped<IPublicationsRepository, PublicationsRepositoryImpl>();
 
         return services;
     }
@@ -26,6 +29,25 @@ public static class DependencyInjectionExtentions
     {
         services.AddScoped<IPasswordHasher, PasswordHasherImpl>();
         services.AddScoped<ITokenGenerator, TokenGeneratorImpl>();
+
+        services.AddSingleton(sp =>
+        {
+            IConfiguration config = sp.GetRequiredService<IConfiguration>();
+            string host = config["RabbitMq:Host"] ?? "localhost";
+            string password = config["RabbitMq:Pass"] ?? throw new ArgumentNullException(nameof(password));
+            string name = config["RabbitMq:Name"] ?? throw new ArgumentNullException(nameof(name));
+
+            var factory = new ConnectionFactory()
+            {
+                HostName = host,
+                Password = password,
+                UserName = name,
+            };
+
+            return factory.CreateConnection();
+        });
+
+        services.AddScoped<IQueuePublisher, Publisher>();
 
         return services;
     }
