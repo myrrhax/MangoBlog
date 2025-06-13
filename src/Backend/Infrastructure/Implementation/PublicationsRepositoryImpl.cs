@@ -111,6 +111,14 @@ internal class PublicationsRepositoryImpl : IPublicationsRepository
         return document?.MapToEntity();
     }
 
+    public async Task<IEnumerable<Publication>> GetUserPublications(Guid userId)
+    {
+        IEnumerable<PublicationDocument> documents = await _publications.Find(publication => publication.UserId == userId)
+            .ToListAsync();
+
+        return documents.Select(document => document.MapToEntity());
+    }
+
     public async Task<Result> IsStatusUnconfirmed(Guid userId, string PublicationId, string ChannelId, IntegrationType type)
     {
         if (!ObjectId.TryParse(PublicationId, out ObjectId id)) 
