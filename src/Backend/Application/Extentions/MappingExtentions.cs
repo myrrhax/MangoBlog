@@ -71,7 +71,7 @@ internal static class MappingExtentions
         => new PublicationDto(entity.PublicationId,
             entity.UserId,
             entity.Content,
-            entity.MediaFiles,
+            entity.MediaFiles.Select(file => new MediaFileDto(file.Id, file.Type.ToString())),
             entity.CreationDate.ToLocalTime(),
             entity.PublicationTime,
             entity.IntegrationPublishInfos.Select(info => info.MapToDto(channelNames)));

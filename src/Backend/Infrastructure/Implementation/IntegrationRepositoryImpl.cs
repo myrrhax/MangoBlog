@@ -127,10 +127,12 @@ internal class IntegrationRepositoryImpl(ApplicationDbContext context,
         return context.Integrations
             .Include(integr => integr.TelegramIntegration)
             .Include(integr => integr.User)
-            .FirstOrDefaultAsync(integr => integr.TelegramIntegration.TelegramId == telegramId);
+            .FirstOrDefaultAsync(integr => integr.TelegramIntegration!.TelegramId == telegramId);
     }
 
     public Task<TelegramIntegration?> GetTelegramIntegration(Guid userId, CancellationToken cancellationToken)
         => context.TelegramIntegration
+            .AsNoTracking()
+            .Include(integration => integration.ConnectedChannels)
             .FirstOrDefaultAsync(integration => integration.UserId == userId);
 }
