@@ -77,3 +77,9 @@ public class SomeMediasAreAbsent()
 
 public class PublicationAlreadyConfirmed()
     : Error("Publication is already confirmed");
+
+public class UnparsableId(string id)
+    : Error($"PublicationId ({id}) must be ObjectId");
+
+public class ConfrimationStatusIsNotFound(string publicationId, string roomId)
+    : Error($"Unconfirmed publication for publication {publicationId} in room: {roomId} is not found");
