@@ -56,29 +56,33 @@ internal class PublicationsRepositoryImpl : IPublicationsRepository
 
     public async Task<Result> ConfirmPublicationStatus(string publicationId, string channelId, IntegrationType type)
     {
-        var filter = Builders<PublicationDocument>.Filter.And(
-            Builders<PublicationDocument>.Filter.Eq(x => x.PublicationId, ObjectId.Parse(publicationId)),
-            Builders<PublicationDocument>.Filter.ElemMatch(x => x.IntegrationPublishInfos, publishInfo =>
-                publishInfo.IntegrationType == type &&
-                publishInfo.PublishStatuses.Any(status => status.RoomId == channelId && !status.IsPublished)
-            )
-        );
-
-        var arrayFilters = new List<ArrayFilterDefinition>
+        if (!ObjectId.TryParse(publicationId, out ObjectId id))
         {
-            new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("info.IntegrationType", type)),
-            new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument
-            {
-                { "status.RoomId", channelId },
-                { "status.IsPublished", false }
-            })
-        };
-
-        var update = Builders<PublicationDocument>.Update
-            .Set("IntegrationPublishInfos.$[info].PublishStatuses.$[status].IsPublished", true);
+            return Result.Failure<bool>(new UnparsableId(publicationId));
+        }
 
         try
         {
+            var filter = Builders<PublicationDocument>.Filter.And(
+                Builders<PublicationDocument>.Filter.Eq(x => x.PublicationId, id),
+                Builders<PublicationDocument>.Filter.ElemMatch(x => x.IntegrationPublishInfos,
+                    info => info.IntegrationType == type &&
+                            info.PublishStatuses.Any(status => status.RoomId == channelId && !status.IsPublished))
+            );
+
+            var update = Builders<PublicationDocument>.Update
+                .Set("IntegrationPublishInfos.$[info].PublishStatuses.$[status].IsPublished", true);
+
+            var arrayFilters = new List<ArrayFilterDefinition>
+            {
+                new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("info.IntegrationType", type.ToString())),
+                new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument
+                {
+                    { "status.RoomId", channelId },
+                    { "status.IsPublished", false }
+                })
+            };
+
             var result = await _publications.UpdateOneAsync(filter, update, new UpdateOptions { ArrayFilters = arrayFilters });
 
             if (result.ModifiedCount == 0)
@@ -91,10 +95,8 @@ internal class PublicationsRepositoryImpl : IPublicationsRepository
         catch (Exception ex)
         {
             _logger.LogError("Failed to update confirmation status. Error: {}", ex.Message);
-
             return Result.Failure(new DatabaseInteractionError("Failed to update confirmation status"));
         }
-
     }
 
     public async Task<Result> IsStatusUnconfirmed(Guid userId, string PublicationId, string ChannelId, IntegrationType type)
