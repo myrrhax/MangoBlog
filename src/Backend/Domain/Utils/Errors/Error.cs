@@ -74,3 +74,6 @@ public class FailedToPublishAMessage()
 
 public class SomeMediasAreAbsent()
     : Error("Some media files are absent");
+
+public class PublicationAlreadyConfirmed()
+    : Error("Publication is already confirmed");
