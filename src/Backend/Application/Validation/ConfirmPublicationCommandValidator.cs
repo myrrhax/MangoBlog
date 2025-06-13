@@ -20,6 +20,10 @@ public class ConfirmPublicationCommandValidator : AbstractValidator<ConfirmPubli
             .NotEmpty()
             .WithMessage("Room id can't be empty");
 
+        RuleFor(command => command.MessageId)
+            .NotEmpty()
+            .WithMessage("Message id can't be empty");
+
         RuleFor(command => command.IntegrationType)
             .Must(type => validIntegrationTypes.Contains(type.ToLower().Trim()))
             .WithMessage($"Invalid integration type. Valid types: [{string.Join(", ", validIntegrationTypes)}]");

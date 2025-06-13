@@ -7,5 +7,5 @@ public interface IPublicationsRepository
 {
     Task<Result> AddPublication(Publication publication);
     Task<Result> IsStatusUnconfirmed(Guid userId, string publicationId, string channelId, IntegrationType type);
-    Task<Result> ConfirmPublicationStatus(string publicationId, string channelId, IntegrationType type);
+    Task<Result> ConfirmPublicationStatus(string publicationId, string channelId, string messageId, IntegrationType type);
 }

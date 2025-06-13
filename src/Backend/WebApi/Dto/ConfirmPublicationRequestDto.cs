@@ -2,4 +2,5 @@
 
 public record ConfirmPublicationRequestDto(string PublicationId,
     string RoomId,
-    string IntegrationType);
+    string IntegrationType,
+    string MessageId);

@@ -86,21 +86,4 @@ public class IntegrationController(IMediator mediator) : ControllerBase
             ? Ok()
             : NotFound();
     }
-
-    [HttpPost]
-    [Authorize]
-    [Route("confirm")]
-    public async Task<IActionResult> ConfirmMessageSending([FromBody] ConfirmPublicationRequestDto dto)
-    {
-        Guid id = User.GetUserId()!.Value;
-        var command = new ConfirmPublicationCommand(id, dto.PublicationId, dto.RoomId, dto.IntegrationType);
-        Result res = await mediator.Send(command);
-
-        return res switch
-        {
-            { IsSuccess: true } => Ok(dto),
-            { Error: ConfrimationStatusIsNotFound } => NotFound(res.Error),
-            _ => BadRequest(res.Error),
-        };
-    }
 }

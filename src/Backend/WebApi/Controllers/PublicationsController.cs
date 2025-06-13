@@ -1,4 +1,5 @@
 ﻿using Application.Dto;
+using Application.Integrations.Commands;
 using Application.Publications.Command;
 using Domain.Utils;
 using Domain.Utils.Errors;
@@ -29,6 +30,23 @@ public class PublicationsController(IMediator mediator) : ControllerBase
             { IsSuccess: true } => Ok(result.Value),
             { Error: UserNotFound or NoChannlesToPublish } => NotFound(result.Error),
             _ => BadRequest(result.Error)
+        };
+    }
+
+    [HttpPost]
+    [Authorize]
+    [Route("confirm")]
+    public async Task<IActionResult> ConfirmMessageSending([FromBody] ConfirmPublicationRequestDto dto)
+    {
+        Guid id = User.GetUserId()!.Value;
+        var command = new ConfirmPublicationCommand(id, dto.PublicationId, dto.RoomId, dto.IntegrationType, dto.MessageId);
+        Result res = await mediator.Send(command);
+
+        return res switch
+        {
+            { IsSuccess: true } => Ok(),
+            { Error: ConfrimationStatusIsNotFound } => NotFound(res.Error),
+            _ => BadRequest(res.Error),
         };
     }
 }

@@ -54,7 +54,7 @@ internal class PublicationsRepositoryImpl : IPublicationsRepository
         }
     }
 
-    public async Task<Result> ConfirmPublicationStatus(string publicationId, string channelId, IntegrationType type)
+    public async Task<Result> ConfirmPublicationStatus(string publicationId, string channelId, string messageId, IntegrationType type)
     {
         if (!ObjectId.TryParse(publicationId, out ObjectId id))
         {
@@ -71,7 +71,8 @@ internal class PublicationsRepositoryImpl : IPublicationsRepository
             );
 
             var update = Builders<PublicationDocument>.Update
-                .Set("IntegrationPublishInfos.$[info].PublishStatuses.$[status].IsPublished", true);
+                .Set("IntegrationPublishInfos.$[info].PublishStatuses.$[status].IsPublished", true)
+                .Set("IntegrationPublishInfos.$[info].PublishStatuses.$[status].MessageId", messageId);
 
             var arrayFilters = new List<ArrayFilterDefinition>
             {

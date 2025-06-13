@@ -11,7 +11,8 @@ namespace Application.Integrations.Commands;
 public record ConfirmPublicationCommand(Guid UserId,
     string PublicationId,
     string RoomId,
-    string IntegrationType) : IRequest<Result>;
+    string IntegrationType,
+    string MessageId) : IRequest<Result>;
 
 public class ConfirmPublicationCommandHandler : IRequestHandler<ConfirmPublicationCommand, Result>
 {
@@ -41,6 +42,6 @@ public class ConfirmPublicationCommandHandler : IRequestHandler<ConfirmPublicati
         if (isConfirmed.IsFailure)
             return Result.Failure(isConfirmed.Error);
 
-        return await _publicationsRepository.ConfirmPublicationStatus(request.PublicationId, request.RoomId, type);
+        return await _publicationsRepository.ConfirmPublicationStatus(request.PublicationId, request.RoomId, request.MessageId, type);
     }
 }
