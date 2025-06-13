@@ -9,4 +9,5 @@ public interface IPublicationsRepository
     Task<Result> IsStatusUnconfirmed(Guid userId, string publicationId, string channelId, IntegrationType type);
     Task<Result> ConfirmPublicationStatus(string publicationId, string channelId, string messageId, IntegrationType type);
     Task<Publication?> GetPublicationById(string id);
+    Task<IEnumerable<Publication>> GetUserPublications(Guid userId);
 }

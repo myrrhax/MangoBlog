@@ -5,7 +5,7 @@ namespace Application.Dto;
 public record PublicationDto(string Id,
     Guid UserId,
     string Content,
-    IEnumerable<(Guid, MediaFileType)> MediaIds,
+    IEnumerable<MediaFileDto> Medias,
     DateTime CreationDate,
     DateTime? PublicationTime,
     IEnumerable<IntegrationPublishInfoDto> Integrations);
