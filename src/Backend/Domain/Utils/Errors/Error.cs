@@ -83,3 +83,6 @@ public class UnparsableId(string id)
 
 public class ConfrimationStatusIsNotFound(string publicationId, string roomId)
     : Error($"Unconfirmed publication for publication {publicationId} in room: {roomId} is not found");
+
+public class PublicationNotFound(string publicationId)
+    : Error($"Publication with id {publicationId} is not found");
