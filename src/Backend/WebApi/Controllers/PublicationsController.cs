@@ -1,6 +1,7 @@
 ﻿using Application.Dto;
 using Application.Integrations.Commands;
 using Application.Publications.Command;
+using Application.Publications.Queries;
 using Domain.Utils;
 using Domain.Utils.Errors;
 using MediatR;
@@ -34,7 +35,6 @@ public class PublicationsController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost]
-    [Authorize]
     [Route("confirm")]
     public async Task<IActionResult> ConfirmMessageSending([FromBody] ConfirmPublicationRequestDto dto)
     {
@@ -47,6 +47,23 @@ public class PublicationsController(IMediator mediator) : ControllerBase
             { IsSuccess: true } => Ok(),
             { Error: ConfrimationStatusIsNotFound } => NotFound(res.Error),
             _ => BadRequest(res.Error),
+        };
+    }
+
+    [HttpGet]
+    [Route("{id}")]
+    public async Task<IActionResult> GetPublicationById([FromRoute] string id)
+    {
+        Guid userId = User.GetUserId()!.Value;
+        var query = new GetPublicationByIdQuery(id, userId);
+        Result<PublicationDto> result = await mediator.Send(query);
+
+        return result switch
+        {
+            { IsSuccess: true } => Ok(result.Value),
+            { IsFailure: true, Error: PublicationNotFound } => NotFound(result.Error),
+            { IsFailure: true, Error: NoPermission } => Forbid(),
+            _ => BadRequest(result.Error),
         };
     }
 }

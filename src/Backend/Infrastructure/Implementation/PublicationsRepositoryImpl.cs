@@ -100,6 +100,17 @@ internal class PublicationsRepositoryImpl : IPublicationsRepository
         }
     }
 
+    public async Task<Publication?> GetPublicationById(string id)
+    {
+        if (!ObjectId.TryParse(id, out ObjectId documentId))
+            return null;
+
+        var document = await _publications.Find(doc => doc.PublicationId == documentId)
+            .SingleOrDefaultAsync();
+
+        return document?.MapToEntity();
+    }
+
     public async Task<Result> IsStatusUnconfirmed(Guid userId, string PublicationId, string ChannelId, IntegrationType type)
     {
         if (!ObjectId.TryParse(PublicationId, out ObjectId id)) 
