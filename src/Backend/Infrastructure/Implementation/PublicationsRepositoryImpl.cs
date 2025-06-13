@@ -1,11 +1,13 @@
 ﻿using Application.Abstractions;
 using Domain.Entities;
+using Domain.Enums;
 using Domain.Utils;
 using Domain.Utils.Errors;
 using Infrastructure.MongoModels;
 using Infrastructure.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Infrastructure.Implementation;
@@ -48,6 +50,39 @@ internal class PublicationsRepositoryImpl : IPublicationsRepository
         {
             _logger.LogError("An error occurred database interaction: {}", ex.Message);
             return Result.Failure(new DatabaseInteractionError($"Failed to insert publication to database"));
+        }
+    }
+
+    public Task<Result> ConfirmPublicationStatus(string PublicationId, string ChannelId, IntegrationType type)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<Result> IsStatusUnconfirmed(Guid userId, string PublicationId, string ChannelId, IntegrationType type)
+    {
+        if (!ObjectId.TryParse(PublicationId, out ObjectId id)) 
+        {
+            return Result.Failure<bool>(new UnparsableId(PublicationId));
+        }
+        try
+        {
+
+            PublicationDocument? doc = await _publications.Find(publication => publication.PublicationId == id
+                && publication.UserId == userId
+                && publication.IntegrationPublishInfos.Where(publishInfo => publishInfo.IntegrationType == type)
+                    .Select(publishInfo => publishInfo.PublishStatuses)
+                    .Any(roomStatus => roomStatus.Any(status => status.RoomId == ChannelId && !status.IsPublished)))
+                .SingleOrDefaultAsync();
+
+            return doc is null
+                ? Result.Failure<bool>(new ConfrimationStatusIsNotFound(PublicationId, ChannelId))
+                : Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to load infromation about confirmation. Error: {}", ex.Message);
+
+            return Result.Failure(new DatabaseInteractionError("Failed to load information"));
         }
     }
 }
