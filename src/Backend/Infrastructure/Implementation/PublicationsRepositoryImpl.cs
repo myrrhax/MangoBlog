@@ -1,4 +1,5 @@
-﻿using Application.Abstractions;
+﻿using System.Threading.Channels;
+using Application.Abstractions;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Utils;
@@ -53,9 +54,47 @@ internal class PublicationsRepositoryImpl : IPublicationsRepository
         }
     }
 
-    public Task<Result> ConfirmPublicationStatus(string PublicationId, string ChannelId, IntegrationType type)
+    public async Task<Result> ConfirmPublicationStatus(string publicationId, string channelId, IntegrationType type)
     {
-        throw new NotImplementedException();
+        var filter = Builders<PublicationDocument>.Filter.And(
+            Builders<PublicationDocument>.Filter.Eq(x => x.PublicationId, ObjectId.Parse(publicationId)),
+            Builders<PublicationDocument>.Filter.ElemMatch(x => x.IntegrationPublishInfos, publishInfo =>
+                publishInfo.IntegrationType == type &&
+                publishInfo.PublishStatuses.Any(status => status.RoomId == channelId && !status.IsPublished)
+            )
+        );
+
+        var arrayFilters = new List<ArrayFilterDefinition>
+        {
+            new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("info.IntegrationType", type)),
+            new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument
+            {
+                { "status.RoomId", channelId },
+                { "status.IsPublished", false }
+            })
+        };
+
+        var update = Builders<PublicationDocument>.Update
+            .Set("IntegrationPublishInfos.$[info].PublishStatuses.$[status].IsPublished", true);
+
+        try
+        {
+            var result = await _publications.UpdateOneAsync(filter, update, new UpdateOptions { ArrayFilters = arrayFilters });
+
+            if (result.ModifiedCount == 0)
+            {
+                return Result.Failure<bool>(new ConfrimationStatusIsNotFound(publicationId, channelId));
+            }
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to update confirmation status. Error: {}", ex.Message);
+
+            return Result.Failure(new DatabaseInteractionError("Failed to update confirmation status"));
+        }
+
     }
 
     public async Task<Result> IsStatusUnconfirmed(Guid userId, string PublicationId, string ChannelId, IntegrationType type)
@@ -67,11 +106,16 @@ internal class PublicationsRepositoryImpl : IPublicationsRepository
         try
         {
 
-            PublicationDocument? doc = await _publications.Find(publication => publication.PublicationId == id
-                && publication.UserId == userId
-                && publication.IntegrationPublishInfos.Where(publishInfo => publishInfo.IntegrationType == type)
-                    .Select(publishInfo => publishInfo.PublishStatuses)
-                    .Any(roomStatus => roomStatus.Any(status => status.RoomId == ChannelId && !status.IsPublished)))
+            PublicationDocument? doc = await _publications.Find(publication =>
+                    publication.PublicationId == id
+                    && publication.UserId == userId
+                    && publication.IntegrationPublishInfos.Any(publishInfo =>
+                        publishInfo.IntegrationType == type
+                        && publishInfo.PublishStatuses.Any(status =>
+                            status.RoomId == ChannelId && !status.IsPublished
+                        )
+                    )
+                )
                 .SingleOrDefaultAsync();
 
             return doc is null
