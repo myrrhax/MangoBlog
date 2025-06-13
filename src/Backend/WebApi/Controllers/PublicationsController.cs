@@ -66,4 +66,17 @@ public class PublicationsController(IMediator mediator) : ControllerBase
             _ => BadRequest(result.Error),
         };
     }
+
+    [HttpGet]
+    [Route("my")]
+    public async Task<IActionResult> GetMyPublications()
+    {
+        Guid userId = User.GetUserId()!.Value;
+        var query = new GetMyPublicationsQuery(userId);
+        IEnumerable<PublicationDto> result = await mediator.Send(query);
+
+        return result.Any()
+            ? Ok(result)
+            : NotFound();
+    }
 }
