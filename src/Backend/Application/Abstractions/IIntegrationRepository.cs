@@ -14,4 +14,5 @@ public interface IIntegrationRepository
     Task<Result> DeleteTelegramIntegration(Guid userId, CancellationToken cancellationToken);
     Task<Result> DeleteFromTelegramChannel(Guid userId, string channelId, CancellationToken cancellationToken);
     Task<Result> AttachTelegramChannelToIntegration(Guid userId, TelegramChannel channel, CancellationToken cancellationToken);
+    Task<Result<Dictionary<string, string>>> GetChannelNamesFromIds(List<string> channelIds, CancellationToken cancellationToken);
 }

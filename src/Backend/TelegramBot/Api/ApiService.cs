@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using TelegramBot.Dto;
@@ -12,7 +13,7 @@ internal class ApiService
     private readonly HttpClient _httpClient;
     private readonly ILogger<ApiService> _logger;
 
-    public ApiService(HttpClient httpClient, ILogger<ApiService> logger)
+    public ApiService(HttpClient httpClient, ILogger<ApiService> logger, IConfiguration configuration)
     {
         _httpClient = httpClient;
         _logger = logger;
@@ -38,6 +39,21 @@ internal class ApiService
         {
             _logger.LogError("Failed to add channel for user: {}. Error: {}", user.UserId, ex.Message);
             return false;
+        }
+    }
+
+    public async Task<byte[]?> GetMediaFile(Guid fileId)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync("api/media/" + fileId);
+            response.EnsureSuccessStatusCode();
+            byte[] bytes = await response.Content.ReadAsByteArrayAsync();
+            return bytes;
+        }
+        catch (Exception ex)
+        {
+            return null;
         }
     }
 

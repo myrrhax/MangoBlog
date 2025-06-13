@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "TelegramBot": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "EnvironmentName": "Development",
+        "Test": "123"
+      }
+    }
+  }
+}

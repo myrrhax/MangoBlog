@@ -101,6 +101,7 @@ class AuthStore {
     }
 
     updateUserInfo(data) {
+        console.log(data)
         const { user, accessToken } = data;
         localStorage.setItem('accessToken', accessToken);
         this.isAuthenticated = true;

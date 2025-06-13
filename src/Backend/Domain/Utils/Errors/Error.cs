@@ -62,3 +62,27 @@ public class ApiTokenHasNoPermission()
 
 public class VkGroupNotFound()
     : Error("Vk group is not found");
+
+public class NoChannlesToPublish(Guid userId)
+    : Error($"User {userId} has no linked channels to publish");
+
+public class SomeChannelsAreAbsent()
+    : Error("Some channels are absent");
+
+public class FailedToPublishAMessage()
+    : Error("An error occurred publishing message. Try again later");
+
+public class SomeMediasAreAbsent()
+    : Error("Some media files are absent");
+
+public class PublicationAlreadyConfirmed()
+    : Error("Publication is already confirmed");
+
+public class UnparsableId(string id)
+    : Error($"PublicationId ({id}) must be ObjectId");
+
+public class ConfrimationStatusIsNotFound(string publicationId, string roomId)
+    : Error($"Unconfirmed publication for publication {publicationId} in room: {roomId} is not found");
+
+public class PublicationNotFound(string publicationId)
+    : Error($"Publication with id {publicationId} is not found");

@@ -7,11 +7,8 @@ public class Publication
     public string PublicationId { get; set; } = string.Empty;
     public Guid UserId { get; set; }
     public string Content { get; set; } = string.Empty;
-    public List<Guid> MediaIds { get; set; } = [];
-    public IntegrationType PublishedAt { get; set; }
-    public string RoomId { get; set; } = string.Empty;
-    public string PublishedPostId { get; set; } = string.Empty;
+    public List<(Guid Id, MediaFileType Type)> MediaFiles { get; set; } = [];
     public DateTime CreationDate { get; set; }
-    public DateTime PublicationTime { get; set; }
-    public bool IsPublished { get; set; }
+    public DateTime? PublicationTime { get; set; }
+    public List<IntegrationPublishInfo> IntegrationPublishInfos { get; set; } = [];
 }

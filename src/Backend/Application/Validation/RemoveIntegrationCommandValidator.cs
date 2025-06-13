@@ -5,7 +5,7 @@ namespace Application.Validation;
 
 public class RemoveIntegrationCommandValidator : AbstractValidator<RemoveIntegrationCommand>
 {
-    private static readonly string[] validIntegrationTypes = ["tg", "vk"];
+    private static readonly string[] validIntegrationTypes = ["tg"];
 
     public RemoveIntegrationCommandValidator()
     {

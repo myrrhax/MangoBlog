@@ -108,15 +108,31 @@ internal class IntegrationRepositoryImpl(ApplicationDbContext context,
         }
     }
 
+    public async Task<Result<Dictionary<string, string>>> GetChannelNamesFromIds(List<string> channelIds, CancellationToken cancellationToken)
+    {
+        var channels = await context.TelegramChannels
+            .Where(channel => channelIds.Contains(channel.ChannelId))
+            .Select(channel => new { Id = channel.ChannelId, Name = channel.Name })
+            .ToListAsync();
+
+        if (channels.Count != channelIds.Count)
+            return Result.Failure<Dictionary<string, string>>(new SomeChannelsAreAbsent());
+
+        var idsDict = channels.ToDictionary(channel => channel.Id, channel => channel.Name);
+        return Result.Success(idsDict);
+    }
+
     public Task<Integration?> GetIntegrationByTelegramId(string telegramId, CancellationToken cancellationToken)
     {
         return context.Integrations
             .Include(integr => integr.TelegramIntegration)
             .Include(integr => integr.User)
-            .FirstOrDefaultAsync(integr => integr.TelegramIntegration.TelegramId == telegramId);
+            .FirstOrDefaultAsync(integr => integr.TelegramIntegration!.TelegramId == telegramId);
     }
 
     public Task<TelegramIntegration?> GetTelegramIntegration(Guid userId, CancellationToken cancellationToken)
         => context.TelegramIntegration
+            .AsNoTracking()
+            .Include(integration => integration.ConnectedChannels)
             .FirstOrDefaultAsync(integration => integration.UserId == userId);
 }
