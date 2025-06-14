@@ -47,7 +47,7 @@ internal class ApiService
     {
         var body = new { publicationId, roomId, messageId, integrationType = "tg" };
         string json = JsonConvert.SerializeObject(body);
-        var content = new StringContent(json);
+        var content = new StringContent(json, encoding: Encoding.UTF8, "application/json");
         var request = new HttpRequestMessage(HttpMethod.Post, "api/publications/confirm");
         request.Content = content;
         request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiToken);
