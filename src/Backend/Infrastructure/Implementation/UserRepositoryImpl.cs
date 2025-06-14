@@ -191,6 +191,9 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
         return await context.Users
             .Include(user => user.Subscriptions)
             .Include(user => user.Avatar)
+            .Include(user => user.Integration)
+            .ThenInclude(integration => integration!.TelegramIntegration)
+            .ThenInclude(tgIntegration => tgIntegration.ConnectedChannels)
             .FirstOrDefaultAsync(user => user.Login == login, cancellationToken);
     }
 
