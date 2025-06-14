@@ -11,6 +11,8 @@ using RabbitMQ.Client.Events;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using TelegramBot.Api;
+using TelegramBot.Persistence;
+using TelegramBot.Persistence.Entites;
 using TelegramBot.Utils;
 
 namespace TelegramBot.Services;
@@ -91,40 +93,52 @@ internal class PublicationsListener : BackgroundService
         return Task.CompletedTask;
     }
 
-        private async Task PublishToChats(Publication publication)
+    private async Task PublishToChats(Publication publication)
+    {
+        using var scope = _serviceProvider.CreateScope();
+        UsersService usersService = scope.ServiceProvider.GetRequiredService<UsersService>();
+        PersistenceUser? user = await usersService.GetUserByUserId(publication.UserId);
+        if (user is null)
+            return;
+
+        IntegrationPublishInfo? tgOnly = publication.IntegrationPublishInfos
+            .FirstOrDefault(info => info.IntegrationType == IntegrationType.Telegram);
+
+        if (tgOnly is null)
+            return;
+        IEnumerable<RoomPublishStatus> unpublishedRooms = tgOnly.PublishStatuses
+            .Where(status => !status.IsPublished);
+
+        IEnumerable<long> chatIds = unpublishedRooms.Select(status => long.Parse(status.RoomId));
+        List<(string roomId, string messageId)> successfullyPublishedRoomsIds = new();
+
+        var mediaBytes = await GetMediaAlbum(publication.MediaFiles);
+        foreach (long chatId in chatIds)
         {
-            IntegrationPublishInfo? tgOnly = publication.IntegrationPublishInfos
-                .FirstOrDefault(info => info.IntegrationType == IntegrationType.Telegram);
-
-            if (tgOnly is null)
-                return;
-            IEnumerable<RoomPublishStatus> unpublishedRooms = tgOnly.PublishStatuses
-                .Where(status => !status.IsPublished);
-
-            IEnumerable<long> chatIds = unpublishedRooms.Select(status => long.Parse(status.RoomId));
-            List<string> successfullyPublishedRoomsIds = new();
-
-            var mediaBytes = await GetMediaAlbum(publication.MediaFiles);
-            foreach (long chatId in chatIds)
+            try
             {
-                try
+                long messageId;
+                if (publication.MediaFiles.Any())
                 {
-                    if (publication.MediaFiles.Any())
-                    {
-                        await SendMediaAlbum(mediaBytes, publication.Content, chatId);
-                    }
-                    else
-                    {
-                        await _bot.SendMessage(chatId, publication.Content);
-                    }
-                    successfullyPublishedRoomsIds.Add(chatId.ToString());
+                    messageId = await SendMediaAlbum(mediaBytes, publication.Content, chatId);
                 }
-                catch (Exception ex)
+                else
                 {
-                    _logger.LogError("Failed to send a message to chat: {}. Reason: {}", chatId, ex.Message);
+                    Message msg = await _bot.SendMessage(chatId, publication.Content);
+                    messageId = msg.Id;
                 }
+                successfullyPublishedRoomsIds.Add((chatId.ToString(), messageId.ToString()));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Failed to send a message to chat: {}. Reason: {}", chatId, ex.Message);
             }
         }
+        IEnumerable<Task<bool>> confirmTasks = successfullyPublishedRoomsIds.Select(data => 
+            _apiService.ConfirmMessageSending(publication.PublicationId, data.roomId, data.messageId, user.AccessToken));
+    
+        await Task.WhenAll(confirmTasks);
+    }
 
     private async Task<Dictionary<Guid, (MediaFileType Type, byte[] Bytes)>> GetMediaAlbum(IEnumerable<(Guid Id, MediaFileType Type)> medias)
     {
@@ -141,7 +155,7 @@ internal class PublicationsListener : BackgroundService
         return result;
     }
 
-    private async Task SendMediaAlbum(Dictionary<Guid, (MediaFileType Type, byte[] Bytes)> medias, string caption, long chatId)
+    private async Task<long> SendMediaAlbum(Dictionary<Guid, (MediaFileType Type, byte[] Bytes)> medias, string caption, long chatId)
     {
         var album = new List<IAlbumInputMedia>();
         foreach (Guid id in medias.Keys)
@@ -158,6 +172,8 @@ internal class PublicationsListener : BackgroundService
             album.Add((IAlbumInputMedia)media);
         }
 
-        await _bot.SendMediaGroup(chatId, album);
+        Message[] messages = await _bot.SendMediaGroup(chatId, album);
+        
+        return messages.First().Id;
     }
 }

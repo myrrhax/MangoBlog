@@ -3,6 +3,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Telegram.Bot.Types;
 using TelegramBot.Dto;
 using TelegramBot.Persistence.Entites;
 
@@ -38,6 +39,28 @@ internal class ApiService
         catch (Exception ex)
         {
             _logger.LogError("Failed to add channel for user: {}. Error: {}", user.UserId, ex.Message);
+            return false;
+        }
+    }
+
+    public async Task<bool> ConfirmMessageSending(string publicationId, string roomId, string messageId, string apiToken)
+    {
+        var body = new { publicationId, roomId, messageId, integrationType = "tg" };
+        string json = JsonConvert.SerializeObject(body);
+        var content = new StringContent(json);
+        var request = new HttpRequestMessage(HttpMethod.Post, "api/publications/confirm");
+        request.Content = content;
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiToken);
+
+        try
+        {
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            return true;
+        }
+        catch(Exception)
+        {
             return false;
         }
     }
