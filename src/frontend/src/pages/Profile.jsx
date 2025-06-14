@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useParams } from 'react-router-dom';
 import {
@@ -15,6 +15,7 @@ import {
     Paper,
     List,
     ListItem,
+    Button,
 } from '@mui/material';
 import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
@@ -22,47 +23,34 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import TelegramIcon from '@mui/icons-material/Telegram';
 import { authStore } from '../stores/authStore';
 import { mediaService } from '../services/mediaService';
-import api from '../services/api';
 import ProfileGridComponent from '../components/ProfileGridComponent';
 import parseDateTime from "../utils/parseDateTime.js";
 import useSecretText from "../hooks/useSecretText.jsx";
 import NewspaperIcon from '@mui/icons-material/Newspaper';
+import { profileStore } from '../stores/profileStore';
 
 const Profile = observer(() => {
     const { userId } = useParams();
-    const [isMyProfile, setIsMyProfile] = useState(false);
-    const [profile, setProfile] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
     const { isAuthenticated, user } = authStore;
     const [showIntegrationCodeStatus, showCode] = useSecretText(3000);
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                setIsLoading(true);
-                setError(null);
-                
-                if (userId === 'me' || (isAuthenticated && userId === user?.id)) {
-                    setIsMyProfile(true);
-                    setProfile(user);
-                } else {
-                    setIsMyProfile(false);
-                    const response = await api.get(`/users/${userId}`);
-                    setProfile(response.data);
-                    console.log(response.data);
-                }
-            } catch (error) {
-                setError(error.response?.data?.message || 'Failed to fetch profile');
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    const addIntegration = async () => {
+        const isSuccess = await profileStore.addIntegration();
+        if (isSuccess) {
+            await authStore.fetchUser();
+            profileStore.setUser(authStore.user, true);
+        }
+    }
 
-        fetchProfile();
+    useEffect(() => {
+        if (userId === 'me' || userId === authStore.user?.id) {
+            profileStore.setUser(authStore.user, true);
+        } else {
+            profileStore.fetchUser(userId);
+        }
     }, [userId, isAuthenticated, user]);
 
-    if (isLoading) {
+    if (profileStore.isLoading) {
         return (
             <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
                 <CircularProgress />
@@ -70,15 +58,17 @@ const Profile = observer(() => {
         );
     }
 
-    if (error) {
+    if (profileStore.loadingError) {
         return (
             <Alert severity="error" sx={{ my: 2 }}>
-                {error}
+                {profileStore.loadingError}
             </Alert>
         );
     }
 
-    if (!profile) return null;
+    if (!profileStore.user) {
+        return null;
+    }
 
     return (
         <Container
@@ -92,7 +82,7 @@ const Profile = observer(() => {
                     sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }}
                 >
                     <Avatar
-                        src={profile.avatarId ? mediaService.makeImageUrl(profile.avatarId) : null}
+                        src={profileStore.user.avatarId ? mediaService.makeImageUrl(profileStore.user.avatarId) : null}
                         sx={{width: 64, height: 64}}
                     />
                     <Box
@@ -104,17 +94,17 @@ const Profile = observer(() => {
                             <Typography
                                 variant="h5"
                             >
-                                {profile.displayedName}
+                                {profileStore.user.displayedName}
                             </Typography>
                             <Chip
-                                label={profile.role}
+                                label={profileStore.user.role}
                             />
                         </Box>
                         <Box>
                             <Typography
                                 variant="body1"
                             >
-                                {profile.firstName} {profile.lastName}
+                                {profileStore.user.firstName} {profileStore.user.lastName}
                             </Typography>
                         </Box>
                     </Box>
@@ -124,23 +114,23 @@ const Profile = observer(() => {
                     sx={{display: 'flex', gap: 1}}
                 >
                     <CalendarTodayIcon/>
-                    <Box>{profile.birthDate}</Box>
+                    <Box>{profileStore.user.birthDate}</Box>
                 </Box>
 
-                {isMyProfile && (
+                {profileStore.isCurrentUser && (
                     <Box
                         sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1}}
                     >
                         <Box sx={{gap: 2, display:'flex', alignItems: 'center'}}>
-                            <ProfileGridComponent caption={profile.login} Icon={PersonIcon} />
-                            <ProfileGridComponent caption={profile.email} Icon={EmailIcon} />
+                            <ProfileGridComponent caption={profileStore.user.login} Icon={PersonIcon} />
+                            <ProfileGridComponent caption={profileStore.user.email} Icon={EmailIcon} />
                         </Box>
                         <Box sx={{gap: 1, display:'flex', alignItems: 'center'}}>
                             <Typography variant="body1">
                                 Дата регистрации:
                             </Typography>
                             <Typography variant="body1">
-                                {parseDateTime(profile.registrationTime)}
+                                {parseDateTime(profileStore.user.registrationTime)}
                             </Typography>
                         </Box>
                         <Divider sx={{my:3}} />
@@ -149,7 +139,7 @@ const Profile = observer(() => {
                         >
                             Интеграции:
                         </Typography>
-                        {profile.integration?.telegram
+                        {profileStore.user.integration?.telegram
                             ? (
                                 <Paper sx={{display: 'flex', flexDirection: 'column', gap: 1, p: 2}}>
                                     <Box sx={{gap: 1, display:'flex', alignItems: 'center'}}>
@@ -161,7 +151,7 @@ const Profile = observer(() => {
                                             Статус:
                                         </Typography>
                                         <Checkbox
-                                            checked={profile.integration.telegram.isConnected}
+                                            checked={profileStore.user.integration.telegram.isConnected}
                                             readOnly
                                             sx={{ width: '16px', height: '16px' }}
                                         />
@@ -172,8 +162,8 @@ const Profile = observer(() => {
                                         </Typography>
                                         {showIntegrationCodeStatus
                                         ? (
-                                            <Link href={"https://t.me/mango_blog_dev_bot?start=" + profile.integration.telegram.integrationCode}>
-                                                {profile.integration.telegram.integrationCode}
+                                            <Link href={"https://t.me/mango_blog_dev_bot?start=" + profileStore.user.integration.telegram.integrationCode}>
+                                                {profileStore.user.integration.telegram.integrationCode}
                                             </Link>
                                         )
                                         : (
@@ -190,7 +180,7 @@ const Profile = observer(() => {
                                             Подключенные каналы:
                                         </Typography>
                                         <List>
-                                            {profile.integration.telegram.channels.map((channel) => (
+                                            {profileStore.user.integration.telegram.channels.map((channel) => (
                                                 <ListItem key={channel.channelId}
                                                     sx={{display: 'flex', gap: 1}}
                                                 >
@@ -205,10 +195,15 @@ const Profile = observer(() => {
                                 </Paper>
                             )
                             : (
-                                <Box>
+                                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                                     <Typography variant={"body1"}>
                                         Здесь пока ничего нет. Добавьте новую интеграцию
                                     </Typography>
+                                    <Button
+                                        onClick={() => addIntegration()}
+                                    >
+                                        Добавить новую интеграцию
+                                    </Button>
                                 </Box>
                             )
                         }
