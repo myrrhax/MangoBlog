@@ -1,9 +1,7 @@
 ﻿using System.Text;
-using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Telegram.Bot.Types;
 using TelegramBot.Dto;
 using TelegramBot.Persistence.Entites;
 
@@ -22,7 +20,7 @@ internal class ApiService
 
     public async Task<bool> AttachTelegramChannel(PersistenceUser user, string channelId, string channelName)
     {
-        var body = new { ChatId = channelId,  ChatName = channelName };
+        var body = new { ChatId = channelId, ChatName = channelName };
         string json = JsonConvert.SerializeObject(body);
         var bodyContent = new StringContent(json, encoding: Encoding.UTF8, "application/json");
         var request = new HttpRequestMessage(HttpMethod.Post, "api/integrations/tg/add-channel");
@@ -59,7 +57,7 @@ internal class ApiService
 
             return true;
         }
-        catch(Exception)
+        catch (Exception)
         {
             return false;
         }

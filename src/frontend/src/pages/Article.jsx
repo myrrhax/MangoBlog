@@ -94,7 +94,7 @@ const Article = observer(() => {
                                 <Skeleton variant="text" width={60} height={32} sx={{ display: 'inline-block' }} />
                             </Box>
                             <Box sx={{ mb: 3 }}>
-                                <Skeleton variant="rectangular" height={200} />
+                                <Skeleton variant="rectangular" height={400} />
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                 <Skeleton variant="circular" width={40} height={40} />
@@ -105,6 +105,20 @@ const Article = observer(() => {
                         </>
                     ) : article ? (
                         <>
+                            <Box sx={{ mb: 4 }}>
+                                <img
+                                    src={article.coverImageId 
+                                        ? mediaService.makeImageUrl(article.coverImageId)
+                                        : '/default-article-cover.jpg'}
+                                    alt={article.title}
+                                    style={{
+                                        width: '100%',
+                                        height: '400px',
+                                        objectFit: 'cover',
+                                        borderRadius: '8px'
+                                    }}
+                                />
+                            </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                                 <Avatar
                                     src={article.creator?.avatarId 

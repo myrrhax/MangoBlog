@@ -113,70 +113,96 @@ const Home = observer(() => {
                 </Box>
             ) : (
                 <>
-                    <Grid container spacing={3}>
+                    <Box sx={{ maxWidth: 800, mx: 'auto' }}>
                         {articlesStore.articles.map((article) => (
-                            <Grid item xs={12} md={6} lg={4} key={article.id}>
-                                <Card onClick={() => navigate(`/article/${article.id}`)}>
-                                    <CardContent>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                            <Avatar
-                                                src={article.creator.avatarId 
-                                                    ? mediaService.makeImageUrl(article.creator.avatarId)
-                                                    : '/default-avatar.png'}
-                                                alt={article.creator.displayedName}
-                                                sx={{ width: 40, height: 40, mr: 2 }}
+                            <Card 
+                                key={article.id}
+                                onClick={() => navigate(`/article/${article.id}`)}
+                                sx={{ 
+                                    cursor: 'pointer',
+                                    mb: 3,
+                                    '&:hover': {
+                                        boxShadow: 6
+                                    }
+                                }}
+                            >
+                                <Box 
+                                    sx={{ 
+                                        width: '100%',
+                                        height: '300px'
+                                    }}
+                                >
+                                    <img
+                                        src={article.coverImageId 
+                                            ? mediaService.makeImageUrl(article.coverImageId)
+                                            : '/default-article-cover.jpg'}
+                                        alt={article.title}
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'cover'
+                                        }}
+                                    />
+                                </Box>
+                                <CardContent>
+                                    <Typography variant="h5" gutterBottom>
+                                        {article.title}
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                        <Avatar
+                                            src={article.creator.avatarId 
+                                                ? mediaService.makeImageUrl(article.creator.avatarId)
+                                                : '/default-avatar.png'}
+                                            alt={article.creator.displayedName}
+                                            sx={{ width: 40, height: 40, mr: 2 }}
+                                        />
+                                        <Box>
+                                            <Typography variant="subtitle1">
+                                                {article.creator.displayedName}
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                {new Date(article.creatioDate).toLocaleString('ru-RU', {
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                    <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+                                        {article.tags.map((tag) => (
+                                            <Chip
+                                                key={tag}
+                                                label={tag}
+                                                size="small"
+                                                onClick={() =>
+                                                    articlesStore.setFilters({
+                                                        tags: [...articlesStore.filters.tags, tag],
+                                                    })
+                                                }
                                             />
-                                            <Box>
-                                                <Typography variant="subtitle1">
-                                                    {article.creator.displayedName}
-                                                </Typography>
-                                                <Typography variant="caption" color="text.secondary">
-                                                    {new Date(article.creatioDate).toLocaleString('ru-RU', {
-                                                        year: 'numeric',
-                                                        month: 'long',
-                                                        day: 'numeric',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit'
-                                                    })}
-                                                </Typography>
-                                            </Box>
+                                        ))}
+                                    </Stack>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                            <ThumbUpIcon fontSize="small" color="action" />
+                                            <Typography variant="body2">
+                                                {article.likes}
+                                            </Typography>
                                         </Box>
-                                        <Typography variant="h6" gutterBottom>
-                                            {article.title}
-                                        </Typography>
-                                        <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-                                            {article.tags.map((tag) => (
-                                                <Chip
-                                                    key={tag}
-                                                    label={tag}
-                                                    size="small"
-                                                    onClick={() =>
-                                                        articlesStore.setFilters({
-                                                            tags: [...articlesStore.filters.tags, tag],
-                                                        })
-                                                    }
-                                                />
-                                            ))}
-                                        </Stack>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                                <ThumbUpIcon fontSize="small" color="action" />
-                                                <Typography variant="body2">
-                                                    {article.likes}
-                                                </Typography>
-                                            </Box>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                                <ThumbDownIcon fontSize="small" color="action" />
-                                                <Typography variant="body2">
-                                                    {article.dislikes}
-                                                </Typography>
-                                            </Box>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                            <ThumbDownIcon fontSize="small" color="action" />
+                                            <Typography variant="body2">
+                                                {article.dislikes}
+                                            </Typography>
                                         </Box>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
+                                    </Box>
+                                </CardContent>
+                            </Card>
                         ))}
-                    </Grid>
+                    </Box>
 
                     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
                         <Pagination
