@@ -11,6 +11,7 @@ class ArticlesStore {
         query: '',
         sortByDate: 'none',
         sortByPopularity: 'none',
+        authorId: null
     };
 
     constructor() {
@@ -39,6 +40,21 @@ class ArticlesStore {
 
     setFilters(filters) {
         this.filters = { ...this.filters, ...filters };
+    }
+
+    setAuthorId(id) {
+        this.filters = { ...this.filters, authorId: id };
+    }
+
+    clearFilters() {
+        this.filters = {
+            query: '',
+            sortByDate: 'none',
+            sortByPopularity: 'none',
+            authorId: null
+        }
+        this.totalPages = 0;
+        this.currentPage = 1;
     }
 
     async fetchArticles() {

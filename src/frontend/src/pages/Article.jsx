@@ -18,7 +18,7 @@ import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
 import ThumbDownOutlinedIcon from '@mui/icons-material/ThumbDownOutlined';
 import { articlesStore } from '../stores/articlesStore';
 import { authStore } from '../stores/authStore';
-import ArticleView from '../components/ArticleView';
+import ArticleView from '../components/articles/ArticleView.jsx';
 import SnackbarNotification from '../components/SnackbarNotification';
 import useNotificationSnackbar from '../hooks/useNotificationSnackbar';
 import { mediaService } from '../services/mediaService';

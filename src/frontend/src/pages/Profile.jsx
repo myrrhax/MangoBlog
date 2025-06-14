@@ -28,6 +28,9 @@ import parseDateTime from "../utils/parseDateTime.js";
 import useSecretText from "../hooks/useSecretText.jsx";
 import NewspaperIcon from '@mui/icons-material/Newspaper';
 import { profileStore } from '../stores/profileStore';
+import ArticlesFilters from "../components/articles/ArticlesFilters.jsx";
+import {articlesStore} from "../stores/articlesStore.js";
+import ArticlesList from "../components/articles/ArticlesList.jsx";
 
 const Profile = observer(() => {
     const { userId } = useParams();
@@ -43,11 +46,24 @@ const Profile = observer(() => {
     }
 
     useEffect(() => {
+        articlesStore.clearFilters();
+    }, []);
+
+    useEffect(() => {
+        articlesStore.fetchArticles();
+    }, [articlesStore.currentPage, articlesStore.filters]);
+
+
+    useEffect(() => {
         if (userId === 'me' || userId === authStore.user?.id) {
             profileStore.setUser(authStore.user, true);
         } else {
             profileStore.fetchUser(userId);
         }
+
+        const providedId = userId === 'me' ? authStore.user.id : userId;
+        articlesStore.setAuthorId(providedId);
+        articlesStore.fetchArticles();
     }, [userId, isAuthenticated, user]);
 
     if (profileStore.isLoading) {
@@ -179,18 +195,23 @@ const Profile = observer(() => {
                                         <Typography variant={"h6"}>
                                             Подключенные каналы:
                                         </Typography>
-                                        <List>
-                                            {profileStore.user.integration.telegram.channels.map((channel) => (
-                                                <ListItem key={channel.channelId}
-                                                    sx={{display: 'flex', gap: 1}}
-                                                >
-                                                    <NewspaperIcon sx={{width: '24px', height: '24px'}}/>
-                                                    <Typography variant={"body1"} sx={{color: 'blue', cursor: 'pointer'}}>
-                                                        {channel.channelName}
-                                                    </Typography>
-                                                </ListItem>
-                                            ))}
-                                        </List>
+                                            {profileStore.user.integration.telegram.channels.length > 0
+                                                ? (
+                                                    <List>
+                                                        {profileStore.user.integration.telegram.channels.map((channel) => (
+                                                            <ListItem key={channel.channelId}
+                                                                      sx={{display: 'flex', gap: 1}}
+                                                            >
+                                                                <NewspaperIcon sx={{width: '24px', height: '24px'}}/>
+                                                                <Typography variant={"body1"} sx={{color: 'blue', cursor: 'pointer'}}>
+                                                                    {channel.channelName}
+                                                                </Typography>
+                                                            </ListItem>
+                                                        ))}
+                                                    </List>
+                                                )
+                                                : <Typography variant={'body1'}>Здесь пока ничего нет!</Typography>
+                                            }
                                     </Box>
                                 </Paper>
                             )
@@ -209,6 +230,20 @@ const Profile = observer(() => {
                         }
                     </Box>
                 )}
+            </Paper>
+            <Divider/>
+            <Paper
+                sx={{ width: '75%', m: 3, p: 3 }}
+                elevation={3}
+            >
+                <Typography
+                    variant={"h6"}>
+                    Посты:
+                </Typography>
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: 1}}>
+                    <ArticlesFilters showAddPost={profileStore.isCurrentUser} />
+                    <ArticlesList autoCenter={false} />
+                </Box>
             </Paper>
         </Container>
     );

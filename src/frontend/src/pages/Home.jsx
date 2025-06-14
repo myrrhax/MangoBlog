@@ -2,104 +2,26 @@ import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
     Box,
-    Grid,
-    Card,
-    CardContent,
-    Typography,
-    TextField,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    Chip,
-    Stack,
     Pagination,
     CircularProgress,
     Alert,
-    Avatar,
-    Button,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import { articlesStore } from '../stores/articlesStore';
-import { useNavigate } from 'react-router-dom';
-import { mediaService } from '../services/mediaService';
+import ArticlesFilters from "../components/articles/ArticlesFilters";
+import ArticlesList from "../components/articles/ArticlesList";
 
 const Home = observer(() => {
-    const navigate = useNavigate();
+    useEffect(() => {
+        articlesStore.clearFilters();
+    }, []);
+
     useEffect(() => {
         articlesStore.fetchArticles();
     }, [articlesStore.currentPage, articlesStore.filters]);
 
-    const handlePageChange = (event, value) => {
-        articlesStore.setCurrentPage(value);
-    };
-
-    const handleQueryChange = (event) => {
-        articlesStore.setFilters({ query: event.target.value });
-    };
-
-    const handleSortByDateChange = (event) => {
-        articlesStore.setFilters({ sortByDate: event.target.value });
-    };
-
-    const handleSortByPopularityChange = (event) => {
-        articlesStore.setFilters({ sortByPopularity: event.target.value });
-    };
-
     return (
         <Box>
-            <Box sx={{ mb: 4 }}>
-                <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={12} md={3}>
-                        <TextField
-                            fullWidth
-                            label="Search"
-                            value={articlesStore.filters.query}
-                            onChange={handleQueryChange}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={3}>
-                        <FormControl fullWidth>
-                            <InputLabel>Sort by Date</InputLabel>
-                            <Select
-                                value={articlesStore.filters.sortByDate}
-                                label="Sort by Date"
-                                onChange={handleSortByDateChange}
-                            >
-                                <MenuItem value="none">None</MenuItem>
-                                <MenuItem value="asc">Oldest First</MenuItem>
-                                <MenuItem value="desc">Newest First</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} md={3}>
-                        <FormControl fullWidth>
-                            <InputLabel>Sort by Popularity</InputLabel>
-                            <Select
-                                value={articlesStore.filters.sortByPopularity}
-                                label="Sort by Popularity"
-                                onChange={handleSortByPopularityChange}
-                            >
-                                <MenuItem value="none">None</MenuItem>
-                                <MenuItem value="asc">Least Popular</MenuItem>
-                                <MenuItem value="desc">Most Popular</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} md={3} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        <Button
-                            variant="contained"
-                            color="success"
-                            startIcon={<AddIcon />}
-                            onClick={() => navigate('/article/new')}
-                        >
-                            Add Post
-                        </Button>
-                    </Grid>
-                </Grid>
-            </Box>
+            <ArticlesFilters/>
 
             {articlesStore.error && (
                 <Alert severity="error" sx={{ mb: 2 }}>
@@ -112,107 +34,7 @@ const Home = observer(() => {
                     <CircularProgress />
                 </Box>
             ) : (
-                <>
-                    <Box sx={{ maxWidth: 800, mx: 'auto' }}>
-                        {articlesStore.articles.map((article) => (
-                            <Card 
-                                key={article.id}
-                                onClick={() => navigate(`/article/${article.id}`)}
-                                sx={{ 
-                                    cursor: 'pointer',
-                                    mb: 3,
-                                    '&:hover': {
-                                        boxShadow: 6
-                                    }
-                                }}
-                            >
-                                <Box 
-                                    sx={{ 
-                                        width: '100%',
-                                        height: '300px'
-                                    }}
-                                >
-                                    <img
-                                        src={article.coverImageId 
-                                            ? mediaService.makeImageUrl(article.coverImageId)
-                                            : '/default-article-cover.jpg'}
-                                        alt={article.title}
-                                        style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            objectFit: 'cover'
-                                        }}
-                                    />
-                                </Box>
-                                <CardContent>
-                                    <Typography variant="h5" gutterBottom>
-                                        {article.title}
-                                    </Typography>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                        <Avatar
-                                            src={article.creator.avatarId 
-                                                ? mediaService.makeImageUrl(article.creator.avatarId)
-                                                : '/default-avatar.png'}
-                                            alt={article.creator.displayedName}
-                                            sx={{ width: 40, height: 40, mr: 2 }}
-                                        />
-                                        <Box>
-                                            <Typography variant="subtitle1">
-                                                {article.creator.displayedName}
-                                            </Typography>
-                                            <Typography variant="caption" color="text.secondary">
-                                                {new Date(article.creatioDate).toLocaleString('ru-RU', {
-                                                    year: 'numeric',
-                                                    month: 'long',
-                                                    day: 'numeric',
-                                                    hour: '2-digit',
-                                                    minute: '2-digit'
-                                                })}
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                    <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-                                        {article.tags.map((tag) => (
-                                            <Chip
-                                                key={tag}
-                                                label={tag}
-                                                size="small"
-                                                onClick={() =>
-                                                    articlesStore.setFilters({
-                                                        tags: [...articlesStore.filters.tags, tag],
-                                                    })
-                                                }
-                                            />
-                                        ))}
-                                    </Stack>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                            <ThumbUpIcon fontSize="small" color="action" />
-                                            <Typography variant="body2">
-                                                {article.likes}
-                                            </Typography>
-                                        </Box>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                            <ThumbDownIcon fontSize="small" color="action" />
-                                            <Typography variant="body2">
-                                                {article.dislikes}
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </Box>
-
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                        <Pagination
-                            count={articlesStore.totalPages}
-                            page={articlesStore.currentPage}
-                            onChange={handlePageChange}
-                            color="primary"
-                        />
-                    </Box>
-                </>
+                <ArticlesList />
             )}
         </Box>
     );
