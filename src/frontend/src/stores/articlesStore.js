@@ -57,10 +57,19 @@ class ArticlesStore {
         this.currentPage = 1;
     }
 
+    clear() {
+        this.clearFilters();
+        this.articles = [];
+        this.isLoading = false;
+        this.error = null;
+        this.totalPages = 0;
+        this.currentPage = 1;
+    }
+
     async fetchArticles() {
         this.setLoading(true);
         this.setError(null);
-
+        this.articles = [];
         try {
             const params = {
                 page: this.currentPage,
@@ -73,6 +82,19 @@ class ArticlesStore {
         } catch (error) {
             this.setArticles([]);
             this.setTotalPages(0);
+        } finally {
+            this.setLoading(false);
+        }
+    }
+
+    async fetchMyRatedArticles() {
+        this.setLoading(true);
+        this.setError(null);
+        try {
+            const response = await api.get('ratings/my');
+            this.setArticles(response.data);
+        } catch (error) {
+            this.articles = [];
         } finally {
             this.setLoading(false);
         }
@@ -114,6 +136,16 @@ class ArticlesStore {
         } catch (error) {
             console.log(error);
             throw new Error(error.response?.data?.message || 'Failed to create article');
+        }
+    }
+
+    async updateArticle(id, articleData) {
+        try {
+            const response = await api.put(`/articles`, {id, ...articleData});
+            return response.data;
+        } catch (error) {
+            console.log(error);
+            throw new Error(error.response?.data?.message || 'Failed to update article');
         }
     }
 }

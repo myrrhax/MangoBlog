@@ -6,16 +6,19 @@ import {
     Typography,
     Avatar,
     Stack,
-    Chip
+    Chip, IconButton
 } from "@mui/material";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import {mediaService} from "../../services/mediaService.js";
 import {observer} from "mobx-react-lite";
 import {authStore} from "../../stores/authStore.js";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {articlesStore} from "../../stores/articlesStore.js";
+import ThumbDownOutlinedIcon from "@mui/icons-material/ThumbDownOutlined";
+import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
+import ThumbDownIcon from "@mui/icons-material/ThumbDown";
+import React from "react";
 
 const Article = observer(({article}) => {
     const navigate = useNavigate();
@@ -24,7 +27,6 @@ const Article = observer(({article}) => {
         event.stopPropagation();
         await articlesStore.deleteArticle(id);
     }
-
     return (
         <Card
             key={article.id}
@@ -63,9 +65,21 @@ const Article = observer(({article}) => {
                         {article.title}
                     </Typography>
                     {authStore.user?.id === article.creator.id && (
-                        <Box sx={{display: 'flex', flexDirection: 'row', gap: 1}}>
-                            <EditIcon />
-                            <DeleteIcon onClick={(event) => handleDelete(event, article.id)} />
+                        <Box 
+                            sx={{display: 'flex', flexDirection: 'row', gap: 1}}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <IconButton 
+                                onClick={(event) => {
+                                    event.stopPropagation();
+                                    navigate(`/edit-article/${article.id}`);
+                                }}
+                            >
+                                <EditIcon />
+                            </IconButton>
+                            <IconButton onClick={(event) => handleDelete(event, article.id)}>
+                                <DeleteIcon />
+                            </IconButton>
                         </Box>
                     )}
                 </Box>
@@ -103,13 +117,17 @@ const Article = observer(({article}) => {
                 </Stack>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <ThumbUpIcon fontSize="small" color="action" />
+                        <IconButton color={article.userRating === 'Like' ? 'primary' : 'default'}>
+                            {article.userRating === 'like' ? <ThumbUpIcon /> : <ThumbUpOutlinedIcon />}
+                        </IconButton>
                         <Typography variant="body2">
                             {article.likes}
                         </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <ThumbDownIcon fontSize="small" color="action" />
+                        <IconButton color={article.userRating === 'Dislike' ? 'primary' : 'default'}>
+                            {article.userRating === 'dislike' ? <ThumbDownIcon /> : <ThumbDownOutlinedIcon />}
+                        </IconButton>
                         <Typography variant="body2">
                             {article.dislikes}
                         </Typography>

@@ -104,7 +104,7 @@ public class ArticlesController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> UpdateArticle([FromBody] UpdateArticleRequest request)
     {
         Guid userId = User.GetUserId()!.Value;
-        var command = new UpdateArticleCommand(request.Id, userId, request.Title, request.Content, request.Tags);
+        var command = new UpdateArticleCommand(request.Id, userId, request.Title, request.Content, request.Tags, request.CoverImageId);
         Result<ArticleDto> updateResult = await mediator.Send(command);
 
         return updateResult.IsSuccess

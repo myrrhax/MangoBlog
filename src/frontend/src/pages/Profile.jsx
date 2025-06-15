@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import { observer } from 'mobx-react-lite';
 import { useParams } from 'react-router-dom';
 import {
@@ -30,10 +30,11 @@ import parseDateTime from "../utils/parseDateTime.js";
 import useSecretText from "../hooks/useSecretText.jsx";
 import NewspaperIcon from '@mui/icons-material/Newspaper';
 import { profileStore } from '../stores/profileStore';
-import ArticlesFilters from "../components/articles/ArticlesFilters.jsx";
 import {articlesStore} from "../stores/articlesStore.js";
+import ArticlesWithFilters from "../components/articles/ArticlesWithFilters";
+import PublicationsList from "../components/publications/PublicationsList";
+import {publicationsStore} from "../stores/publicationsStore.js";
 import ArticlesList from "../components/articles/ArticlesList.jsx";
-import ArticlesWithFilters from "../components/articles/ArticlesWithFilters.jsx";
 
 const Profile = observer(() => {
     const { userId } = useParams();
@@ -43,7 +44,9 @@ const Profile = observer(() => {
     const tabNames = {'articles': 'Посты', 'publications': 'Публикации', 'ratedPosts': 'Оценки постов'};
 
     const tabsContent = {
-        'articles': <ArticlesWithFilters isCurrent={profileStore.isCurrentUser} />
+        'articles': <ArticlesWithFilters isCurrent={profileStore.isCurrentUser} />,
+        'publications': <PublicationsList publications={publicationsStore.publications} />,
+        'ratedPosts': <ArticlesList articles={articlesStore.articles} />
     }
 
     const addIntegration = async () => {
@@ -54,26 +57,51 @@ const Profile = observer(() => {
         }
     }
 
+    const isDisabled = (type) => {
+        return type === 'publications'
+            ? (!profileStore.isCurrentUser
+                || authStore.user.integration?.telegram === null
+                || !authStore.user.integration.telegram.isConnected)
+            : false;
+    }
+
     useEffect(() => {
         articlesStore.clearFilters();
     }, []);
 
     useEffect(() => {
-        articlesStore.fetchArticles();
-    }, [articlesStore.currentPage, articlesStore.filters]);
+        // Основная загрузка профиля и установка фильтра authorId
+        const fetchData = async () => {
+            if (userId === 'me' || userId === authStore.user?.id) {
+                await profileStore.setUser(authStore.user, true);
+            } else {
+                await profileStore.fetchUser(userId);
+            }
 
+            await articlesStore.setAuthorId(userId === 'me' ? authStore.user.id : userId); // Устанавливает authorId в фильтры → триггерит другой useEffect
+        };
+
+        fetchData();
+    }, [userId, isAuthenticated, user]);
 
     useEffect(() => {
-        if (userId === 'me' || userId === authStore.user?.id) {
-            profileStore.setUser(authStore.user, true);
-        } else {
-            profileStore.fetchUser(userId);
+        const loadData = async () => {
+            if (currentTab === 'publications') {
+                await publicationsStore.fetchMy();
+            } else if (currentTab === 'ratedPosts') {
+                await articlesStore.fetchMyRatedArticles();
+            }
         }
 
-        const providedId = userId === 'me' ? authStore.user.id : userId;
-        articlesStore.setAuthorId(providedId);
+        loadData();
+    }, [currentTab]);
+
+    useEffect(() => {
+        if (currentTab !== 'articles') return;
+        if (!articlesStore.filters.authorId) return;
         articlesStore.fetchArticles();
-    }, [userId, isAuthenticated, user]);
+    }, [articlesStore.currentPage, articlesStore.filters, currentTab]);
+
 
     if (profileStore.isLoading) {
         return (
@@ -248,7 +276,7 @@ const Profile = observer(() => {
                     textColor="secondary"
                 >
                     {Object.keys(tabNames).map((key) => (
-                        <Tab key={key} value={key} label={tabNames[key]} />
+                        <Tab key={key} value={key} label={tabNames[key]} disabled={isDisabled(key)} />
                     ))}
                 </Tabs>
             )}

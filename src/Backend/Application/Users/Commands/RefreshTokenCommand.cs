@@ -15,7 +15,6 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, R
     private readonly IUserRepository _userRepository;
     private readonly ITokenGenerator _tokenGenerator;
 
-
     public RefreshTokenCommandHandler(IUserRepository userRepository, ITokenGenerator tokenGenerator)
     {
         _userRepository = userRepository;

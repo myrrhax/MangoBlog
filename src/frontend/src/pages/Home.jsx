@@ -21,7 +21,7 @@ const Home = observer(() => {
 
     return (
         <Box>
-            <ArticlesFilters/>
+            <ArticlesFilters />
 
             {articlesStore.error && (
                 <Alert severity="error" sx={{ mb: 2 }}>
@@ -34,7 +34,7 @@ const Home = observer(() => {
                     <CircularProgress />
                 </Box>
             ) : (
-                <ArticlesList />
+                <ArticlesList articles={articlesStore.articles} />
             )}
         </Box>
     );
