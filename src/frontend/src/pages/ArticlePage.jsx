@@ -18,12 +18,12 @@ import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
 import ThumbDownOutlinedIcon from '@mui/icons-material/ThumbDownOutlined';
 import { articlesStore } from '../stores/articlesStore';
 import { authStore } from '../stores/authStore';
-import ArticleView from '../components/ArticleView';
+import ArticleView from '../components/articles/ArticleView.jsx';
 import SnackbarNotification from '../components/SnackbarNotification';
 import useNotificationSnackbar from '../hooks/useNotificationSnackbar';
 import { mediaService } from '../services/mediaService';
 
-const Article = observer(() => {
+const ArticlePage = observer(() => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [article, setArticle] = useState(null);
@@ -94,7 +94,7 @@ const Article = observer(() => {
                                 <Skeleton variant="text" width={60} height={32} sx={{ display: 'inline-block' }} />
                             </Box>
                             <Box sx={{ mb: 3 }}>
-                                <Skeleton variant="rectangular" height={200} />
+                                <Skeleton variant="rectangular" height={400} />
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                 <Skeleton variant="circular" width={40} height={40} />
@@ -105,6 +105,20 @@ const Article = observer(() => {
                         </>
                     ) : article ? (
                         <>
+                            <Box sx={{ mb: 4 }}>
+                                <img
+                                    src={article.coverImageId 
+                                        ? mediaService.makeImageUrl(article.coverImageId)
+                                        : '/default-article-cover.jpg'}
+                                    alt={article.title}
+                                    style={{
+                                        width: '100%',
+                                        height: '400px',
+                                        objectFit: 'cover',
+                                        borderRadius: '8px'
+                                    }}
+                                />
+                            </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                                 <Avatar
                                     src={article.creator?.avatarId 
@@ -174,4 +188,4 @@ const Article = observer(() => {
     );
 });
 
-export default Article; 
+export default ArticlePage;

@@ -13,17 +13,15 @@ export const authService = {
             'Content-Type': 'application/json',
         },
     }),
-    refreshToken: () => api.post('/users/refresh', {
-        withCredentials: true,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    }),
     getCurrentUser: () => api.get('/users/me', {
         withCredentials: true,
         headers: {
             'Content-Type': 'application/json',
         },
     }),
-    
+    getUser: (id) => api.get(`/users/${id}`, {
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    }),
 };

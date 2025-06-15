@@ -5,8 +5,9 @@ import { theme } from './theme';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Home from './pages/Home';
-import Article from './pages/Article';
+import ArticlePage from './pages/ArticlePage.jsx';
 import NewArticle from './pages/NewArticle';
+import Profile from './pages/Profile';
 import MainLayout from './components/layout/MainLayout';
 import AuthLayout from './components/layout/AuthLayout';
 import { authStore } from './stores/authStore';
@@ -88,7 +89,15 @@ const App = observer(() => {
                         path="/profile"
                         element={
                             <PrivateRoute>
-                                <div>Profile Page (Coming Soon)</div>
+                                <Profile />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/profile/:userId"
+                        element={
+                            <PrivateRoute>
+                                <Profile />
                             </PrivateRoute>
                         }
                     />
@@ -112,7 +121,7 @@ const App = observer(() => {
                         path="/article/:id"
                         element={
                             <PrivateRoute>
-                                <Article />
+                                <ArticlePage />
                             </PrivateRoute>
                         }
                     />

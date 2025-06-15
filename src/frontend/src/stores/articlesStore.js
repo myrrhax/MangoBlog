@@ -11,6 +11,7 @@ class ArticlesStore {
         query: '',
         sortByDate: 'none',
         sortByPopularity: 'none',
+        authorId: null
     };
 
     constructor() {
@@ -41,6 +42,21 @@ class ArticlesStore {
         this.filters = { ...this.filters, ...filters };
     }
 
+    setAuthorId(id) {
+        this.filters = { ...this.filters, authorId: id };
+    }
+
+    clearFilters() {
+        this.filters = {
+            query: '',
+            sortByDate: 'none',
+            sortByPopularity: 'none',
+            authorId: null
+        }
+        this.totalPages = 0;
+        this.currentPage = 1;
+    }
+
     async fetchArticles() {
         this.setLoading(true);
         this.setError(null);
@@ -68,6 +84,18 @@ class ArticlesStore {
             return response.data.data;
         } catch (error) {
             throw new Error(error.response?.data?.message || 'Failed to fetch article');
+        }
+    }
+
+    async deleteArticle(id) {
+        this.setLoading(true);
+        try {
+            await api.delete(`/articles/${id}`);
+            await this.fetchArticles();
+        } catch (error) {
+            console.log(error);
+        } finally {
+            this.setLoading(false);
         }
     }
 

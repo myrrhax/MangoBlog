@@ -20,13 +20,22 @@ class AuthStore {
             return;
         }
 
+        const isSuccess = await this.fetchUser();
+        if (isSuccess) {
+            this.setAuthenticated(true);
+        } else {
+            this.logout();
+        }
+        this.setLoading(false);
+    }
+
+    async fetchUser() {
         try {
             const response = await authService.getCurrentUser();
-            console.log(response);
             this.setUser(response.data);
-            this.setAuthenticated(true);
-        } catch (error) {
-            this.logout();
+            return true;
+        } catch {
+            return false;
         }
     }
 
@@ -87,6 +96,10 @@ class AuthStore {
         } finally {
             this.setLoading(false);
         }
+    }
+
+    async addIntegration() {
+
     }
 
     logout() {

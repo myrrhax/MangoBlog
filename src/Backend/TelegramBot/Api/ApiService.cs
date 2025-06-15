@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -21,7 +20,7 @@ internal class ApiService
 
     public async Task<bool> AttachTelegramChannel(PersistenceUser user, string channelId, string channelName)
     {
-        var body = new { ChatId = channelId,  ChatName = channelName };
+        var body = new { ChatId = channelId, ChatName = channelName };
         string json = JsonConvert.SerializeObject(body);
         var bodyContent = new StringContent(json, encoding: Encoding.UTF8, "application/json");
         var request = new HttpRequestMessage(HttpMethod.Post, "api/integrations/tg/add-channel");
@@ -38,6 +37,28 @@ internal class ApiService
         catch (Exception ex)
         {
             _logger.LogError("Failed to add channel for user: {}. Error: {}", user.UserId, ex.Message);
+            return false;
+        }
+    }
+
+    public async Task<bool> ConfirmMessageSending(string publicationId, string roomId, string messageId, string apiToken)
+    {
+        var body = new { publicationId, roomId, messageId, integrationType = "tg" };
+        string json = JsonConvert.SerializeObject(body);
+        var content = new StringContent(json, encoding: Encoding.UTF8, "application/json");
+        var request = new HttpRequestMessage(HttpMethod.Post, "api/publications/confirm");
+        request.Content = content;
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiToken);
+
+        try
+        {
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            return true;
+        }
+        catch (Exception)
+        {
             return false;
         }
     }

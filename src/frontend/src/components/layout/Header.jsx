@@ -11,7 +11,7 @@ const Header = observer(() => {
 
     const handleProfile = () => {
         setIsMenuOpen(false);
-        navigate('/profile');
+        navigate('/profile/me');
     };
 
     const handleIntegrations = () => {
