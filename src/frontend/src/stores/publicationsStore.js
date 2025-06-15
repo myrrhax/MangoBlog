@@ -13,9 +13,13 @@ class PublicationsStore {
             const response = await publicationsService.fetchMy();
             this.publications = response.data;
         } catch (error) {
-            console.log(error);
+            this.publications = [];
             return;
         }
+    }
+
+    clear() {
+        this.publications = [];
     }
 }
 

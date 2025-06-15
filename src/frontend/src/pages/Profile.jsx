@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import { observer } from 'mobx-react-lite';
 import { useParams } from 'react-router-dom';
 import {
@@ -33,7 +33,7 @@ import { profileStore } from '../stores/profileStore';
 import {articlesStore} from "../stores/articlesStore.js";
 import ArticlesWithFilters from "../components/articles/ArticlesWithFilters";
 import PublicationsList from "../components/publications/PublicationsList";
-import {publicationsStore} from "../stores/publicationsStore.jsx";
+import {publicationsStore} from "../stores/publicationsStore.js";
 
 const Profile = observer(() => {
     const { userId } = useParams();
@@ -55,26 +55,41 @@ const Profile = observer(() => {
         }
     }
 
+    const isDisabled = (type) => {
+        return type === 'publications'
+            ? (!profileStore.isCurrentUser
+                || authStore.user.integration?.telegram === null
+                || !authStore.user.integration.telegram.isConnected)
+            : false;
+    }
+
     useEffect(() => {
+        // Очистка фильтров один раз при монтировании компонента
         articlesStore.clearFilters();
     }, []);
 
     useEffect(() => {
+        // Основная загрузка профиля и установка фильтра authorId
+        const fetchData = async () => {
+            if (userId === 'me' || userId === authStore.user?.id) {
+                profileStore.setUser(authStore.user, true);
+            } else {
+                await profileStore.fetchUser(userId);
+            }
+
+            const providedId = userId === 'me' ? authStore.user.id : userId;
+            articlesStore.setAuthorId(providedId); // Устанавливает authorId в фильтры → триггерит другой useEffect
+            publicationsStore.fetchMy();
+        };
+
+        fetchData();
+    }, [userId, isAuthenticated, user]);
+
+    useEffect(() => {
+        // Вызываем fetchArticles, когда меняются фильтры или страница
         articlesStore.fetchArticles();
     }, [articlesStore.currentPage, articlesStore.filters]);
 
-    useEffect(() => {
-        if (userId === 'me' || userId === authStore.user?.id) {
-            profileStore.setUser(authStore.user, true);
-        } else {
-            profileStore.fetchUser(userId);
-        }
-
-        const providedId = userId === 'me' ? authStore.user.id : userId;
-        articlesStore.setAuthorId(providedId);
-        articlesStore.fetchArticles();
-        publicationsStore.fetchMy();
-    }, [userId, isAuthenticated, user]);
 
     if (profileStore.isLoading) {
         return (
@@ -249,7 +264,7 @@ const Profile = observer(() => {
                     textColor="secondary"
                 >
                     {Object.keys(tabNames).map((key) => (
-                        <Tab key={key} value={key} label={tabNames[key]} />
+                        <Tab key={key} value={key} label={tabNames[key]} disabled={isDisabled(key)} />
                     ))}
                 </Tabs>
             )}

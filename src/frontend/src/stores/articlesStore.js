@@ -57,10 +57,19 @@ class ArticlesStore {
         this.currentPage = 1;
     }
 
+    clear() {
+        this.clearFilters();
+        this.articles = [];
+        this.isLoading = false;
+        this.error = null;
+        this.totalPages = 0;
+        this.currentPage = 1;
+    }
+
     async fetchArticles() {
         this.setLoading(true);
         this.setError(null);
-
+        this.articles = [];
         try {
             const params = {
                 page: this.currentPage,
