@@ -65,6 +65,10 @@ const ArticlePage = observer(() => {
         }
     }
 
+    const handleNameClick = (event) => {
+        navigate('/profile/' + article.creator?.id);
+    }
+
     if (error) {
         return (
             <Alert severity="error" sx={{ my: 2 }}>
@@ -128,7 +132,7 @@ const ArticlePage = observer(() => {
                                     sx={{ width: 48, height: 48, mr: 2 }}
                                 />
                                 <Box>
-                                    <Typography variant="h6">
+                                    <Typography sx={{cursor: 'pointer'}} variant="h6" onClick={handleNameClick}>
                                         {article.creator?.displayedName || 'Anonymous'}
                                     </Typography>
                                     <Typography variant="caption" color="text.secondary">
