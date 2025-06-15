@@ -34,12 +34,16 @@ api.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
-                const response = await api.post('/users/refresh');
+                const response = await api.post('/users/refresh', null, {
+                    withCredentials: true,
+                });
+                console.log('token refreshed');
                 const { accessToken } = response.data;
                 
                 // Store new access token
                 localStorage.setItem('accessToken', accessToken);
-                
+
+                console.log('token refreshed');
                 // Retry original request with new token
                 originalRequest.headers.Authorization = `Bearer ${accessToken}`;
                 return api(originalRequest);
