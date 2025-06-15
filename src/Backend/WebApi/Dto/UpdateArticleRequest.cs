@@ -3,4 +3,5 @@
 public record UpdateArticleRequest(string Id,
     string Title,
     Dictionary<string, object> Content,
-    IEnumerable<string> Tags);
+    IEnumerable<string> Tags,
+    Guid? CoverImageId);

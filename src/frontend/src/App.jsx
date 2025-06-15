@@ -7,6 +7,7 @@ import Register from './components/auth/Register';
 import Home from './pages/Home';
 import ArticlePage from './pages/ArticlePage.jsx';
 import NewArticle from './pages/NewArticle';
+import EditArticle from './pages/EditArticle';
 import Profile from './pages/Profile';
 import MainLayout from './components/layout/MainLayout';
 import AuthLayout from './components/layout/AuthLayout';
@@ -126,6 +127,14 @@ const App = observer(() => {
                         element={
                             <PrivateRoute>
                                 <ArticlePage />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/edit-article/:id"
+                        element={
+                            <PrivateRoute>
+                                <EditArticle />
                             </PrivateRoute>
                         }
                     />

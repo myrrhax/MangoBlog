@@ -65,9 +65,21 @@ const Article = observer(({article}) => {
                         {article.title}
                     </Typography>
                     {authStore.user?.id === article.creator.id && (
-                        <Box sx={{display: 'flex', flexDirection: 'row', gap: 1}}>
-                            <EditIcon />
-                            <DeleteIcon onClick={(event) => handleDelete(event, article.id)} />
+                        <Box 
+                            sx={{display: 'flex', flexDirection: 'row', gap: 1}}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <IconButton 
+                                onClick={(event) => {
+                                    event.stopPropagation();
+                                    navigate(`/edit-article/${article.id}`);
+                                }}
+                            >
+                                <EditIcon />
+                            </IconButton>
+                            <IconButton onClick={(event) => handleDelete(event, article.id)}>
+                                <DeleteIcon />
+                            </IconButton>
                         </Box>
                     )}
                 </Box>

@@ -3,6 +3,7 @@ using Application.Abstractions;
 using Application.Dto.Articles;
 using Application.Extentions;
 using Domain.Entities;
+using Domain.Enums;
 using Domain.Utils;
 using Domain.Utils.Errors;
 using FluentValidation;
@@ -14,7 +15,8 @@ public record UpdateArticleCommand(string ArticleId,
     Guid CallerId,
     string Title,
     Dictionary<string, object> Content, 
-    IEnumerable<string> Tags) : IRequest<Result<ArticleDto>>;
+    IEnumerable<string> Tags,
+    Guid? CoverImageId = null) : IRequest<Result<ArticleDto>>;
 
 public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand, Result<ArticleDto>>
 {
@@ -22,19 +24,20 @@ public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand,
     private readonly IArticlesRepository _articlesRepository;
     private readonly IValidator<UpdateArticleCommand> _validator;
     private readonly ITagsRepository _tagsRepository;
-    private readonly IRatingsRepository _ratingsRepository;
+    private readonly IMediaFileService _mediaFileService;
 
-    public UpdateArticleCommandHandler(IUserRepository userRepository, 
-        IArticlesRepository articlesRepository, 
-        IValidator<UpdateArticleCommand> validator, 
-        ITagsRepository tagsRepository, 
-        IRatingsRepository ratingsRepository)
+    public UpdateArticleCommandHandler(IUserRepository userRepository,
+        IArticlesRepository articlesRepository,
+        IValidator<UpdateArticleCommand> validator,
+        ITagsRepository tagsRepository,
+        IRatingsRepository ratingsRepository,
+        IMediaFileService mediaFileService)
     {
         _userRepository = userRepository;
         _articlesRepository = articlesRepository;
         _validator = validator;
         _tagsRepository = tagsRepository;
-        _ratingsRepository = ratingsRepository;
+        _mediaFileService = mediaFileService;
     }
 
     public async Task<Result<ArticleDto>> Handle(UpdateArticleCommand request, CancellationToken cancellationToken)
@@ -63,6 +66,19 @@ public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand,
         if (article.CreatorId != caller.Id)
             return Result.Failure<ArticleDto>(new NoPermission(caller.Id));
 
+        if (request.CoverImageId.HasValue)
+        {
+            MediaFile? file = await _mediaFileService.GetMediaFile(request.CoverImageId.Value);
+            if (file is null)
+            {
+                return Result.Failure<ArticleDto>(new MediaNotFound(request.CoverImageId.Value));
+            }
+            if (file.FileType != MediaFileType.Photo)
+            {
+                return Result.Failure<ArticleDto>(new InvalidMediaFormat(file.Id, file.FileType));
+            }
+        }
+
         Result<IEnumerable<Tag>> getTagsResult = await _tagsRepository.AddTagsIfAbsent(request.Tags, cancellationToken);
 
         if (getTagsResult.IsFailure)
@@ -75,7 +91,8 @@ public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand,
             request.Tags.ToList(),
             article.Likes,
             article.Dislikes,
-            article.CreationDate);
+            article.CreationDate,
+            request.CoverImageId);
 
         Result updateResult = await _articlesRepository.ReplaceArticle(replaceArticle);
 
@@ -90,7 +107,8 @@ public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand,
             replaceArticle.CreationDate,
             replaceArticle.Likes,
             replaceArticle.Dislikes,
-            UserRating: null);
+            UserRating: null,
+            replaceArticle.CoverImageId);
 
         return Result.Success(resultModel);
     }

@@ -138,6 +138,16 @@ class ArticlesStore {
             throw new Error(error.response?.data?.message || 'Failed to create article');
         }
     }
+
+    async updateArticle(id, articleData) {
+        try {
+            const response = await api.put(`/articles`, {id, ...articleData});
+            return response.data;
+        } catch (error) {
+            console.log(error);
+            throw new Error(error.response?.data?.message || 'Failed to update article');
+        }
+    }
 }
 
 export const articlesStore = new ArticlesStore(); 
