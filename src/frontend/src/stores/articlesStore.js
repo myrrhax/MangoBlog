@@ -87,6 +87,19 @@ class ArticlesStore {
         }
     }
 
+    async fetchMyRatedArticles() {
+        this.setLoading(true);
+        this.setError(null);
+        try {
+            const response = await api.get('ratings/my');
+            this.setArticles(response.data);
+        } catch (error) {
+            this.articles = [];
+        } finally {
+            this.setLoading(false);
+        }
+    }
+
     async fetchArticle(id) {
         try {
             const response = await api.get(`/articles/${id}`);

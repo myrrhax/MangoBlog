@@ -51,7 +51,7 @@ internal class EnterChatHandler : IHandler<Message>
             bool result = await AddChat(context, chatId, userId, chatName);
             string answer = result
                 ? "Интеграция добавлена"
-                : "Что-то пошло не так!";
+                : "Что-то пошло не так! Возможно бот уже добавлен в канал.";
             await context.Bot.SendMessage(userId, answer);
             context.CurrentState = null;
             return;

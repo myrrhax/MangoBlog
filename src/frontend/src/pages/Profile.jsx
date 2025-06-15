@@ -34,6 +34,7 @@ import {articlesStore} from "../stores/articlesStore.js";
 import ArticlesWithFilters from "../components/articles/ArticlesWithFilters";
 import PublicationsList from "../components/publications/PublicationsList";
 import {publicationsStore} from "../stores/publicationsStore.js";
+import ArticlesList from "../components/articles/ArticlesList.jsx";
 
 const Profile = observer(() => {
     const { userId } = useParams();
@@ -44,7 +45,8 @@ const Profile = observer(() => {
 
     const tabsContent = {
         'articles': <ArticlesWithFilters isCurrent={profileStore.isCurrentUser} />,
-        'publications': <PublicationsList publications={publicationsStore.publications} />
+        'publications': <PublicationsList publications={publicationsStore.publications} />,
+        'ratedPosts': <ArticlesList articles={articlesStore.articles} />
     }
 
     const addIntegration = async () => {
@@ -64,7 +66,6 @@ const Profile = observer(() => {
     }
 
     useEffect(() => {
-        // Очистка фильтров один раз при монтировании компонента
         articlesStore.clearFilters();
     }, []);
 
@@ -72,23 +73,34 @@ const Profile = observer(() => {
         // Основная загрузка профиля и установка фильтра authorId
         const fetchData = async () => {
             if (userId === 'me' || userId === authStore.user?.id) {
-                profileStore.setUser(authStore.user, true);
+                await profileStore.setUser(authStore.user, true);
             } else {
                 await profileStore.fetchUser(userId);
             }
 
-            const providedId = userId === 'me' ? authStore.user.id : userId;
-            articlesStore.setAuthorId(providedId); // Устанавливает authorId в фильтры → триггерит другой useEffect
-            publicationsStore.fetchMy();
+            await articlesStore.setAuthorId(userId === 'me' ? authStore.user.id : userId); // Устанавливает authorId в фильтры → триггерит другой useEffect
         };
 
         fetchData();
     }, [userId, isAuthenticated, user]);
 
     useEffect(() => {
-        // Вызываем fetchArticles, когда меняются фильтры или страница
+        const loadData = async () => {
+            if (currentTab === 'publications') {
+                await publicationsStore.fetchMy();
+            } else if (currentTab === 'ratedPosts') {
+                await articlesStore.fetchMyRatedArticles();
+            }
+        }
+
+        loadData();
+    }, [currentTab]);
+
+    useEffect(() => {
+        if (currentTab !== 'articles') return;
+        if (!articlesStore.filters.authorId) return;
         articlesStore.fetchArticles();
-    }, [articlesStore.currentPage, articlesStore.filters]);
+    }, [articlesStore.currentPage, articlesStore.filters, currentTab]);
 
 
     if (profileStore.isLoading) {
