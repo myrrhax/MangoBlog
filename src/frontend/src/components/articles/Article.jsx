@@ -11,9 +11,20 @@ import {
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import {mediaService} from "../../services/mediaService.js";
+import {observer} from "mobx-react-lite";
+import {authStore} from "../../stores/authStore.js";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import {articlesStore} from "../../stores/articlesStore.js";
 
-const Article = ({article}) => {
+const Article = observer(({article}) => {
     const navigate = useNavigate();
+
+    const handleDelete = async (event, id) => {
+        event.stopPropagation();
+        await articlesStore.deleteArticle(id);
+    }
+
     return (
         <Card
             key={article.id}
@@ -45,9 +56,19 @@ const Article = ({article}) => {
                 />
             </Box>
             <CardContent>
-                <Typography variant="h5" gutterBottom>
-                    {article.title}
-                </Typography>
+                <Box
+                    sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}
+                >
+                    <Typography variant="h5" gutterBottom>
+                        {article.title}
+                    </Typography>
+                    {authStore.user?.id === article.creator.id && (
+                        <Box sx={{display: 'flex', flexDirection: 'row', gap: 1}}>
+                            <EditIcon />
+                            <DeleteIcon onClick={(event) => handleDelete(event, article.id)} />
+                        </Box>
+                    )}
+                </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Avatar
                         src={article.creator.avatarId
@@ -97,6 +118,6 @@ const Article = ({article}) => {
             </CardContent>
         </Card>
     )
-}
+})
 
 export default Article;

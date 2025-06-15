@@ -5,7 +5,7 @@ import { theme } from './theme';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Home from './pages/Home';
-import Article from './pages/Article';
+import ArticlePage from './pages/ArticlePage.jsx';
 import NewArticle from './pages/NewArticle';
 import Profile from './pages/Profile';
 import MainLayout from './components/layout/MainLayout';
@@ -121,7 +121,7 @@ const App = observer(() => {
                         path="/article/:id"
                         element={
                             <PrivateRoute>
-                                <Article />
+                                <ArticlePage />
                             </PrivateRoute>
                         }
                     />

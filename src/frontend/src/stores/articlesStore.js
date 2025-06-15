@@ -87,6 +87,18 @@ class ArticlesStore {
         }
     }
 
+    async deleteArticle(id) {
+        this.setLoading(true);
+        try {
+            await api.delete(`/articles/${id}`);
+            await this.fetchArticles();
+        } catch (error) {
+            console.log(error);
+        } finally {
+            this.setLoading(false);
+        }
+    }
+
     async rateArticle(id, rating) {
         try {
             await api.post(`/ratings`, { postId: id, ratingType: rating });

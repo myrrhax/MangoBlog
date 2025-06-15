@@ -1,4 +1,4 @@
-﻿import {Box, Pagination} from "@mui/material";
+﻿import {Box, Pagination, Typography} from "@mui/material";
 import {articlesStore} from "../../stores/articlesStore.js";
 import React, {useEffect} from "react";
 import {observer} from "mobx-react-lite";
@@ -12,9 +12,17 @@ const ArticlesList = observer(({autoCenter = true}) => {
     return (
         <>
             <Box sx={{ maxWidth: 800, mx: autoCenter ? 'auto' : '0px' }}>
-                {articlesStore.articles.map((article) => (
-                    <Article article={article} />
-                ))}
+                {articlesStore.articles.length > 0
+                    ? (
+                        articlesStore.articles.map((article) => (
+                            <Article key={article.id} article={article} />
+                        ))
+                    ) : (
+                        <Typography variant={'h6'}>
+                            Здесь пока ничего нет
+                        </Typography>
+                    )}
+
             </Box>
 
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>

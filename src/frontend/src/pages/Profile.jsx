@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import {useEffect, useState} from 'react';
 import { observer } from 'mobx-react-lite';
 import { useParams } from 'react-router-dom';
 import {
@@ -16,6 +16,8 @@ import {
     List,
     ListItem,
     Button,
+    Tabs,
+    Tab
 } from '@mui/material';
 import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
@@ -31,11 +33,18 @@ import { profileStore } from '../stores/profileStore';
 import ArticlesFilters from "../components/articles/ArticlesFilters.jsx";
 import {articlesStore} from "../stores/articlesStore.js";
 import ArticlesList from "../components/articles/ArticlesList.jsx";
+import ArticlesWithFilters from "../components/articles/ArticlesWithFilters.jsx";
 
 const Profile = observer(() => {
     const { userId } = useParams();
     const { isAuthenticated, user } = authStore;
+    const [currentTab, setCurrentTab] = useState('articles');
     const [showIntegrationCodeStatus, showCode] = useSecretText(3000);
+    const tabNames = {'articles': 'Посты', 'publications': 'Публикации', 'ratedPosts': 'Оценки постов'};
+
+    const tabsContent = {
+        'articles': <ArticlesWithFilters isCurrent={profileStore.isCurrentUser} />
+    }
 
     const addIntegration = async () => {
         const isSuccess = await profileStore.addIntegration();
@@ -232,18 +241,26 @@ const Profile = observer(() => {
                 )}
             </Paper>
             <Divider/>
+            {profileStore.isCurrentUser && (
+                <Tabs
+                    value={currentTab}
+                    onChange={(e, value) => setCurrentTab(value)}
+                    textColor="secondary"
+                >
+                    {Object.keys(tabNames).map((key) => (
+                        <Tab key={key} value={key} label={tabNames[key]} />
+                    ))}
+                </Tabs>
+            )}
             <Paper
                 sx={{ width: '75%', m: 3, p: 3 }}
                 elevation={3}
             >
                 <Typography
                     variant={"h6"}>
-                    Посты:
+                    {tabNames[currentTab]}:
                 </Typography>
-                <Box sx={{display: 'flex', flexDirection: 'column', gap: 1}}>
-                    <ArticlesFilters showAddPost={profileStore.isCurrentUser} />
-                    <ArticlesList autoCenter={false} />
-                </Box>
+                {tabsContent[currentTab]}
             </Paper>
         </Container>
     );

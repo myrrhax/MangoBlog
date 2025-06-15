@@ -23,7 +23,7 @@ import SnackbarNotification from '../components/SnackbarNotification';
 import useNotificationSnackbar from '../hooks/useNotificationSnackbar';
 import { mediaService } from '../services/mediaService';
 
-const Article = observer(() => {
+const ArticlePage = observer(() => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [article, setArticle] = useState(null);
@@ -188,4 +188,4 @@ const Article = observer(() => {
     );
 });
 
-export default Article; 
+export default ArticlePage;
