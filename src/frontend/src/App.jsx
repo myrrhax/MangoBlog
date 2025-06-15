@@ -11,7 +11,7 @@ import Profile from './pages/Profile';
 import MainLayout from './components/layout/MainLayout';
 import AuthLayout from './components/layout/AuthLayout';
 import { authStore } from './stores/authStore';
-import { useEffect, useState } from 'react';
+import {useEffect, useRef, useState} from 'react';
 
 const PrivateRoute = observer(({ children }) => {
     if (!authStore.isAuthenticated) {
@@ -29,8 +29,12 @@ const AuthRoute = observer(({ children }) => {
 
 const App = observer(() => {
     const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+    const hasCheckedRef = useRef(false);
 
     useEffect(() => {
+        if (hasCheckedRef.current) return;
+        hasCheckedRef.current = true;
+
         const checkAuth = async () => {
             await authStore.checkAuth();
             setIsCheckingAuth(false);
