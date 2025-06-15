@@ -20,6 +20,7 @@ export const authService = {
         },
     }),
     getUser: (id) => api.get(`/users/${id}`, {
+        withCredentials: true,
         headers: {
             'Content-Type': 'application/json',
         }

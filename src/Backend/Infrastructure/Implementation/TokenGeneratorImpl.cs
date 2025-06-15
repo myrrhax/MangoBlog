@@ -19,7 +19,7 @@ internal class TokenGeneratorImpl(IOptions<JwtConfig> jwtConfig) : ITokenGenerat
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Role, user.Role.ToString().ToLower()),
         };
-        DateTime expirationDate = DateTime.UtcNow.AddMinutes(jwtConfig.Value.ExpirationTimeMinutes);
+        DateTime expirationDate = DateTime.UtcNow.AddSeconds(30);
         
         return WriteJwtToken(claims, expirationDate);
     }

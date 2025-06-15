@@ -268,7 +268,7 @@ internal class UserRepositoryImpl(ApplicationDbContext context, ILogger<UserRepo
 
             if (rows > 0)
             {
-                logger.LogInformation("Token with id: {} was successfully deleted.",
+                logger.LogInformation("Token with id: {} was successfully updated.",
                     tokenId);
                 return Result.Success();
             }

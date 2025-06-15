@@ -19,7 +19,6 @@ class AuthStore {
         if (!token) {
             return;
         }
-
         const isSuccess = await this.fetchUser();
         if (isSuccess) {
             this.setAuthenticated(true);
@@ -32,6 +31,8 @@ class AuthStore {
     async fetchUser() {
         try {
             const response = await authService.getCurrentUser();
+            console.log(`fetched user: `);
+            console.log(response.data);
             this.setUser(response.data);
             return true;
         } catch {
