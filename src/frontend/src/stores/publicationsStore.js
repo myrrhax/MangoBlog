@@ -18,6 +18,16 @@ class PublicationsStore {
         }
     }
 
+    async createPublication(publicationData) {
+        try {
+            const response = await publicationsService.create(publicationData);
+            this.publications = [response.data, ...this.publications];
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     clear() {
         this.publications = [];
     }
