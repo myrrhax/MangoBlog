@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import { observer } from 'mobx-react-lite';
 import { useParams } from 'react-router-dom';
 import {
@@ -35,6 +35,10 @@ import ArticlesWithFilters from "../components/articles/ArticlesWithFilters";
 import PublicationsList from "../components/publications/PublicationsList";
 import {publicationsStore} from "../stores/publicationsStore.js";
 import ArticlesList from "../components/articles/ArticlesList.jsx";
+import DeleteIcon from "@mui/icons-material/Delete";
+import useNotificationSnackbar from "../hooks/useNotificationSnackbar.jsx";
+import {integrationsService} from "../services/integrationsService.js";
+import SnackbarNotification from "../components/SnackbarNotification.jsx";
 
 const Profile = observer(() => {
     const { userId } = useParams();
@@ -42,6 +46,7 @@ const Profile = observer(() => {
     const [currentTab, setCurrentTab] = useState('articles');
     const [showIntegrationCodeStatus, showCode] = useSecretText(3000);
     const tabNames = {'articles': 'Посты', 'publications': 'Публикации', 'ratedPosts': 'Оценки постов'};
+    const [isOpen, setIsOpen, message, setMessage] = useNotificationSnackbar();
 
     const tabsContent = {
         'articles': <ArticlesWithFilters isCurrent={profileStore.isCurrentUser} />,
@@ -63,6 +68,24 @@ const Profile = observer(() => {
                 || authStore.user.integration?.telegram === null
                 || !authStore.user.integration?.telegram.isConnected)
             : false;
+    }
+
+    const onIntegrationDeleteClick = async () => {
+        const answer = confirm('Вы уверены?');
+
+        if (answer) {
+            try {
+                await integrationsService.deleteIntegration();
+                await authStore.fetchUser();
+                profileStore.setUser(authStore.user, true);
+                setMessage('Интеграция удалена!');
+                setIsOpen(true);
+            } catch (e) {
+                setMessage('Не удалось удалить интеграцию. Попробуйте позднее!');
+                setIsOpen(true);
+                console.error(e);
+            }
+        }
     }
 
     useEffect(() => {
@@ -127,6 +150,7 @@ const Profile = observer(() => {
         <Container
             sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}
         >
+            <SnackbarNotification open={isOpen} setOpen={setIsOpen} message={message} />
             <Paper
                 sx={{ width: '75%', m: 3, p: 3 }}
                 elevation={3}
@@ -195,9 +219,12 @@ const Profile = observer(() => {
                         {profileStore.user.integration?.telegram
                             ? (
                                 <Paper sx={{display: 'flex', flexDirection: 'column', gap: 1, p: 2}}>
-                                    <Box sx={{gap: 1, display:'flex', alignItems: 'center'}}>
-                                        <Typography variant="h5" sx={{color: 'blue'}}>Telegram</Typography>
-                                        <TelegramIcon sx={{width: '24px', height: '24px'}} />
+                                    <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
+                                        <Box sx={{gap: 1, display:'flex', alignItems: 'center'}}>
+                                            <Typography variant="h5" sx={{color: 'blue'}}>Telegram</Typography>
+                                            <TelegramIcon sx={{width: '24px', height: '24px'}} />
+                                        </Box>
+                                        <DeleteIcon sx={{cursor: 'pointer'}} onClick={onIntegrationDeleteClick} />
                                     </Box>
                                     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                                         <Typography variant="body1">

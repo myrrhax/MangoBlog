@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -10,13 +10,9 @@ import {
     Typography,
     Chip,
     Stack,
-    Alert, Avatar,
+    Alert,
+    Checkbox,
 } from '@mui/material';
-import EditorJS from '@editorjs/editorjs';
-import Header from '@editorjs/header';
-import Paragraph from '@editorjs/paragraph';
-import List from '@editorjs/list';
-import Image from '@editorjs/image';
 import { articlesStore } from '../stores/articlesStore';
 import { mediaService } from '../services/mediaService';
 import Editor from '../components/EditorJS/Editor';
@@ -31,13 +27,13 @@ const NewArticle = observer(() => {
     const [error, setError] = useState(null);
     const [cover, setCover] = useState('');
     const [coverFile, setCoverFile] = useState(null);
+    const [autoPublish, setAutoPublish] = useState(false);
 
     const uploadMedia = async (file) => {
         try {
             const response = await mediaService.loadMedia(file, false);
             return response.data.id;
         } catch (error) {
-            console.log(error);
             setError(error.message);
             return null;
         }
@@ -74,7 +70,7 @@ const NewArticle = observer(() => {
         try {
             const editorData = await editorRef.current.save();
             let coverId = null;
-            if (cover !== null) {
+            if (coverFile !== null) {
                 coverId = await uploadMedia(coverFile);
                 if (coverId === null) {
                     return;
@@ -85,10 +81,11 @@ const NewArticle = observer(() => {
                 content: editorData,
                 tags,
                 coverImageId: coverId,
+                autoPublish: autoPublish
             });
             navigate('/');
         } catch (err) {
-            setError(err.message || 'Failed to create article');
+            setError('Добавьте 1 или более тэгов'); // Временный фикс
         }
     };
 
@@ -173,6 +170,15 @@ const NewArticle = observer(() => {
                                     />
                                 ))}
                             </Stack>
+                        </Box>
+
+                        <Box
+                            sx={{ display: 'flex', flexDirection: 'row', gap: 1, alignItems: 'center' }}
+                        >
+                            <Typography variant="body1">
+                                Опубликовать в интеграции?
+                            </Typography>
+                            <Checkbox value={autoPublish} onClick={() => setAutoPublish(!autoPublish)} />
                         </Box>
 
                         <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>

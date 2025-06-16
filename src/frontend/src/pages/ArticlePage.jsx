@@ -30,7 +30,7 @@ const ArticlePage = observer(() => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const { isAuthenticated, user } = authStore;
-    const { isOpen, setIsOpen, message, setMessage } = useNotificationSnackbar();
+    const [isOpen, setIsOpen, message, setMessage] = useNotificationSnackbar();
 
     useEffect(() => {
         const fetchArticle = async () => {
