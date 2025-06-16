@@ -57,6 +57,25 @@ internal class UsersService
         }
     }
 
+    public async Task<bool> DeleteUserById(Guid userId)
+    {
+        const string sql = """
+            DELETE FROM users WHERE user_id = @userId;
+        """;
+        try
+        {
+            int rows = await _dbConnection.ExecuteAsync(sql, new { userId });
+
+            _logger.LogInformation("User: {} successfully deleted from bot", userId);
+            return rows > 0;
+        } 
+        catch (Exception ex)
+        {
+            _logger.LogError("An error occurred deleting user with id: {}. Error: {}", userId, ex.Message);
+            return false;
+        }
+    }
+
     public async Task<PersistenceUser?> GetUserByTelegramId(long telegramId)
     {
         const string sql = """

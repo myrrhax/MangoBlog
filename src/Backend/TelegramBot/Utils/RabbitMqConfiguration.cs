@@ -8,4 +8,6 @@ internal class RabbitMqConfiguration
     public string Pass { get; set; } = string.Empty;
     public string QueueName { get; set; } = string.Empty;
     public string RoutingKey { get; set; } = string.Empty;
+    public string ExchangeNameIntegrations { get; set; } = string.Empty;
+    public Dictionary<string, string> ExchangeNameIntegrationsKeys { get; set; } = [];
 }
