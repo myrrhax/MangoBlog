@@ -61,7 +61,7 @@ const Profile = observer(() => {
         return type === 'publications'
             ? (!profileStore.isCurrentUser
                 || authStore.user.integration?.telegram === null
-                || !authStore.user.integration.telegram.isConnected)
+                || !authStore.user.integration?.telegram.isConnected)
             : false;
     }
 
