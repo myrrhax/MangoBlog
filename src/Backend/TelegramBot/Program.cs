@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Npgsql;
+using RabbitMQ.Client;
 using Telegram.Bot;
 using TelegramBot.Api;
 using TelegramBot.Context;
@@ -12,6 +13,7 @@ using TelegramBot.Handlers;
 using TelegramBot.Persistence;
 using TelegramBot.Routing;
 using TelegramBot.Services;
+using TelegramBot.Utils;
 
 var hostBuilder = Host.CreateDefaultBuilder(args);
 
@@ -54,7 +56,23 @@ hostBuilder.ConfigureServices((context, services) =>
     services.AddSingleton<Router>();
 
     services.AddHostedService<BotListenerService>();
-    services.AddHostedService<PublicationsListener>();
+
+    services.AddSingleton<IConnection>(provider =>
+    {
+        RabbitMqConfiguration config = context.Configuration.GetSection("RabbitMq").Get<RabbitMqConfiguration>()
+            ?? throw new ArgumentNullException(nameof(RabbitMqConfiguration));
+        var factory = new ConnectionFactory
+        {
+            HostName = config.Host,
+            UserName = config.Name,
+            Password = config.Pass,
+        };
+
+        return factory.CreateConnection();
+    });
+
+    services.AddHostedService<QueueListener>();
+    services.AddHostedService<DeleteTelegramIntegrationListener>();
 });
 
 var host = hostBuilder.Build();

@@ -16,35 +16,29 @@ namespace TelegramBot.Services;
 internal class DeleteTelegramIntegrationListener : BackgroundService
 {
     private readonly IConfiguration _configuration;
-    private readonly ILogger<PublicationsListener> _logger;
+    private readonly ILogger<QueueListener> _logger;
     private readonly ITelegramBotClient _bot;
     private readonly IServiceProvider _serviceProvider;
+    private readonly IConnection _connection;
 
     public DeleteTelegramIntegrationListener(IConfiguration configuration,
-        ILogger<PublicationsListener> logger,
+        ILogger<QueueListener> logger,
         ITelegramBotClient bot,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        IConnection connection)
     {
         _configuration = configuration;
         _logger = logger;
         _bot = bot;
         _serviceProvider = serviceProvider;
+        _connection = connection;
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         RabbitMqConfiguration config = _configuration.GetSection("RabbitMq").Get<RabbitMqConfiguration>()
             ?? throw new ArgumentNullException(nameof(RabbitMqConfiguration));
-
-        var factory = new ConnectionFactory
-        {
-            HostName = config.Host,
-            UserName = config.Name,
-            Password = config.Pass,
-        };
-
-        var connection = factory.CreateConnection();
-        var channel = connection.CreateModel();
+        var channel = _connection.CreateModel();
 
         channel.ExchangeDeclare(config.ExchangeNameIntegrations,
             type: ExchangeType.Topic,
@@ -58,8 +52,8 @@ internal class DeleteTelegramIntegrationListener : BackgroundService
             autoDelete: false,
             arguments: new Dictionary<string, object>());
 
-        channel.QueueBind(queue: config.QueueName,
-            exchange: config.ExchangeName,
+        channel.QueueBind(queue: queueName,
+            exchange: config.ExchangeNameIntegrations,
             routingKey: config.ExchangeNameIntegrationsKeys["DeleteTelegramIntegrationKey"]);
 
         var consume = new EventingBasicConsumer(channel);
@@ -76,11 +70,10 @@ internal class DeleteTelegramIntegrationListener : BackgroundService
             _logger.LogInformation("New id for remove: {}", id);
             await RemoveUser(id);
         };
-        channel.BasicConsume(queue: config.QueueName, autoAck: true, consumer: consume);
+        channel.BasicConsume(queue: queueName, autoAck: true, consumer: consume);
 
         stoppingToken.Register(() =>
         {
-            connection.Dispose();
             channel.Dispose();
             _logger.LogInformation("Подключение закрыто!");
         });

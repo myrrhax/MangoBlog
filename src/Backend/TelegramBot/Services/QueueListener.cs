@@ -17,25 +17,28 @@ using TelegramBot.Utils;
 
 namespace TelegramBot.Services;
 
-internal class PublicationsListener : BackgroundService
+internal class QueueListener : BackgroundService
 {
     private readonly IConfiguration _configuration;
-    private readonly ILogger<PublicationsListener> _logger;
+    private readonly ILogger<QueueListener> _logger;
     private readonly ITelegramBotClient _bot;
     private readonly IServiceProvider _serviceProvider;
     private readonly ApiService _apiService;
+    private readonly IConnection _connection;
 
-    public PublicationsListener(IConfiguration configuration,
-        ILogger<PublicationsListener> logger,
+    public QueueListener(IConfiguration configuration,
+        ILogger<QueueListener> logger,
         ITelegramBotClient bot,
         IServiceProvider serviceProvider,
-        ApiService apiService)
+        ApiService apiService,
+        IConnection connection)
     {
         _configuration = configuration;
         _logger = logger;
         _bot = bot;
         _serviceProvider = serviceProvider;
         _apiService = apiService;
+        _connection = connection;
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -43,15 +46,7 @@ internal class PublicationsListener : BackgroundService
         RabbitMqConfiguration config = _configuration.GetSection("RabbitMq").Get<RabbitMqConfiguration>()
             ?? throw new ArgumentNullException(nameof(RabbitMqConfiguration));
 
-        var factory = new ConnectionFactory
-        {
-            HostName = config.Host,
-            UserName = config.Name,
-            Password = config.Pass,
-        };
-
-        var connection = factory.CreateConnection();
-        var channel = connection.CreateModel();
+        var channel = _connection.CreateModel();
 
         channel.ExchangeDeclare(config.ExchangeName,
             type: ExchangeType.Fanout,
@@ -78,14 +73,13 @@ internal class PublicationsListener : BackgroundService
             if (publication is not null)
             {
                 _logger.LogInformation("Новая публикация: {}", publication.PublicationId);
-                await PublishToChats(publication);
+                await PublishToChats(publication, channel, eventArgs);
             }
         };
-        channel.BasicConsume(queue: config.QueueName, autoAck: true, consumer: consume);
+        channel.BasicConsume(queue: config.QueueName, autoAck: false, consumer: consume);
 
         stoppingToken.Register(() =>
         {
-            connection.Dispose();
             channel.Dispose();
             _logger.LogInformation("Подключение закрыто!");
         });
@@ -93,7 +87,7 @@ internal class PublicationsListener : BackgroundService
         return Task.CompletedTask;
     }
 
-    private async Task PublishToChats(Publication publication)
+    private async Task PublishToChats(Publication publication, IModel channel, BasicDeliverEventArgs args)
     {
         using var scope = _serviceProvider.CreateScope();
         UsersService usersService = scope.ServiceProvider.GetRequiredService<UsersService>();
@@ -138,6 +132,7 @@ internal class PublicationsListener : BackgroundService
             _apiService.ConfirmMessageSending(publication.PublicationId, data.roomId, data.messageId, user.AccessToken));
     
         await Task.WhenAll(confirmTasks);
+        channel.BasicAck(args.DeliveryTag, multiple: false);
     }
 
     private async Task<Dictionary<Guid, (MediaFileType Type, byte[] Bytes)>> GetMediaAlbum(IEnumerable<(Guid Id, MediaFileType Type)> medias)
