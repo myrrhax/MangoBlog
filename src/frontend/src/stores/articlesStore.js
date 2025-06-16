@@ -134,8 +134,7 @@ class ArticlesStore {
             const response = await api.post('/articles', articleData);
             return response.data;
         } catch (error) {
-            console.log(error);
-            throw new Error(error.response?.data?.message || 'Failed to create article');
+            throw new Error(error.response?.data?.errors);
         }
     }
 
