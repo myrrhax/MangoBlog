@@ -100,6 +100,43 @@ internal class PublicationsRepositoryImpl : IPublicationsRepository
         }
     }
 
+    public async Task<Result> DeleteIntegrationPublicationsInfo(Guid userId, IntegrationType type)
+    {
+        try
+        {
+            // 1. Удаляем полностью те документы, где у пользователя единственный IntegrationType == Telegram
+            FilterDefinition<PublicationDocument> deleteFilter = Builders<PublicationDocument>.Filter.And(
+                Builders<PublicationDocument>.Filter.Eq(x => x.UserId, userId),
+                Builders<PublicationDocument>.Filter.Size(x => x.IntegrationPublishInfos, 1),
+                Builders<PublicationDocument>.Filter.Eq("IntegrationPublishInfos.0.IntegrationType", IntegrationType.Telegram)
+            );
+            await _publications.DeleteManyAsync(deleteFilter);
+
+            // 2. В оставшихся документах удаляем IntegrationPublishInfos с IntegrationType == Telegram
+            FilterDefinition<PublicationDocument> updateFilter = Builders<PublicationDocument>.Filter.And(
+                Builders<PublicationDocument>.Filter.Eq(x => x.UserId, userId),
+                Builders<PublicationDocument>.Filter.ElemMatch(x => x.IntegrationPublishInfos,
+                    Builders<IntegrationPublicationInfoDocument>.Filter.Eq(x => x.IntegrationType, IntegrationType.Telegram))
+            );
+
+            UpdateDefinition<PublicationDocument> update = Builders<PublicationDocument>.Update.PullFilter(x => x.IntegrationPublishInfos,
+                Builders<IntegrationPublicationInfoDocument>.Filter.Eq(x => x.IntegrationType, IntegrationType.Telegram));
+
+            await _publications.UpdateManyAsync(updateFilter, update);
+            _logger.LogInformation("Successfully deleted publications of type: {} for user: {}", type.ToString(),
+                userId);
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("An error occurred deleting publications of type: {} for user: {}. Error: {}", type.ToString(),
+                userId, ex.Message);
+
+            return Result.Failure(new DatabaseInteractionError("Failed to delete publications"));
+        }
+    }
+
     public async Task<Publication?> GetPublicationById(string id)
     {
         if (!ObjectId.TryParse(id, out ObjectId documentId))
