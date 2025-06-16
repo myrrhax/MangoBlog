@@ -57,7 +57,7 @@ internal class Publisher : IQueuePublisher
     public Result PublishDeleteIntegration(IntegrationType type, Guid userId)
     {
         using var channel = _connection.CreateModel();
-        string exchangeName = _configuration["ExchangeNameIntegrations"] 
+        string exchangeName = _configuration["RabbitMq:ExchangeNameIntegrations"] 
             ?? throw new ArgumentNullException(nameof(exchangeName));
         try
         {
@@ -91,7 +91,7 @@ internal class Publisher : IQueuePublisher
     private string GetDeleteRoutingKeyByType(IntegrationType type)
         => type switch
         {
-            IntegrationType.Telegram => _configuration["ExchangeNameIntegrationsKeys:DeleteTelegramIntegration"]
+            IntegrationType.Telegram => _configuration["RabbitMq:ExchangeNameIntegrationsKeys:DeleteTelegramIntegration"]
                 ?? throw new ArgumentNullException(),
             _ => throw new ArgumentException(nameof(IntegrationType)),
         };
