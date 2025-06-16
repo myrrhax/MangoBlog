@@ -31,6 +31,7 @@ const EditArticle = observer(() => {
     const [coverFile, setCoverFile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [editorData, setEditorData] = useState(null);
+    const [coverId, setCoverId] = useState('');
 
     useEffect(() => {
         const loadArticle = async () => {
@@ -43,11 +44,11 @@ const EditArticle = observer(() => {
                     setTimeout(() => navigate(`/article/${id}`), 2000);
                     return;
                 }
-
+                setCoverId(article.coverImageId);
                 setTitle(article.title);
                 setTags(article.tags || []);
-                setCover(article.coverImageId ? mediaService.makeImageUrl(article.coverImageId) : '');
                 setEditorData(article.content);
+                setCover(mediaService.makeImageUrl(article.coverImageId));
             } catch (error) {
                 setError(error.message || 'Failed to load article');
                 setTimeout(() => navigate('/'), 2000);
@@ -101,20 +102,20 @@ const EditArticle = observer(() => {
 
         try {
             const editorData = await editorRef.current.save();
-            let coverId = null;
-            
+            let finalCoverId = coverId;
             if (coverFile) {
-                coverId = await uploadMedia(coverFile);
-                if (coverId === null) {
+                const uploadedId = await uploadMedia(coverFile);
+                if (uploadedId === null) {
                     return;
                 }
+                finalCoverId = uploadedId;
             }
 
             await articlesStore.updateArticle(id, {
                 title: title.trim(),
                 content: editorData,
                 tags,
-                coverImageId: coverId,
+                coverImageId: finalCoverId,
             });
             
             navigate(`/article/${id}`);

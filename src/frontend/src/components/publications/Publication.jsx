@@ -1,4 +1,4 @@
-﻿import {Box, Card, Divider, List, ListItem, Paper, Typography, Checkbox} from "@mui/material";
+﻿import {Box, Card, Divider, List, ListItem, Paper, Typography, Checkbox, CardMedia} from "@mui/material";
 import ImageSlider from "../ImageSlider.jsx";
 import {mediaService} from "../../services/mediaService.js";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -10,13 +10,22 @@ const Publication = ({content, medias, creationDate, integrations}) => {
     const integrationTypeIcons = {
         'Telegram': <TelegramIcon sx={{width: 32, height: 32}} />,
     }
+    console.log(imageUrls);
     return (
         <Paper
             sx={{display: 'flex', flexDirection: 'column', my: 2}}
             elevation={3}
         >
             <Box>
-                {imageUrls.length > 0 && (
+                {imageUrls.length === 1 && (
+                    <CardMedia
+                        component="img"
+                        image={imageUrls[0]}
+                        alt="image"
+                        sx={{ width: '100%', maxWidth: 800, mx: 'auto', borderRadius: 2 }}
+                    />
+                )}
+                {imageUrls.length > 1 && (
                     <ImageSlider images={imageUrls} />
                 )}
             </Box>

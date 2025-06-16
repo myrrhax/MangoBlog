@@ -215,7 +215,7 @@ const Profile = observer(() => {
                                         </Typography>
                                         {showIntegrationCodeStatus
                                         ? (
-                                            <Link href={"https://t.me/mango_blog_dev_bot?start=" + profileStore.user.integration.telegram.integrationCode}>
+                                            <Link href={"https://t.me/mango_blog_dev_bot?start=" + encodeURIComponent(profileStore.user.integration.telegram.integrationCode)}>
                                                 {profileStore.user.integration.telegram.integrationCode}
                                             </Link>
                                         )
