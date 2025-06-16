@@ -94,10 +94,12 @@ public class CreateArticleCommandHandler : IRequestHandler<CreateArticleCommand,
 
             string clientUrl = _configuration["ClientUrl"]
                 ?? throw new ArgumentNullException(nameof(clientUrl));
+            string link = $"{clientUrl}/article/{article.Id}";
             IEnumerable<Guid> medias = article.CoverImageId.HasValue
                 ? [article.CoverImageId.Value]
                 : [];
-            string content = request.Caption ?? $"У меня новая публикация на MangoBlog. Прочитать её можно здесь: {clientUrl}";
+            string hashTags = string.Join(' ', article.Tags.Select(tag => '#' + tag));
+            string content = request.Caption ?? $"У меня новая публикация на MangoBlog. Прочитать её можно здесь: <a href=\"{link}\">{link}</a>\n{hashTags}";
 
             var command = new AddPublicationCommand(content, medias, article.CreatorId, null);
             await _mediator.Send(command);

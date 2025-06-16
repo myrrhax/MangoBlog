@@ -118,7 +118,7 @@ internal class QueueListener : BackgroundService
                 }
                 else
                 {
-                    Message msg = await _bot.SendMessage(chatId, publication.Content);
+                    Message msg = await _bot.SendMessage(chatId, publication.Content, Telegram.Bot.Types.Enums.ParseMode.Html);
                     messageId = msg.Id;
                 }
                 successfullyPublishedRoomsIds.Add((chatId.ToString(), messageId.ToString()));
@@ -128,9 +128,9 @@ internal class QueueListener : BackgroundService
                 _logger.LogError("Failed to send a message to chat: {}. Reason: {}", chatId, ex.Message);
             }
         }
-        IEnumerable<Task<bool>> confirmTasks = successfullyPublishedRoomsIds.Select(data => 
+        IEnumerable<Task<bool>> confirmTasks = successfullyPublishedRoomsIds.Select(data =>
             _apiService.ConfirmMessageSending(publication.PublicationId, data.roomId, data.messageId, user.AccessToken));
-    
+
         await Task.WhenAll(confirmTasks);
         channel.BasicAck(args.DeliveryTag, multiple: false);
     }
@@ -163,12 +163,13 @@ internal class QueueListener : BackgroundService
             if (!album.Any())
             {
                 media.Caption = caption;
+                media.ParseMode = Telegram.Bot.Types.Enums.ParseMode.Html;
             }
             album.Add((IAlbumInputMedia)media);
         }
 
         Message[] messages = await _bot.SendMediaGroup(chatId, album);
-        
+
         return messages.First().Id;
     }
 }
