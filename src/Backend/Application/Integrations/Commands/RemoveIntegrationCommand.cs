@@ -15,12 +15,18 @@ public class RemoveIntegrationCommandHandler : IRequestHandler<RemoveIntegration
 {
     private readonly IIntegrationRepository _integrationRepository;
     private readonly IValidator<RemoveIntegrationCommand> _validator;
+    private readonly IQueuePublisher _queuePublisher;
+    private readonly IPublicationsRepository _publicationsRepository;
 
     public RemoveIntegrationCommandHandler(IIntegrationRepository integrationRepository,
-        IValidator<RemoveIntegrationCommand> validator)
+        IValidator<RemoveIntegrationCommand> validator,
+        IQueuePublisher queuePublisher,
+        IPublicationsRepository publicationsRepository)
     {
         _integrationRepository = integrationRepository;
         _validator = validator;
+        _queuePublisher = queuePublisher;
+        _publicationsRepository = publicationsRepository;
     }
 
     public async Task<Result> Handle(RemoveIntegrationCommand request, CancellationToken cancellationToken)
@@ -35,10 +41,24 @@ public class RemoveIntegrationCommandHandler : IRequestHandler<RemoveIntegration
         }
 
         IntegrationType type = StringParsing.ParseIntegrationType(request.IntegrationType);
+
         return type switch
         {
-            IntegrationType.Telegram => await _integrationRepository.DeleteTelegramIntegration(request.CallerId, cancellationToken),
+            IntegrationType.Telegram => await DeleteTelegramIntegration(request.CallerId, cancellationToken),
             _ => throw new ArgumentException(nameof(type))
         };
+    }
+
+    private async Task<Result> DeleteTelegramIntegration(Guid userId, CancellationToken cancellationToken)
+    {
+        Result deleteResult = await _integrationRepository.DeleteTelegramIntegration(userId, cancellationToken);
+        if (deleteResult.IsFailure)
+            return deleteResult;
+
+        Result deleteInfoResult = await _publicationsRepository.DeleteIntegrationPublicationsInfo(userId, IntegrationType.Telegram);
+        if (deleteInfoResult.IsFailure)
+            return deleteInfoResult;
+
+        return _queuePublisher.PublishDeleteIntegration(IntegrationType.Telegram, userId);
     }
 }

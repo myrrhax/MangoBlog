@@ -10,4 +10,5 @@ public interface IPublicationsRepository
     Task<Result> ConfirmPublicationStatus(string publicationId, string channelId, string messageId, IntegrationType type);
     Task<Publication?> GetPublicationById(string id);
     Task<IEnumerable<Publication>> GetUserPublications(Guid userId);
+    Task<Result> DeleteIntegrationPublicationsInfo(Guid userId, IntegrationType type);
 }
