@@ -66,8 +66,7 @@ internal class Publisher : IQueuePublisher
                 durable: true,
                 autoDelete: false,
                 arguments: new Dictionary<string, object>());
-            string jsonMessage = JsonConvert.SerializeObject(new { userId });
-            byte[] bytes = Encoding.UTF8.GetBytes(jsonMessage);
+            byte[] bytes = Encoding.UTF8.GetBytes(userId.ToString());
             string deleteRoutingKey = GetDeleteRoutingKeyByType(type);
 
             channel.BasicPublish(exchange: exchangeName,
